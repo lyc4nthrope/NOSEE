@@ -594,10 +594,12 @@ export const analyzeImageFileForRestrictedContent = async (file) => {
       animeSkinRatio >= ANIME_SKIN_RATIO_BLOCK_THRESHOLD &&
       vividRatio >= VIVID_RATIO_BLOCK_THRESHOLD &&
       maxAnimeHotspotRatio >= 0.24;
+    // Requiere ratio GLOBAL alto además del hotspot: packaging rojo concentrado
+    // (salsa, ketchup, etiqueta roja) no debe bloquearse solo por tener alta
+    // concentración local si el global está por debajo del umbral.
     const flaggedGore =
-      (bloodRatio >= BLOOD_RATIO_BLOCK_THRESHOLD &&
-        maxBloodHotspotRatio >= BLOOD_HOTSPOT_RATIO_BLOCK_THRESHOLD) ||
-      maxBloodHotspotRatio >= BLOOD_HOTSPOT_RATIO_BLOCK_THRESHOLD * 1.35;
+      bloodRatio >= BLOOD_RATIO_BLOCK_THRESHOLD &&
+      maxBloodHotspotRatio >= BLOOD_HOTSPOT_RATIO_BLOCK_THRESHOLD;
     const flagged = flaggedAdult || flaggedAnimeAdult || flaggedGore;
 
     const labels = [];

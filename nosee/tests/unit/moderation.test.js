@@ -310,6 +310,22 @@ describe('analyzeImageFileForRestrictedContent — fotos PERMITIDAS (no deben bl
     expect(result.metrics.bloodRatio).toBeLessThan(0.35);
   });
 
+  it('frasco de salsa / packaging rojo (10% rojizo global — CORREGIDO: hotspot solitario eliminado)', async () => {
+    // Caso real: bote de salsa con label rojo y salsa oscura.
+    // bloodRatio global ≈ 0.10 (el frasco ocupa solo parte de la foto).
+    // Antes: maxBloodHotspotRatio en las celdas del label era ≥ 0.405 → GORE (falso positivo).
+    // Ahora: requiere bloodRatio global ≥ 0.35 TAMBIÉN → no bloqueado.
+    currentImageData = buildPixelData(IMG_W, IMG_H, [
+      [BLOOD_PIXEL,   0.10],
+      [NEUTRAL_PIXEL, 0.90],
+    ]);
+
+    const result = await analyzeImageFileForRestrictedContent(makeFile('salsa_negra.jpg'));
+
+    expect(result.flagged).toBe(false);
+    expect(result.metrics.bloodRatio).toBeLessThan(0.35);
+  });
+
   it('packaging naranja/amarillo (40% anime-skin+vivid — CORREGIDO con umbral 0.55)', async () => {
     // animeSkinRatio = 0.40 < ANIME_SKIN_RATIO_BLOCK_THRESHOLD (0.55) → seguro
     // Con el umbral anterior de 0.32 este caso era bloqueado (falso positivo)
