@@ -13,9 +13,10 @@ const IMAGE_MIN_ANALYSIS_PIXELS = Number(
 const SKIN_RATIO_BLOCK_THRESHOLD = Number(
   import.meta.env.VITE_IMAGE_SKIN_RATIO_BLOCK || 0.58,
 );
-// 0.35 en vez de 0.20: fotos de carne, tomates, empaques rojos ya no se bloquean
+// 0.45 en vez de 0.35: etiquetas de marca con franjas rojas extensas (aceites, salsas)
+// pueden llegar a 35-40 % de píxeles rojizo-oscuros sin ser gore; se necesita >45 %
 const BLOOD_RATIO_BLOCK_THRESHOLD = Number(
-  import.meta.env.VITE_IMAGE_BLOOD_RATIO_BLOCK || 0.35,
+  import.meta.env.VITE_IMAGE_BLOOD_RATIO_BLOCK || 0.45,
 );
 // 0.55 en vez de 0.32: el rango H=5-45° (naranja/amarillo) es común en alimentos
 // y packaging de supermercado; 0.32 producía falsos positivos en fotos de producto
@@ -487,6 +488,8 @@ export const analyzeImageFileForRestrictedContent = async (file) => {
       const { h, s, v } = rgbToHsv(r, g, b);
       const redDominance = r / (r + g + b + 1);
       const isRedHue = h <= 13 || h >= 348;
+      // v < 0.75: excluye rojos brillantes de plástico/lacado (empaques, tapas, marcas)
+      // que tienen v ≥ 0.75; la sangre real es más oscura (v ∈ [0.18, 0.75]).
       const isBloodLike =
         ((r > 110 && g < 115 && b < 115) || (r > 75 && g < 75 && b < 75)) &&
         redDominance > 0.52 &&
@@ -495,7 +498,7 @@ export const analyzeImageFileForRestrictedContent = async (file) => {
         isRedHue &&
         s >= 0.35 &&
         v >= 0.18 &&
-        v < 0.80;
+        v < 0.75;
       if (isBloodLike) {
         bloodPixels += 1;
         bucket.blood += 1;

@@ -33,7 +33,7 @@ import {
 const SKIN_PIXEL    = [200, 140, 110, 255];
 
 // BLOOD_PIXEL: rojo oscuro similar a sangre
-//   • HSV: H=0° (isRedHue), s≈0.89≥0.35, v≈0.71∈[0.18,0.80] ✓
+//   • HSV: H=0° (isRedHue), s≈0.89≥0.35, v≈0.71∈[0.18,0.75] ✓
 //   • redDominance≈0.81>0.52, R-G=160>35, R-B=160>35 ✓
 const BLOOD_PIXEL   = [180,  20,  20, 255];
 
@@ -265,9 +265,10 @@ describe('detectIndecentImageByModeration — respuesta de Cloudinary', () => {
 // 3. ANÁLISIS DE PÍXELES — el corazón del sistema
 //    Umbrales vigentes (corregidos en branch cristhian):
 //      SKIN  ≥ 0.58  (sin cambio)
-//      BLOOD ≥ 0.35  (antes 0.20 — producía falsos positivos en carne/tomates)
+//      BLOOD ≥ 0.45  (antes 0.20 → 0.35 → 0.45: etiquetas de marca con franjas rojas)
 //      ANIME ≥ 0.55  (antes 0.32 — producía falsos positivos en packaging naranja)
 //      VIVID ≥ 0.55  (antes 0.38 — producía falsos positivos bajo luz fluorescente)
+//      isBloodLike: v < 0.75 (antes 0.80) — excluye rojos brillantes de plástico/lacado
 // ══════════════════════════════════════════════════════════════════════════════
 
 describe('analyzeImageFileForRestrictedContent — fotos PERMITIDAS (no deben bloquearse)', () => {
@@ -296,8 +297,8 @@ describe('analyzeImageFileForRestrictedContent — fotos PERMITIDAS (no deben bl
     expect(result.metrics.bloodRatio).toBeLessThan(0.10);
   });
 
-  it('foto de carne roja / tomates (30% píxeles rojizos — CORREGIDO con umbral 0.35)', async () => {
-    // bloodRatio = 0.30 < BLOOD_RATIO_BLOCK_THRESHOLD (0.35) → seguro
+  it('foto de carne roja / tomates (30% píxeles rojizos — CORREGIDO con umbral 0.45)', async () => {
+    // bloodRatio = 0.30 < BLOOD_RATIO_BLOCK_THRESHOLD (0.45) → seguro
     // Con el umbral anterior de 0.20 este caso era bloqueado (falso positivo)
     currentImageData = buildPixelData(IMG_W, IMG_H, [
       [BLOOD_PIXEL,   0.30],
@@ -307,14 +308,14 @@ describe('analyzeImageFileForRestrictedContent — fotos PERMITIDAS (no deben bl
     const result = await analyzeImageFileForRestrictedContent(makeFile('carne_res.jpg'));
 
     expect(result.flagged).toBe(false);
-    expect(result.metrics.bloodRatio).toBeLessThan(0.35);
+    expect(result.metrics.bloodRatio).toBeLessThan(0.45);
   });
 
   it('frasco de salsa / packaging rojo (10% rojizo global — CORREGIDO: hotspot solitario eliminado)', async () => {
     // Caso real: bote de salsa con label rojo y salsa oscura.
     // bloodRatio global ≈ 0.10 (el frasco ocupa solo parte de la foto).
     // Antes: maxBloodHotspotRatio en las celdas del label era ≥ 0.405 → GORE (falso positivo).
-    // Ahora: requiere bloodRatio global ≥ 0.35 TAMBIÉN → no bloqueado.
+    // Ahora: requiere bloodRatio global ≥ 0.45 TAMBIÉN → no bloqueado.
     currentImageData = buildPixelData(IMG_W, IMG_H, [
       [BLOOD_PIXEL,   0.10],
       [NEUTRAL_PIXEL, 0.90],
@@ -323,7 +324,22 @@ describe('analyzeImageFileForRestrictedContent — fotos PERMITIDAS (no deben bl
     const result = await analyzeImageFileForRestrictedContent(makeFile('salsa_negra.jpg'));
 
     expect(result.flagged).toBe(false);
-    expect(result.metrics.bloodRatio).toBeLessThan(0.35);
+    expect(result.metrics.bloodRatio).toBeLessThan(0.45);
+  });
+
+  it('producto con etiqueta roja extensa (40% rojo oscuro — CORREGIDO con umbral 0.45)', async () => {
+    // Caso real: botella de aceite Motul con tapa roja + franja de marca roja en etiqueta.
+    // bloodRatio global ≈ 0.40 < BLOOD_RATIO_BLOCK_THRESHOLD (0.45) → seguro.
+    // Con el umbral anterior de 0.35 este caso era bloqueado (falso positivo).
+    currentImageData = buildPixelData(IMG_W, IMG_H, [
+      [BLOOD_PIXEL,   0.40],
+      [NEUTRAL_PIXEL, 0.60],
+    ]);
+
+    const result = await analyzeImageFileForRestrictedContent(makeFile('aceite_motor.jpg'));
+
+    expect(result.flagged).toBe(false);
+    expect(result.metrics.bloodRatio).toBeLessThan(0.45);
   });
 
   it('packaging naranja/amarillo (40% anime-skin+vivid — CORREGIDO con umbral 0.55)', async () => {
@@ -358,7 +374,7 @@ describe('analyzeImageFileForRestrictedContent — fotos BLOQUEADAS (contenido i
   });
 
   it('bloquea gore / violencia gráfica (60% píxeles de sangre)', async () => {
-    // bloodRatio = 0.60 ≥ BLOOD_RATIO_BLOCK_THRESHOLD (0.35) y hotspot ≥ 0.30 → gore
+    // bloodRatio = 0.60 ≥ BLOOD_RATIO_BLOCK_THRESHOLD (0.45) y hotspot ≥ 0.30 → gore
     currentImageData = buildPixelData(IMG_W, IMG_H, [
       [BLOOD_PIXEL,   0.60],
       [NEUTRAL_PIXEL, 0.40],
@@ -368,7 +384,7 @@ describe('analyzeImageFileForRestrictedContent — fotos BLOQUEADAS (contenido i
 
     expect(result.flagged).toBe(true);
     expect(result.labels).toContain('gore');
-    expect(result.metrics.bloodRatio).toBeGreaterThanOrEqual(0.35);
+    expect(result.metrics.bloodRatio).toBeGreaterThanOrEqual(0.45);
   });
 
   it('bloquea hentai / anime adulto (80% anime-skin con vivid alto)', async () => {
