@@ -4,7 +4,7 @@ import { useGeoLocation } from './useGeoLocation';
 import { playSuccessSound } from '@/utils/celebrationSound';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { insertUserActivityLog } from '@/services/api/audit.api';
-import { recordPublicationCreated } from '@/services/metrics';
+import { recordPublicationCreated, recordPublicationAttempted } from '@/services/metrics';
 
 const initialFormData = {
   productId: '',
@@ -108,6 +108,9 @@ export function usePublicationCreation({ publicationId = null, mode = 'create' }
         photoModeration: formData.photoModeration || null,
       };
 
+      if (mode === 'create') {
+        recordPublicationAttempted();
+      }
       const result = mode === 'create'
         ? await publicationsApi.createPublication(payload)
         : await publicationsApi.updatePublication(publicationId, payload);

@@ -24,7 +24,7 @@ import {
   detectRestrictedContentText,
   detectIndecentImageByModeration,
 } from "@/services/moderation";
-import { recordVote, recordPublicationReport, recordVoteDuplicateRejected } from "@/services/metrics";
+import { recordVote, recordPublicationReport, recordVoteDuplicateRejected, recordVoteDuplicateAttempted, recordVoteProcessingDuration, recordDbQueryDuration } from "@/services/metrics";
 
 import { clamp, normalizeSearchText } from "@/services/utils/normalization";
 import { hasCoordinates, parseStoreLocation, calculateDistance } from "@/services/utils/geoUtils";
@@ -556,11 +556,13 @@ export const createPublication = async (data) => {
       confidence_score,
     };
 
+    const _t0Pub = Date.now();
     const { data: publication, error } = await supabase
       .from("price_publications")
       .insert(payload)
       .select()
       .single();
+    recordDbQueryDuration('publication_insert', (Date.now() - _t0Pub) / 1000);
 
     if (error) {
       console.error("Error creando publicación:", error);
@@ -1032,6 +1034,7 @@ export const getPublications = async (filters = {}) => {
       runtime: getRuntimeNetworkState(),
     });
 
+    const _t0List = Date.now();
     let publicationsResult = await runWithSessionRetry(
       () => buildPublicationsQuery(nearbyStoreIdsForQuery, { withCount: true }),
       adaptiveTimeoutMs,
@@ -1056,6 +1059,7 @@ export const getPublications = async (filters = {}) => {
         EXTENDED_RETRY_TIMEOUT_MS,
       );
     }
+    recordDbQueryDuration('publications_list', (Date.now() - _t0List) / 1000);
 
     const { data, error, count } = publicationsResult;
 
@@ -1286,6 +1290,7 @@ export const getPublicationDetail = async (publicationId) => {
  * const result = await validatePublication(123);
  */
 export const validatePublication = async (publicationId, voteType = 1) => {
+  const voteStart = Date.now();
   try {
     if (!publicationId) {
       return { success: false, error: "ID de publicación requerido" };
@@ -1304,6 +1309,7 @@ export const validatePublication = async (publicationId, voteType = 1) => {
     }
 
     // Verificar si ya votó
+    recordVoteDuplicateAttempted();
     const { data: existingVote } = await supabase
       .from("publication_votes")
       .select("id")
@@ -1317,6 +1323,7 @@ export const validatePublication = async (publicationId, voteType = 1) => {
     }
 
     // Crear el voto
+    const _t0Vote = Date.now();
     const { data: vote, error } = await supabase
       .from("publication_votes")
       .insert({
@@ -1326,6 +1333,7 @@ export const validatePublication = async (publicationId, voteType = 1) => {
       })
       .select()
       .single();
+    recordDbQueryDuration('vote_insert', (Date.now() - _t0Vote) / 1000);
 
     if (error) {
       console.error("Error validando publicación:", error);
@@ -1373,8 +1381,10 @@ export const validatePublication = async (publicationId, voteType = 1) => {
     }
 
     recordVote(voteType === 1 ? 'upvote' : 'downvote');
+    recordVoteProcessingDuration(Date.now() - voteStart);
     return { success: true, data: vote };
   } catch (err) {
+    recordVoteProcessingDuration(Date.now() - voteStart);
     console.error("Error en validatePublication:", err);
     return { success: false, error: err.message };
   }

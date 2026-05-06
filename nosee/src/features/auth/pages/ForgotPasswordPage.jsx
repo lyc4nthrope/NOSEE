@@ -19,7 +19,7 @@ import { useAuthStore } from '@/features/auth/store/authStore';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { recordPasswordRecovery } from '@/services/metrics';
+import { recordPasswordResetInitiated, recordPasswordResetCompleted } from '@/services/metrics';
 
 // ── Ícono de correo ────────────────────────────────────────────────────────
 const MailIcon = () => (
@@ -127,14 +127,15 @@ export default function ForgotPasswordPage() {
     if (error) { setEmailError(error); return; }
 
     setServerError('');
+    recordPasswordResetInitiated();
     const result = await requestPasswordReset(email.trim());
 
     if (result.success) {
-      recordPasswordRecovery('success');
+      recordPasswordResetCompleted('success');
       setSentEmail(email.trim());
       setSent(true);
     } else {
-      recordPasswordRecovery('failure');
+      recordPasswordResetCompleted('failure');
       setServerError(result.error || tf.serverError);
     }
   };

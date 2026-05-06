@@ -17,7 +17,7 @@ import {
   trackRegisterComplete,
   trackRegisterFailure,
 } from "@/services/analytics";
-import { recordRegisterDuration, recordRegistrationStarted } from "@/services/metrics";
+import { recordRegisterDuration, recordRegistrationStarted, recordRegistrationCompleted } from "@/services/metrics";
 
 // Vista de verificación de email
 function VerificationView({ email, onResend }) {
@@ -163,6 +163,7 @@ export default function RegisterPage() {
       const durationSeconds = (Date.now() - formOpenedAt.current) / 1000;
       trackRegisterComplete(durationSeconds);
       recordRegisterDuration(durationSeconds);
+      recordRegistrationCompleted();
 
       if (result.needsVerification) {
         setRegisteredEmail(email);
