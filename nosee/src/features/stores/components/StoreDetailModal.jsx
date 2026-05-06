@@ -345,6 +345,7 @@ export default function StoreDetailModal({ store, onClose, onStoreUpdated }) {
   const [savingStore, setSavingStore] = useState(false);
   const [saveMessage, setSaveMessage] = useState('');
   const [reportOpen, setReportOpen] = useState(false);
+  const [verTodosHov, setVerTodosHov] = useState(false);
 
   const isPhysical = localStore.type === 'physical';
   const accentColor = isPhysical ? 'var(--success)' : 'var(--info)';
@@ -416,8 +417,9 @@ export default function StoreDetailModal({ store, onClose, onStoreUpdated }) {
     && Number.isFinite(Number(localStore.longitude));
 
   const handleNavigate = useCallback((id) => {
+    if (!id) return;
     onClose();
-    navigate(`/publicaciones?pub=${id}`);
+    navigate(`/publicaciones/${id}`);
   }, [onClose, navigate]);
 
   const bodyContent = (
@@ -430,7 +432,7 @@ export default function StoreDetailModal({ store, onClose, onStoreUpdated }) {
           <SectionLabel>{td.evidences}</SectionLabel>
           {loadingPubs ? (
             <div style={{ display: 'flex', gap: '8px' }}>
-              {[1, 2, 3, 4].map((i) => <ShimmerCard key={i} height={88} delay={i * 0.1} />)}
+              {['ev-1', 'ev-2', 'ev-3', 'ev-4'].map((k, i) => <ShimmerCard key={k} height={88} delay={i * 0.1} />)}
             </div>
           ) : evidences.length === 0 ? (
             <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-muted)' }}>{evidenceError || td.noEvidences}</p>
@@ -481,7 +483,7 @@ export default function StoreDetailModal({ store, onClose, onStoreUpdated }) {
         <SectionLabel>{td.featuredProducts}</SectionLabel>
         {loadingPubs ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            {[1, 2, 3].map((i) => <ShimmerCard key={i} height={64} delay={i * 0.12} />)}
+            {['pub-1', 'pub-2', 'pub-3'].map((k, i) => <ShimmerCard key={k} height={64} delay={i * 0.12} />)}
           </div>
         ) : publications.length === 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', padding: '28px', border: '1px dashed var(--border)', borderRadius: 'var(--radius-md)' }}>
@@ -499,6 +501,35 @@ export default function StoreDetailModal({ store, onClose, onStoreUpdated }) {
               <PublicationMini key={pub.id} pub={pub} isMobile={isMobile} onNavigate={handleNavigate} />
             ))}
           </div>
+        )}
+        {!loadingPubs && publications.length > 0 && (
+          <button
+            type="button"
+            onMouseEnter={() => setVerTodosHov(true)}
+            onMouseLeave={() => setVerTodosHov(false)}
+            onClick={() => {
+              onClose();
+              navigate(`/?storeId=${localStore.id}&storeName=${encodeURIComponent(localStore.name)}`);
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              padding: isMobile ? '12px 16px' : '10px 14px',
+              background: verTodosHov ? 'var(--accent)' : 'var(--accent-soft)',
+              border: '1px solid var(--accent)',
+              borderRadius: 'var(--radius-md)',
+              color: verTodosHov ? 'var(--bg-base)' : 'var(--accent)',
+              fontSize: isMobile ? '14px' : '13px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'background 0.2s, color 0.2s',
+              marginTop: '4px',
+            }}
+          >
+            Ver todos ({publications.length}) →
+          </button>
         )}
       </div>
     </div>
@@ -594,7 +625,7 @@ export default function StoreDetailModal({ store, onClose, onStoreUpdated }) {
         onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
         onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
       >
-        <div style={{ ...desk.modal, borderLeft: `3px solid ${accentColor}` }}>
+        <div style={{ ...desk.modal, borderTop: `3px solid ${accentColor}` }}>
 
           <div style={desk.header}>
             <div style={desk.dotGrid} aria-hidden="true" />

@@ -46,6 +46,7 @@ const areFiltersEqual = (a = {}, b = {}) => {
     'productId',
     'productName',
     'storeName',
+    'storeId',
     'minPrice',
     'maxPrice',
     'maxDistance',
@@ -54,6 +55,7 @@ const areFiltersEqual = (a = {}, b = {}) => {
     'sortBy',
     'limit',
     'categoryId',
+    'brandId',
   ];
 
   return keys.every((key) => {
@@ -121,7 +123,9 @@ export const usePublications = (initialFilters = {}, options = {}) => {
     productId: null,
     productName: '',
     storeName: '',
+    storeId: null,
     categoryId: null,
+    brandId: null,
     minPrice: null,
     maxPrice: null,
     maxDistance: null,
@@ -436,7 +440,9 @@ export const usePublications = (initialFilters = {}, options = {}) => {
       productId: null,
       productName: '',
       storeName: '',
+      storeId: null,
       categoryId: null,
+      brandId: null,
       minPrice: null,
       maxPrice: null,
       maxDistance: null,

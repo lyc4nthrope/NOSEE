@@ -649,3 +649,17 @@ export const searchBrands = async (query, limit = 10) => {
   if (error) return { success: false, error: error.message };
   return { success: true, data: data || [] };
 };
+
+export const getBrands = async () => {
+  try {
+    const { data, error } = await supabase
+      .from("brands")
+      .select("id, name")
+      .order("name", { ascending: true });
+
+    if (error) return { success: false, error: error.message };
+    return { success: true, data: data || [] };
+  } catch (err) {
+    return { success: false, error: err?.message || "Error cargando marcas" };
+  }
+};

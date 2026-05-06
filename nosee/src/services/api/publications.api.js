@@ -36,7 +36,8 @@ import {
 import { createAutoModerationReport } from "@/services/utils/moderationReports";
 import {
   searchProductsAndBrands, searchProducts, findProductByBarcode, getProducts, getStores,
-  searchStores, createProduct, updateProduct, createBrand, getProductCategories, getUnitTypes, searchBrands
+  searchStores, createProduct, updateProduct, createBrand, getProductCategories, getUnitTypes, searchBrands,
+  getBrands,
 } from "@/services/api/products.api";
 import { getComments, addComment, deleteComment } from "@/services/api/comments.api";
 
@@ -641,6 +642,7 @@ export const getPublications = async (filters = {}) => {
       productId = null,
       productName = "",
       storeName = "",
+      storeId: rawStoreId = null,
       minPrice = null,
       maxPrice = null,
       maxDistance = null,
@@ -649,8 +651,12 @@ export const getPublications = async (filters = {}) => {
       sortBy = "recent",
       page = 1,
       limit = 20,
-      categoryId = null,
+      categoryId: rawCategoryId = null,
+      brandId: rawBrandId = null,
     } = filters;
+    const storeId = rawStoreId != null ? Number(rawStoreId) || null : null;
+    const categoryId = rawCategoryId != null ? Number(rawCategoryId) || null : null;
+    const brandId = rawBrandId != null ? Number(rawBrandId) || null : null;
      const offset = (page - 1) * limit;
 
     const hasMinPrice = minPrice !== null && minPrice !== undefined && String(minPrice).trim() !== "";
@@ -720,6 +726,29 @@ export const getPublications = async (filters = {}) => {
         }
       } else {
         productIdFilter = categoryProductIds;
+      }
+    }
+
+    // Pre-filtro: IDs de productos de la marca seleccionada
+    if (brandId) {
+      const { data: brandProducts } = await supabase
+        .from("products")
+        .select("id")
+        .eq("brand_id", brandId);
+
+      const brandProductIds = (brandProducts || []).map((p) => p.id);
+
+      if (brandProductIds.length === 0) {
+        return { success: true, data: [], count: 0, hasMore: false };
+      }
+
+      if (productIdFilter !== null) {
+        productIdFilter = productIdFilter.filter((id) => brandProductIds.includes(id));
+        if (productIdFilter.length === 0) {
+          return { success: true, data: [], count: 0, hasMore: false };
+        }
+      } else {
+        productIdFilter = brandProductIds;
       }
     }
 
@@ -803,14 +832,19 @@ export const getPublications = async (filters = {}) => {
         query = query.lte("price", normalizedMaxPrice);
       }
 
-      // Filtro por tienda (IDs pre-filtrados por nombre, sin filtro de distancia)
-      if (storeNameFilter !== null) {
-        query = query.in("store_id", storeNameFilter);
-      }
+      // Filtro por tienda exacta (storeId tiene prioridad sobre fuzzy storeName)
+      if (storeId) {
+        query = query.eq("store_id", storeId);
+      } else {
+        // Filtro por tienda (IDs pre-filtrados por nombre, sin filtro de distancia)
+        if (storeNameFilter !== null) {
+          query = query.in("store_id", storeNameFilter);
+        }
 
-      // Filtro por tiendas cercanas (filtro de distancia)
-      if (Array.isArray(nearbyStoreIds) && nearbyStoreIds.length > 0) {
-        query = query.in("store_id", nearbyStoreIds);
+        // Filtro por tiendas cercanas (filtro de distancia)
+        if (Array.isArray(nearbyStoreIds) && nearbyStoreIds.length > 0) {
+          query = query.in("store_id", nearbyStoreIds);
+        }
       }
 
       // Ordenamiento
@@ -897,13 +931,15 @@ export const getPublications = async (filters = {}) => {
 
     // ─── BEST_MATCH: delegate entirely to server-side RPC ─────────────────────
     if (sortBy === SORT_OPTIONS.BEST_MATCH) {
-      // p_store_ids: prefer distance-filtered store ids; fall back to name-filter ids
+      // p_store_ids: prefer exact storeId, then distance-filtered ids, then name-filter ids
       const rpcStoreIds =
-        nearbyStoreIds.length > 0
-          ? nearbyStoreIds
-          : storeNameFilter !== null
-            ? storeNameFilter
-            : null;
+        storeId
+          ? [storeId]
+          : nearbyStoreIds.length > 0
+            ? nearbyStoreIds
+            : storeNameFilter !== null
+              ? storeNameFilter
+              : null;
 
       const { data: rpcData, error: rpcError } = await supabase.rpc(
         "search_publications_ranked",
@@ -1720,6 +1756,7 @@ export const deletePublication = async (publicationId, options = {}) => {
 export {
   searchProductsAndBrands, searchProducts, findProductByBarcode, getProducts, getStores,
   searchStores, createProduct, updateProduct, createBrand, getProductCategories, getUnitTypes, searchBrands,
+  getBrands,
   getComments, addComment, deleteComment,
 };
 
@@ -1744,6 +1781,7 @@ export default {
   getProductCategories,
   getUnitTypes,
   searchBrands,
+  getBrands,
   createBrand,
   updateProduct,
   updatePublication,
