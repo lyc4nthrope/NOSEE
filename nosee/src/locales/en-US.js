@@ -241,6 +241,8 @@ const enUS = {
       errorReport: "Could not report the publication",
       errorDelete: "Could not delete the publication",
       contribuir: "Contribute",
+      storeFilterActive: 'Filtering by store:',
+      storeFilterClear: 'Clear filter',
     },
 
     // ── Login ─────────────────────────────────────────────────────────────────
@@ -569,6 +571,8 @@ const enUS = {
       searchPlaceholder: "Search store by name...",
       loading: "Loading stores...",
       errorLoading: "Error loading stores",
+      filterChips: { all: 'All', physical: 'Physical', virtual: 'Virtual' },
+      onlyWithLocation: 'With location only',
       physical: "Physical",
       virtual: "Virtual",
       viewDetail: "View detail",

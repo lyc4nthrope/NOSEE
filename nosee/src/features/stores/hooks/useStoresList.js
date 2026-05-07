@@ -11,6 +11,10 @@ export function useStoresList() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState(null);
+  const [storeType, setStoreType] = useState('all');
+  const [onlyWithLocation, setOnlyWithLocation] = useState(false);
+  const storeTypeRef = useRef('all');
+  const onlyWithLocationRef = useRef(false);
 
   const debounceRef    = useRef(null);
   const pageRef        = useRef(1);
@@ -25,6 +29,8 @@ export function useStoresList() {
     const result = await listStores(query, {
       limit: INFINITE_SCROLL_CONFIG.storesPageSize,
       page: pageToLoad,
+      storeType: storeTypeRef.current,
+      onlyWithLocation: onlyWithLocationRef.current,
     });
 
     if (result.success) {
@@ -61,6 +67,20 @@ export function useStoresList() {
     }, DEBOUNCE_MS);
   }, [fetchStores]);
 
+  const handleStoreTypeChange = useCallback((type) => {
+    storeTypeRef.current = type;
+    setStoreType(type);
+    pageRef.current = 1;
+    fetchStores({ query: searchRef.current, pageToLoad: 1, append: false });
+  }, [fetchStores]);
+
+  const handleOnlyWithLocationChange = useCallback((value) => {
+    onlyWithLocationRef.current = value;
+    setOnlyWithLocation(value);
+    pageRef.current = 1;
+    fetchStores({ query: searchRef.current, pageToLoad: 1, append: false });
+  }, [fetchStores]);
+
   const loadMore = useCallback(() => {
     if (!hasMore || loading || loadingMoreRef.current) return;
     fetchStores({ query: searchRef.current, pageToLoad: pageRef.current + 1, append: true });
@@ -78,7 +98,11 @@ export function useStoresList() {
     loadingMore,
     hasMore,
     error,
+    storeType,
+    onlyWithLocation,
     handleSearchChange,
+    handleStoreTypeChange,
+    handleOnlyWithLocationChange,
     loadMore,
     updateStore,
   };

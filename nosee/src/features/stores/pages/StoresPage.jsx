@@ -55,7 +55,9 @@ export default function StoresPage() {
 
   const {
     search, stores, loading, loadingMore, hasMore, error,
-    handleSearchChange, loadMore, updateStore,
+    storeType, onlyWithLocation,
+    handleSearchChange, handleStoreTypeChange, handleOnlyWithLocationChange,
+    loadMore, updateStore,
   } = useStoresList();
 
   // ── Handlers ───────────────────────────────────────────────────────────────
@@ -118,6 +120,10 @@ export default function StoresPage() {
         loadingMore={loadingMore}
         hasMore={hasMore}
         error={error}
+        storeType={storeType}
+        onStoreTypeChange={handleStoreTypeChange}
+        onlyWithLocation={onlyWithLocation}
+        onOnlyWithLocationChange={handleOnlyWithLocationChange}
         onSearchChange={handleSearchChange}
         onLoadMore={loadMore}
         onViewDetail={handleViewDetail}

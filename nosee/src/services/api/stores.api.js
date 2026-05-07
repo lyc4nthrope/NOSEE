@@ -607,15 +607,26 @@ export async function listStores(name = "", optionsOrLimit = 20) {
     const safePage = Math.max(1, Number(resolvedOptions.page) || 1);
     const offset = (safePage - 1) * safeLimit;
 
+    const { storeType, onlyWithLocation } = resolvedOptions;
+
     let query = supabase
       .from("stores")
       .select("id, name, store_type_id, address, website_url, location, created_by")
-      .order("name", { ascending: true })
-      .range(offset, offset + safeLimit - 1);
+      .order("name", { ascending: true });
 
     if (name && name.trim().length >= 1) {
       query = query.ilike("name", `%${name.trim()}%`);
     }
+
+    if (storeType && storeType !== 'all') {
+      query = query.eq('store_type_id', STORE_TYPE_ID[storeType]);
+    }
+
+    if (onlyWithLocation === true) {
+      query = query.not('location', 'is', null);
+    }
+
+    query = query.range(offset, offset + safeLimit - 1);
 
     const { data, error } = await withTimeout(query, REQUEST_TIMEOUT_MS, "La carga de tiendas tardó demasiado");
 

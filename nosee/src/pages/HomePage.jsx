@@ -13,6 +13,7 @@ import { usePublicationsStore } from "@/features/publications/store/publications
 import { getBrands } from "@/services/api/products.api";
 import PublicationCard from "@/features/publications/components/PublicationCard";
 import PriceSearchFilter from "@/features/publications/components/PriceSearchFilter";
+import StoreFilterBanner from "@/features/publications/components/StoreFilterBanner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { isAdmin } from "@/types";
 import { INFINITE_SCROLL_CONFIG } from "@/config/infiniteScroll";
@@ -385,6 +386,11 @@ export default function HomePage() {
     return result;
   }, [reportPublication, th.reportSuccess, th.reportError]);
 
+  const handleClearStoreFilter = useCallback(() => {
+    setFilters((prev) => ({ ...prev, storeId: null, storeName: '' }));
+    setPublicationFilters((prev) => ({ ...prev, storeId: null, storeName: '' }));
+  }, [setPublicationFilters]);
+
   // ── 4.9: handleRequireAuth — navigate to /login instead of alert ──────────
   const handleRequireAuth = useCallback(() => {
     navigate('/login', { state: { from: '/' } });
@@ -590,6 +596,12 @@ export default function HomePage() {
             Filtrar
           </button>
         </div>
+
+        <StoreFilterBanner
+          filters={filters}
+          onClearStore={handleClearStoreFilter}
+          t={th}
+        />
 
         {/* Filtros activos como tags + panel expandible */}
         <PriceSearchFilter

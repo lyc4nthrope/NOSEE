@@ -43,6 +43,10 @@ const StoresDrawer = memo(function StoresDrawer({
   onSearchChange,
   onLoadMore,
   onViewDetail,
+  storeType,
+  onStoreTypeChange,
+  onlyWithLocation,
+  onOnlyWithLocationChange,
   t,
 }) {
   const listRef = useRef(null);
@@ -129,6 +133,41 @@ const StoresDrawer = memo(function StoresDrawer({
           aria-label={t.searchPlaceholder}
           style={styles.searchInput}
         />
+      </div>
+
+      {/* ── Filtros de tipo ── */}
+      <div style={styles.filterRow}>
+        {[
+          { key: 'all', label: t.filterChips?.all ?? 'Todas' },
+          { key: 'physical', label: t.filterChips?.physical ?? 'Física' },
+          { key: 'virtual', label: t.filterChips?.virtual ?? 'Virtual' },
+        ].map(({ key, label }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => onStoreTypeChange(key)}
+            aria-pressed={storeType === key}
+            style={storeType === key ? { ...styles.chip, ...styles.chipActive } : styles.chip}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Toggle: Solo con ubicación ── */}
+      <div style={styles.toggleRow}>
+        <span style={styles.toggleLabel}>
+          {t.onlyWithLocation ?? 'Solo con ubicación'}
+        </span>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={onlyWithLocation}
+          onClick={() => onOnlyWithLocationChange(!onlyWithLocation)}
+          style={onlyWithLocation ? { ...styles.toggle, ...styles.toggleOn } : styles.toggle}
+        >
+          <span style={onlyWithLocation ? { ...styles.toggleThumb, ...styles.toggleThumbOn } : styles.toggleThumb} />
+        </button>
       </div>
 
       {/* ── List ── */}
@@ -332,5 +371,70 @@ const styles = {
     color: 'var(--text-muted)',
     fontSize: '14px',
     textAlign: 'center',
+  },
+  filterRow: {
+    display: 'flex',
+    gap: '8px',
+    padding: '0 16px 10px',
+    flexShrink: 0,
+    flexWrap: 'wrap',
+  },
+  chip: {
+    padding: '6px 14px',
+    minHeight: '36px',
+    borderRadius: '999px',
+    border: '1px solid var(--border)',
+    background: 'var(--bg-elevated)',
+    color: 'var(--text-secondary)',
+    fontSize: '13px',
+    fontWeight: 500,
+    cursor: 'pointer',
+    whiteSpace: 'nowrap',
+  },
+  chipActive: {
+    background: 'var(--accent)',
+    color: 'var(--on-accent, #002b3d)',
+    border: '1px solid var(--accent)',
+    fontWeight: 600,
+  },
+  toggleRow: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '0 16px 10px',
+    flexShrink: 0,
+  },
+  toggleLabel: {
+    fontSize: '13px',
+    color: 'var(--text-secondary)',
+    userSelect: 'none',
+  },
+  toggle: {
+    position: 'relative',
+    width: '40px',
+    height: '22px',
+    borderRadius: '999px',
+    border: '1px solid var(--border)',
+    background: 'var(--bg-elevated)',
+    cursor: 'pointer',
+    flexShrink: 0,
+  },
+  toggleOn: {
+    background: 'var(--accent)',
+    border: '1px solid var(--accent)',
+  },
+  toggleThumb: {
+    position: 'absolute',
+    top: '2px',
+    left: '2px',
+    width: '16px',
+    height: '16px',
+    borderRadius: '50%',
+    background: 'var(--text-muted, #888)',
+    transition: 'left 0.15s',
+  },
+  toggleThumbOn: {
+    left: '20px',
+    background: '#002b3d',
   },
 };

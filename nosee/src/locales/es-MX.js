@@ -241,6 +241,8 @@ const esMX = {
       errorReport: "No se pudo reportar la publicación",
       errorDelete: "No se pudo eliminar la publicación",
       contribuir: "Contribuir",
+      storeFilterActive: 'Filtrando por tienda:',
+      storeFilterClear: 'Quitar filtro',
     },
 
     // ── Login ─────────────────────────────────────────────────────────────────
@@ -569,6 +571,8 @@ const esMX = {
       searchPlaceholder: "Buscar tienda por nombre...",
       loading: "Cargando tiendas...",
       errorLoading: "Error al cargar tiendas",
+      filterChips: { all: 'Todas', physical: 'Física', virtual: 'Virtual' },
+      onlyWithLocation: 'Solo con ubicación',
       physical: "Física",
       virtual: "Virtual",
       viewDetail: "Ver detalle",
