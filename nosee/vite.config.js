@@ -33,8 +33,6 @@ export default defineConfig({
           'vendor-supabase':    ['@supabase/supabase-js'],
           'vendor-state':       ['zustand'],
           'vendor-virtualizer': ['@tanstack/react-virtual'],
-          // Leaflet (~150 kB) en chunk propio: solo se descarga al abrir una página con mapa
-          'vendor-maps':        ['leaflet', 'react-leaflet'],
         },
       },
     },
