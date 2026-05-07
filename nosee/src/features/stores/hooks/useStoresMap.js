@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { getAllPhysicalStoresWithLocation } from '@/services/api/stores.api';
+import { getAllPhysicalStoresWithLocation, getPhysicalStoresFiltered } from '@/services/api/stores.api';
 import { useAuthStore, selectAuthUser } from '@/features/auth/store/authStore';
 
 const LEAFLET_CSS   = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
@@ -185,7 +185,7 @@ function getA11yTheme() {
 }
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
-export function useStoresMap({ containerRef, onStoreClick }) {
+export function useStoresMap({ containerRef, onStoreClick, productName, categoryId }) {
   const user = useAuthStore(selectAuthUser);
 
   const mapRef          = useRef(null);
@@ -206,12 +206,10 @@ export function useStoresMap({ containerRef, onStoreClick }) {
   const [mapReady,        setMapReady]        = useState(false);
   const [clusterReady,    setClusterReady]    = useState(false);
   const [physicalStores,  setPhysicalStores]  = useState([]);
+  const [mapStores,       setMapStores]       = useState([]);
   const [mapError,        setMapError]        = useState(null);
 
-  // Keep allStoresRef in sync so the moveend handler always has fresh data
-  useEffect(() => { allStoresRef.current = physicalStores; }, [physicalStores]);
-
-  // Fetch stores — ONE request per 5 min, shared across all instances
+  // Fetch all physical stores once (cached 5 min)
   useEffect(() => {
     let cancelled = false;
     fetchPhysicalStores().then(stores => {
@@ -219,6 +217,23 @@ export function useStoresMap({ containerRef, onStoreClick }) {
     });
     return () => { cancelled = true; };
   }, []);
+
+  // When no product/category filter: use full cached set
+  useEffect(() => {
+    if (!productName?.trim() && !categoryId) {
+      setMapStores(physicalStores);
+    }
+  }, [physicalStores, productName, categoryId]);
+
+  // When product/category filter changes: fetch filtered stores for map
+  useEffect(() => {
+    if (!productName?.trim() && !categoryId) return;
+    let cancelled = false;
+    getPhysicalStoresFiltered({ productName, categoryId }).then(res => {
+      if (!cancelled) setMapStores(res.success ? res.data : []);
+    });
+    return () => { cancelled = true; };
+  }, [productName, categoryId]);
 
   // Geolocation
   useEffect(() => {
@@ -359,17 +374,18 @@ export function useStoresMap({ containerRef, onStoreClick }) {
     map.setView([userLocation.lat, userLocation.lng], DEFAULT_ZOOM);
   }, [mapReady, userLocation, user]);
 
-  // Initial marker sync once cluster + stores are both ready
+  // Sync markers whenever the effective store set or cluster readiness changes
   useEffect(() => {
+    allStoresRef.current = mapStores;
     const cluster = clusterRef.current;
     const map     = mapRef.current;
     const L       = _cdnL;
     const icon    = storeIconRef.current;
-    if (!clusterReady || !cluster || !map || !L || !icon || !physicalStores.length) return;
+    if (!clusterReady || !cluster || !map || !L || !icon) return;
 
-    const next = getStoresInViewport(physicalStores, map);
+    const next = getStoresInViewport(mapStores, map);
     syncMarkers(cluster, L, activeMarkersRef.current, next, icon, onStoreClickRef);
-  }, [clusterReady, physicalStores]);
+  }, [mapStores, clusterReady]);
 
   return { isLoading: locationLoading || !mapReady, locationError, mapError };
 }

@@ -573,6 +573,8 @@ const esMX = {
       errorLoading: "Error al cargar tiendas",
       filterChips: { all: 'Todas', physical: 'Física', virtual: 'Virtual' },
       onlyWithLocation: 'Solo con ubicación',
+      productSearchPlaceholder: 'Buscar por producto...',
+      categoryAll: 'Todas las categorías',
       physical: "Física",
       virtual: "Virtual",
       viewDetail: "Ver detalle",

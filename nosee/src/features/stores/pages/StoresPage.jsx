@@ -42,6 +42,14 @@ export default function StoresPage() {
   // ── Hooks ──────────────────────────────────────────────────────────────────
   const { snap, snapTo, cycleSnap, onPointerDown, onPointerMove, onPointerUp } = useDrawer(drawerRef);
 
+  const {
+    search, stores, loading, loadingMore, hasMore, error,
+    storeType, onlyWithLocation, productName, categoryId, categories,
+    handleSearchChange, handleStoreTypeChange, handleOnlyWithLocationChange,
+    handleProductNameChange, handleCategoryChange,
+    loadMore, updateStore,
+  } = useStoresList();
+
   // Opens the modal and nudges the drawer to half if it's peeking
   const handleMarkerClick = useCallback((store) => {
     setSelectedStore(store);
@@ -51,14 +59,9 @@ export default function StoresPage() {
   const { isLoading: mapLoading, locationError, mapError } = useStoresMap({
     containerRef: mapContainerRef,
     onStoreClick: handleMarkerClick,
+    productName,
+    categoryId,
   });
-
-  const {
-    search, stores, loading, loadingMore, hasMore, error,
-    storeType, onlyWithLocation,
-    handleSearchChange, handleStoreTypeChange, handleOnlyWithLocationChange,
-    loadMore, updateStore,
-  } = useStoresList();
 
   // ── Handlers ───────────────────────────────────────────────────────────────
   const handleViewDetail = useCallback((store) => {
@@ -124,6 +127,11 @@ export default function StoresPage() {
         onStoreTypeChange={handleStoreTypeChange}
         onlyWithLocation={onlyWithLocation}
         onOnlyWithLocationChange={handleOnlyWithLocationChange}
+        productName={productName}
+        onProductNameChange={handleProductNameChange}
+        categoryId={categoryId}
+        onCategoryChange={handleCategoryChange}
+        categories={categories}
         onSearchChange={handleSearchChange}
         onLoadMore={loadMore}
         onViewDetail={handleViewDetail}

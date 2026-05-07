@@ -573,6 +573,8 @@ const enUS = {
       errorLoading: "Error loading stores",
       filterChips: { all: 'All', physical: 'Physical', virtual: 'Virtual' },
       onlyWithLocation: 'With location only',
+      productSearchPlaceholder: 'Search by product...',
+      categoryAll: 'All categories',
       physical: "Physical",
       virtual: "Virtual",
       viewDetail: "View detail",

@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { listStores } from '@/services/api/stores.api';
+import { getProductCategories } from '@/services/api/products.api';
 import { INFINITE_SCROLL_CONFIG } from '@/config/infiniteScroll';
 
 const DEBOUNCE_MS = 350;
@@ -13,13 +14,27 @@ export function useStoresList() {
   const [error, setError] = useState(null);
   const [storeType, setStoreType] = useState('all');
   const [onlyWithLocation, setOnlyWithLocation] = useState(false);
-  const storeTypeRef = useRef('all');
-  const onlyWithLocationRef = useRef(false);
+  const [productName, setProductName] = useState('');
+  const [categoryId, setCategoryId] = useState(null);
+  const [categories, setCategories] = useState([]);
 
-  const debounceRef    = useRef(null);
-  const pageRef        = useRef(1);
-  const searchRef      = useRef('');
-  const loadingMoreRef = useRef(false); // sync guard — state update is async and can be bypassed by rapid scroll
+  const storeTypeRef        = useRef('all');
+  const onlyWithLocationRef = useRef(false);
+  const productNameRef      = useRef('');
+  const categoryIdRef       = useRef(null);
+
+  const debounceRef        = useRef(null);
+  const productDebounceRef = useRef(null);
+  const pageRef            = useRef(1);
+  const searchRef          = useRef('');
+  const loadingMoreRef     = useRef(false);
+
+  // Load categories once on mount
+  useEffect(() => {
+    getProductCategories().then(res => {
+      if (res.success) setCategories(res.data ?? []);
+    });
+  }, []);
 
   const fetchStores = useCallback(async ({ query, pageToLoad, append }) => {
     if (pageToLoad === 1) setLoading(true);
@@ -31,6 +46,8 @@ export function useStoresList() {
       page: pageToLoad,
       storeType: storeTypeRef.current,
       onlyWithLocation: onlyWithLocationRef.current,
+      productName: productNameRef.current,
+      categoryId: categoryIdRef.current,
     });
 
     if (result.success) {
@@ -81,6 +98,24 @@ export function useStoresList() {
     fetchStores({ query: searchRef.current, pageToLoad: 1, append: false });
   }, [fetchStores]);
 
+  const handleProductNameChange = useCallback((value) => {
+    setProductName(value);
+    productNameRef.current = value;
+    clearTimeout(productDebounceRef.current);
+    productDebounceRef.current = setTimeout(() => {
+      pageRef.current = 1;
+      fetchStores({ query: searchRef.current, pageToLoad: 1, append: false });
+    }, DEBOUNCE_MS);
+  }, [fetchStores]);
+
+  const handleCategoryChange = useCallback((id) => {
+    const resolved = id ? Number(id) : null;
+    categoryIdRef.current = resolved;
+    setCategoryId(resolved);
+    pageRef.current = 1;
+    fetchStores({ query: searchRef.current, pageToLoad: 1, append: false });
+  }, [fetchStores]);
+
   const loadMore = useCallback(() => {
     if (!hasMore || loading || loadingMoreRef.current) return;
     fetchStores({ query: searchRef.current, pageToLoad: pageRef.current + 1, append: true });
@@ -100,9 +135,14 @@ export function useStoresList() {
     error,
     storeType,
     onlyWithLocation,
+    productName,
+    categoryId,
+    categories,
     handleSearchChange,
     handleStoreTypeChange,
     handleOnlyWithLocationChange,
+    handleProductNameChange,
+    handleCategoryChange,
     loadMore,
     updateStore,
   };

@@ -47,6 +47,11 @@ const StoresDrawer = memo(function StoresDrawer({
   onStoreTypeChange,
   onlyWithLocation,
   onOnlyWithLocationChange,
+  productName,
+  onProductNameChange,
+  categoryId,
+  onCategoryChange,
+  categories,
   t,
 }) {
   const listRef = useRef(null);
@@ -168,6 +173,36 @@ const StoresDrawer = memo(function StoresDrawer({
         >
           <span style={onlyWithLocation ? { ...styles.toggleThumb, ...styles.toggleThumbOn } : styles.toggleThumb} />
         </button>
+      </div>
+
+      {/* ── Filtros de producto ── */}
+      <div style={styles.productFilters}>
+        <div style={styles.searchWrapper}>
+          <span style={styles.searchIconWrap}>
+            <SearchIcon />
+          </span>
+          <input
+            type="search"
+            value={productName}
+            onChange={e => onProductNameChange(e.target.value)}
+            placeholder={t.productSearchPlaceholder ?? 'Buscar por producto...'}
+            aria-label={t.productSearchPlaceholder ?? 'Buscar por producto'}
+            style={styles.searchInput}
+          />
+        </div>
+        {categories.length > 0 && (
+          <select
+            value={categoryId ?? ''}
+            onChange={e => onCategoryChange(e.target.value || null)}
+            aria-label={t.categoryAll ?? 'Categoría de producto'}
+            style={styles.categorySelect}
+          >
+            <option value="">{t.categoryAll ?? 'Todas las categorías'}</option>
+            {categories.map(cat => (
+              <option key={cat.id} value={cat.id}>{cat.name}</option>
+            ))}
+          </select>
+        )}
       </div>
 
       {/* ── List ── */}
@@ -436,5 +471,26 @@ const styles = {
   toggleThumbOn: {
     left: '20px',
     background: '#002b3d',
+  },
+  productFilters: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+    padding: '0 16px 10px',
+    flexShrink: 0,
+  },
+  categorySelect: {
+    width: '100%',
+    padding: '10px 12px',
+    minHeight: '44px',
+    fontSize: '14px',
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius-md)',
+    background: 'var(--bg-elevated)',
+    color: 'var(--text-primary)',
+    outline: 'none',
+    appearance: 'none',
+    WebkitAppearance: 'none',
+    cursor: 'pointer',
   },
 };
