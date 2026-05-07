@@ -5,7 +5,7 @@
  * Mobile:  bottom sheet con drag handle y layout de lista.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getStorePublications, getStoreEvidences, updateStore } from '@/services/api/stores.api';
@@ -347,6 +347,33 @@ export default function StoreDetailModal({ store, onClose, onStoreUpdated }) {
   const [reportOpen, setReportOpen] = useState(false);
   const [verTodosHov, setVerTodosHov] = useState(false);
 
+  // ── Mobile sheet swipe-to-close ──────────────────────
+  const swipeDrag   = useRef(null);
+  const [sheetTranslate, setSheetTranslate] = useState(0);
+
+  const onHandlePointerDown = useCallback((e) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    swipeDrag.current = { startY: e.clientY, wasDrag: false };
+  }, []);
+
+  const onHandlePointerMove = useCallback((e) => {
+    if (!swipeDrag.current) return;
+    const delta = e.clientY - swipeDrag.current.startY;
+    if (!swipeDrag.current.wasDrag && Math.abs(delta) > 8) swipeDrag.current.wasDrag = true;
+    if (swipeDrag.current.wasDrag && delta > 0) setSheetTranslate(delta);
+  }, []);
+
+  const onHandlePointerUp = useCallback((e) => {
+    if (!swipeDrag.current) return;
+    const delta   = e.clientY - swipeDrag.current.startY;
+    const wasDrag = swipeDrag.current.wasDrag;
+    swipeDrag.current = null;
+    if (!wasDrag) { setSheetTranslate(0); onClose(); }
+    else if (delta > 80) { onClose(); }
+    else { setSheetTranslate(0); }
+  }, [onClose]);
+  // ─────────────────────────────────────────────────────
+
   const isPhysical = localStore.type === 'physical';
   const accentColor = isPhysical ? 'var(--success)' : 'var(--info)';
 
@@ -566,9 +593,18 @@ export default function StoreDetailModal({ store, onClose, onStoreUpdated }) {
           onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
           onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
         >
-          <div style={{ ...mob.sheet, borderTop: `3px solid ${accentColor}` }}>
+          <div style={{ ...mob.sheet, borderTop: `3px solid ${accentColor}`, transform: `translateY(${sheetTranslate}px)`, transition: sheetTranslate === 0 ? 'transform 0.25s cubic-bezier(0.32,0.72,0,1)' : 'none' }}>
 
-            <div style={mob.handleWrap} onClick={onClose} role="button" aria-label={td.close} tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter') onClose(); }}>
+            <div
+              style={{ ...mob.handleWrap, touchAction: 'none' }}
+              role="button"
+              aria-label={td.close}
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter') onClose(); }}
+              onPointerDown={onHandlePointerDown}
+              onPointerMove={onHandlePointerMove}
+              onPointerUp={onHandlePointerUp}
+            >
               <div style={mob.handle} />
             </div>
 
