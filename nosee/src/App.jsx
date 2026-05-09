@@ -2,15 +2,14 @@
  * App.jsx
  */
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import {
   useAuthStore,
   selectIsInitialized,
   selectAuthUser,
   selectIsAuthenticated,
 } from "@/features/auth/store/authStore";
-import ChatWidget from "@/features/chat/components/ChatWidget";
+const ChatWidget = lazy(() => import("@/features/chat/components/ChatWidget"));
 import { useShoppingListStore } from "@/features/shopping-list/store/shoppingListStore";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -391,6 +390,15 @@ function ShoppingListSync() {
   return null;
 }
 
+function RouteErrorBoundary() {
+  const { pathname } = useLocation();
+  return (
+    <ErrorBoundary key={pathname}>
+      <AppContent />
+    </ErrorBoundary>
+  );
+}
+
 function AppShell() {
   const { t } = useLanguage();
   const user = useAuthStore(selectAuthUser);
@@ -442,15 +450,17 @@ function AppShell() {
         }}
       >
         {isOffline ? <ConnectionErrorView /> : null}
-        <ErrorBoundary>
-          <AppContent />
-        </ErrorBoundary>
+        <RouteErrorBoundary />
       </main>
 
       <Footer />
       <AccessibilityMenu />
       <RoleChangeToast />
-      <ChatWidget userId={user?.id} isAuthenticated={isAuthenticated} />
+      {isAuthenticated && (
+        <Suspense fallback={null}>
+          <ChatWidget userId={user?.id} isAuthenticated={isAuthenticated} />
+        </Suspense>
+      )}
     </div>
   );
 }

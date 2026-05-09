@@ -14,6 +14,7 @@
  */
 
 import { supabase } from "@/services/supabase.client";
+import { recordRoleAssignment } from "@/services/metrics";
 
 // ─── Mapper BD → UI ───────────────────────────────────────────────────────────
 
@@ -171,6 +172,8 @@ export async function getAllUsers() {
  * @param {string} userId
  * @param {number} roleId - 1=Usuario, 2=Moderador, 3=Admin, 4=Repartidor
  */
+const ROLE_NAME_BY_ID = { 1: 'usuario', 2: 'moderador', 3: 'admin', 4: 'repartidor' };
+
 export async function changeUserRole(userId, roleId) {
   // No usamos .select() después del UPDATE porque la política RLS
   // bloquea que el admin lea filas de otros usuarios, devolviendo 0 filas
@@ -181,6 +184,7 @@ export async function changeUserRole(userId, roleId) {
     .eq("id", userId);
 
   if (error) return { success: false, error: error.message };
+  recordRoleAssignment(ROLE_NAME_BY_ID[roleId] ?? String(roleId));
   return { success: true };
 }
 

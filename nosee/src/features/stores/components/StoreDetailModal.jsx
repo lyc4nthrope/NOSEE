@@ -5,7 +5,8 @@
  * Mobile:  bottom sheet con drag handle y layout de lista.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getStorePublications, getStoreEvidences, updateStore } from '@/services/api/stores.api';
@@ -347,6 +348,33 @@ export default function StoreDetailModal({ store, onClose, onStoreUpdated }) {
   const [reportOpen, setReportOpen] = useState(false);
   const [verTodosHov, setVerTodosHov] = useState(false);
 
+  // ── Mobile sheet swipe-to-close ──────────────────────
+  const swipeDrag   = useRef(null);
+  const [sheetTranslate, setSheetTranslate] = useState(0);
+
+  const onHandlePointerDown = useCallback((e) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    swipeDrag.current = { startY: e.clientY, wasDrag: false };
+  }, []);
+
+  const onHandlePointerMove = useCallback((e) => {
+    if (!swipeDrag.current) return;
+    const delta = e.clientY - swipeDrag.current.startY;
+    if (!swipeDrag.current.wasDrag && Math.abs(delta) > 8) swipeDrag.current.wasDrag = true;
+    if (swipeDrag.current.wasDrag && delta > 0) setSheetTranslate(delta);
+  }, []);
+
+  const onHandlePointerUp = useCallback((e) => {
+    if (!swipeDrag.current) return;
+    const delta   = e.clientY - swipeDrag.current.startY;
+    const wasDrag = swipeDrag.current.wasDrag;
+    swipeDrag.current = null;
+    if (!wasDrag) { setSheetTranslate(0); onClose(); }
+    else if (delta > 80) { onClose(); }
+    else { setSheetTranslate(0); }
+  }, [onClose]);
+  // ─────────────────────────────────────────────────────
+
   const isPhysical = localStore.type === 'physical';
   const accentColor = isPhysical ? 'var(--success)' : 'var(--info)';
 
@@ -385,25 +413,30 @@ export default function StoreDetailModal({ store, onClose, onStoreUpdated }) {
     if (!isPhysical) return;
     setSavingStore(true);
     setSaveMessage('');
-    const parsedLat = Number(editLatitude);
-    const parsedLon = Number(editLongitude);
-    const payload = {
-      address: editAddress,
-      latitude: Number.isFinite(parsedLat) ? parsedLat : undefined,
-      longitude: Number.isFinite(parsedLon) ? parsedLon : undefined,
-    };
-    const result = await updateStore(localStore.id, payload);
-    setSavingStore(false);
-    if (!result.success) { setSaveMessage(result.error || ts.errorUpdate); return; }
-    const updatedStore = { ...localStore, ...result.data, address: result.data.address ?? localStore.address, latitude: result.data.latitude, longitude: result.data.longitude };
-    setLocalStore((prev) => ({ ...prev, ...result.data, address: result.data.address ?? prev.address, latitude: result.data.latitude, longitude: result.data.longitude }));
-    if (typeof onStoreUpdated === 'function') onStoreUpdated(updatedStore);
-    if (typeof window !== 'undefined') {
-      const detail = { storeId: updatedStore.id, updatedStore, updatedAt: Date.now() };
-      window.dispatchEvent(new CustomEvent('nosee:store-updated', { detail }));
-      try { window.localStorage.setItem('NOSEE_STORE_UPDATED_AT', String(detail.updatedAt)); } catch {}
+    try {
+      const parsedLat = Number(editLatitude);
+      const parsedLon = Number(editLongitude);
+      const payload = {
+        address: editAddress,
+        latitude: Number.isFinite(parsedLat) ? parsedLat : undefined,
+        longitude: Number.isFinite(parsedLon) ? parsedLon : undefined,
+      };
+      const result = await updateStore(localStore.id, payload);
+      if (!result.success) { setSaveMessage(result.error || ts.errorUpdate); return; }
+      const updatedStore = { ...localStore, ...result.data, address: result.data.address ?? localStore.address, latitude: result.data.latitude, longitude: result.data.longitude };
+      setLocalStore((prev) => ({ ...prev, ...result.data, address: result.data.address ?? prev.address, latitude: result.data.latitude, longitude: result.data.longitude }));
+      if (typeof onStoreUpdated === 'function') onStoreUpdated(updatedStore);
+      if (typeof window !== 'undefined') {
+        const detail = { storeId: updatedStore.id, updatedStore, updatedAt: Date.now() };
+        window.dispatchEvent(new CustomEvent('nosee:store-updated', { detail }));
+        try { window.localStorage.setItem('NOSEE_STORE_UPDATED_AT', String(detail.updatedAt)); } catch {}
+      }
+      setSaveMessage(ts.successUpdate);
+    } catch (err) {
+      setSaveMessage(ts.errorUpdate);
+    } finally {
+      setSavingStore(false);
     }
-    setSaveMessage(ts.successUpdate);
   };
 
   useEffect(() => {
@@ -418,7 +451,11 @@ export default function StoreDetailModal({ store, onClose, onStoreUpdated }) {
 
   const handleNavigate = useCallback((id) => {
     if (!id) return;
-    onClose();
+    // flushSync garantiza que el modal se desmonte del DOM antes de que
+    // React Router monte la página de detalle de publicación.
+    // Sin esto, React 18 puede batch ambas actualizaciones y el modal
+    // permanece visible encima de la nueva página por un frame.
+    flushSync(() => onClose());
     navigate(`/publicaciones/${id}`);
   }, [onClose, navigate]);
 
@@ -566,9 +603,18 @@ export default function StoreDetailModal({ store, onClose, onStoreUpdated }) {
           onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
           onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
         >
-          <div style={{ ...mob.sheet, borderTop: `3px solid ${accentColor}` }}>
+          <div style={{ ...mob.sheet, borderTop: `3px solid ${accentColor}`, transform: `translateY(${sheetTranslate}px)`, transition: sheetTranslate === 0 ? 'transform 0.25s cubic-bezier(0.32,0.72,0,1)' : 'none' }}>
 
-            <div style={mob.handleWrap} onClick={onClose} role="button" aria-label={td.close} tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter') onClose(); }}>
+            <div
+              style={{ ...mob.handleWrap, touchAction: 'none' }}
+              role="button"
+              aria-label={td.close}
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter') onClose(); }}
+              onPointerDown={onHandlePointerDown}
+              onPointerMove={onHandlePointerMove}
+              onPointerUp={onHandlePointerUp}
+            >
               <div style={mob.handle} />
             </div>
 

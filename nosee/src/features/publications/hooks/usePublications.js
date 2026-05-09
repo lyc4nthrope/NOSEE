@@ -1,11 +1,10 @@
- /*usePublications.js
+/**
+ * usePublications.js
  *
  * Hook personalizado para gestionar publicaciones de precios
- * 
+ *
  * UBICACIÓN: src/features/publications/hooks/usePublications.js
- * FECHA: 26-02-2026
- * STATUS: Paso 2a de Proceso 2
- * 
+ *
  * FUNCIÓN:
  * - Carga publicaciones desde BD
  * - Aplica filtros
@@ -41,7 +40,6 @@ const getRuntimeState = () => {
   };
 };
 
-
 const areFiltersEqual = (a = {}, b = {}) => {
   const keys = [
     'productId',
@@ -66,11 +64,9 @@ const areFiltersEqual = (a = {}, b = {}) => {
   });
 };
 
-
-
 /**
  * Custom hook para gestionar publicaciones de precios
- * 
+ *
  * @param {Object} initialFilters - Filtros iniciales
  * @param {string} initialFilters.productName - Nombre de producto
  * @param {string} initialFilters.storeName - Nombre de tienda
@@ -173,7 +169,7 @@ export const usePublications = (initialFilters = {}, options = {}) => {
         return;
       }
 
-       const requestId = activeRequestIdRef.current + 1;
+      const requestId = activeRequestIdRef.current + 1;
       activeRequestIdRef.current = requestId;
       const startedAt = Date.now();
       let guardTimeoutId = null;
@@ -258,7 +254,6 @@ export const usePublications = (initialFilters = {}, options = {}) => {
           }
         }
       } catch (err) {
-        debugPublications('fetch:exception', { error: err?.message });
         debugPublications('fetch:exception', {
           requestId,
           currentPage,
@@ -360,7 +355,6 @@ export const usePublications = (initialFilters = {}, options = {}) => {
   
   useEffect(() => {
     if (!refetchOnTabActive) return;
-    
 
     const handleTabActive = () => {
       if (document.visibilityState === 'visible') {
@@ -441,7 +435,7 @@ export const usePublications = (initialFilters = {}, options = {}) => {
    * Limpiar todos los filtros
    */
   const clearFilters = useCallback(() => {
-     const resetFilters = {
+    const resetFilters = {
       productId: null,
       productName: '',
       storeName: '',
@@ -455,14 +449,14 @@ export const usePublications = (initialFilters = {}, options = {}) => {
       longitude: null,
       sortBy: 'recent',
       limit: 20,
-       };
+    };
 
     let didChange = false;
     setFilters((prev) => {
       didChange = !areFiltersEqual(prev, resetFilters);
       return didChange ? resetFilters : prev;
     });
-    
+
     if (didChange) {
       setPage(1);
     }

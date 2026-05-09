@@ -49,11 +49,13 @@ export function PublicationForm({ mode = "create", publicationId = null, onSucce
     isLoading,
     latitude,
     longitude,
+    requestLocation,
     updateField,
     submit,
     showCelebration,
     setShowCelebration,
   } = usePublicationCreation({ mode, publicationId });
+  const locationRequestedRef = useRef(false);
 
   // Estado para autocompletes y modales
   const [hasLoadedInitialData, setHasLoadedInitialData] = useState(mode === 'create');
@@ -819,9 +821,13 @@ export function PublicationForm({ mode = "create", publicationId = null, onSucce
               placeholder={autoStoreDetecting ? tf.findingStore : tf.storePlaceholder}
               value={storeQuery}
               onChange={handleStoreQueryChange}
-              onFocus={() =>
-                storeQuery.length >= 2 && setShowStoreDropdown(true)
-              }
+              onFocus={() => {
+                if (!locationRequestedRef.current) {
+                  locationRequestedRef.current = true;
+                  requestLocation();
+                }
+                if (storeQuery.length >= 2) setShowStoreDropdown(true);
+              }}
               onKeyDown={handleStoreKeyDown}
               style={{
                 ...styles.input,

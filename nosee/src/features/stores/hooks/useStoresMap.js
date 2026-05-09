@@ -87,6 +87,13 @@ function syncMarkers(cluster, L, activeMarkers, nextStores, icon, onClickRef) {
 }
 
 // ─── Leaflet loaders ──────────────────────────────────────────────────────────
+// Module-level cache for CDN Leaflet.
+// leaflet-src.js (npm) sets window.L = exports at evaluation time, which would
+// fool the old `if (window.L) return early` guard. By caching the CDN instance
+// here we're immune to npm Leaflet overwriting window.L later.
+let _cdnL = null;
+let _cdnClusterReady = false;
+
 function loadStylesheet(href, attr) {
   if (document.querySelector(`link[${attr}]`)) return;
   const link = document.createElement('link');
@@ -118,21 +125,22 @@ function loadScript(src, attr) {
 }
 
 function ensureLeaflet() {
-  if (window.L) return Promise.resolve(window.L);
+  if (_cdnL) return Promise.resolve(_cdnL);
   if (window.__leafletLoader) return window.__leafletLoader;
   loadStylesheet(LEAFLET_CSS, 'data-lf-css');
   window.__leafletLoader = loadScript(LEAFLET_JS, 'data-lf-js')
-    .then(() => window.L)
+    .then(() => { _cdnL = window.L; return _cdnL; })
     .catch(err => { window.__leafletLoader = null; throw err; });
   return window.__leafletLoader;
 }
 
 function ensureCluster() {
-  if (window.L?.MarkerClusterGroup) return Promise.resolve();
+  if (_cdnClusterReady) return Promise.resolve();
   if (window.__clusterLoader) return window.__clusterLoader;
   loadStylesheet(CLUSTER_CSS,   'data-mc-css');
   loadStylesheet(CLUSTER_CSS_D, 'data-mc-css-d');
   window.__clusterLoader = loadScript(CLUSTER_JS, 'data-mc-js')
+    .then(() => { _cdnClusterReady = true; })
     .catch(err => { window.__clusterLoader = null; throw err; });
   return window.__clusterLoader;
 }
@@ -249,7 +257,7 @@ export function useStoresMap({ containerRef, onStoreClick }) {
   // Init map + viewport listener
   useEffect(() => {
     if (!mapReady || locationLoading || !containerRef.current || mapRef.current) return;
-    const L      = window.L;
+    const L      = _cdnL;
     const center = userLocation ?? DEFAULT_CENTER;
 
     const map = L.map(containerRef.current, {
@@ -318,7 +326,7 @@ export function useStoresMap({ containerRef, onStoreClick }) {
   useEffect(() => {
     const observer = new MutationObserver(() => {
       const map = mapRef.current;
-      const L   = window.L;
+      const L   = _cdnL;
       if (!map || !L || !tileLayerRef.current) return;
       const tileCfg = TILE_LAYERS[getA11yTheme()];
       tileLayerRef.current.remove();
@@ -335,7 +343,7 @@ export function useStoresMap({ containerRef, onStoreClick }) {
   // User location marker
   useEffect(() => {
     const map = mapRef.current;
-    const L   = window.L;
+    const L   = _cdnL;
     if (!map || !L || !userLocation) return;
     if (userMarkerRef.current) {
       userMarkerRef.current.setLatLng([userLocation.lat, userLocation.lng]);
@@ -355,7 +363,7 @@ export function useStoresMap({ containerRef, onStoreClick }) {
   useEffect(() => {
     const cluster = clusterRef.current;
     const map     = mapRef.current;
-    const L       = window.L;
+    const L       = _cdnL;
     const icon    = storeIconRef.current;
     if (!clusterReady || !cluster || !map || !L || !icon || !physicalStores.length) return;
 

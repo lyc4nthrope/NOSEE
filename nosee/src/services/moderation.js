@@ -13,14 +13,19 @@ const IMAGE_MIN_ANALYSIS_PIXELS = Number(
 const SKIN_RATIO_BLOCK_THRESHOLD = Number(
   import.meta.env.VITE_IMAGE_SKIN_RATIO_BLOCK || 0.58,
 );
+// 0.45 en vez de 0.35: etiquetas de marca con franjas rojas extensas (aceites, salsas)
+// pueden llegar a 35-40 % de píxeles rojizo-oscuros sin ser gore; se necesita >45 %
 const BLOOD_RATIO_BLOCK_THRESHOLD = Number(
-  import.meta.env.VITE_IMAGE_BLOOD_RATIO_BLOCK || 0.20,
+  import.meta.env.VITE_IMAGE_BLOOD_RATIO_BLOCK || 0.45,
 );
+// 0.55 en vez de 0.32: el rango H=5-45° (naranja/amarillo) es común en alimentos
+// y packaging de supermercado; 0.32 producía falsos positivos en fotos de producto
 const ANIME_SKIN_RATIO_BLOCK_THRESHOLD = Number(
-  import.meta.env.VITE_IMAGE_ANIME_SKIN_RATIO_BLOCK || 0.32,
+  import.meta.env.VITE_IMAGE_ANIME_SKIN_RATIO_BLOCK || 0.55,
 );
+// 0.55 en vez de 0.38: fotos bajo luz fluorescente de supermercado superan 0.38
 const VIVID_RATIO_BLOCK_THRESHOLD = Number(
-  import.meta.env.VITE_IMAGE_VIVID_RATIO_BLOCK || 0.38,
+  import.meta.env.VITE_IMAGE_VIVID_RATIO_BLOCK || 0.55,
 );
 const IMAGE_HOTSPOT_GRID_SIZE = Number(
   import.meta.env.VITE_IMAGE_HOTSPOT_GRID_SIZE || 12,
@@ -256,20 +261,22 @@ export const detectInappropriateText = (text = "") => {
 };
 
 export const detectRestrictedContentText = (text = "") => {
-  const normalized = collapseRepeatedChars(
-    normalizeText(normalizeLeetspeak(text)),
-  );
+  const preCollapse = normalizeText(normalizeLeetspeak(text));
+  const normalized  = collapseRepeatedChars(preCollapse);
   if (!normalized) {
     return { flagged: false, score: 0, matches: [], strategy: "empty" };
   }
 
-  const matches = ADULT_GORE_KEYWORDS.filter((term) => {
-    const pattern = new RegExp(`(^|\\s)${term}(\\s|$)`, "i");
-    return pattern.test(normalized);
-  });
+  // Se revisan ambas versiones: la colapsada (detecta obfuscación como "puuuuta")
+  // y la sin colapsar (detecta keywords exactos como "xxx" que el colapso destruiría).
+  const findMatches = (str) =>
+    ADULT_GORE_KEYWORDS.filter((term) =>
+      new RegExp(`(^|\\s)${term}(\\s|$)`, "i").test(str),
+    );
+
+  const matches = [...new Set([...findMatches(normalized), ...findMatches(preCollapse)])];
 
   const score = matches.reduce((acc, term) => {
-    // Penaliza más términos explícitos fuertes.
     if (["porn", "porno", "xxx", "nsfw", "gore", "decapitado", "mutilacion"].includes(term)) return acc + 2;
     return acc + 1;
   }, 0);
@@ -481,6 +488,8 @@ export const analyzeImageFileForRestrictedContent = async (file) => {
       const { h, s, v } = rgbToHsv(r, g, b);
       const redDominance = r / (r + g + b + 1);
       const isRedHue = h <= 13 || h >= 348;
+      // v < 0.75: excluye rojos brillantes de plástico/lacado (empaques, tapas, marcas)
+      // que tienen v ≥ 0.75; la sangre real es más oscura (v ∈ [0.18, 0.75]).
       const isBloodLike =
         ((r > 110 && g < 115 && b < 115) || (r > 75 && g < 75 && b < 75)) &&
         redDominance > 0.52 &&
@@ -489,7 +498,7 @@ export const analyzeImageFileForRestrictedContent = async (file) => {
         isRedHue &&
         s >= 0.35 &&
         v >= 0.18 &&
-        v < 0.80;
+        v < 0.75;
       if (isBloodLike) {
         bloodPixels += 1;
         bucket.blood += 1;
@@ -588,10 +597,12 @@ export const analyzeImageFileForRestrictedContent = async (file) => {
       animeSkinRatio >= ANIME_SKIN_RATIO_BLOCK_THRESHOLD &&
       vividRatio >= VIVID_RATIO_BLOCK_THRESHOLD &&
       maxAnimeHotspotRatio >= 0.24;
+    // Requiere ratio GLOBAL alto además del hotspot: packaging rojo concentrado
+    // (salsa, ketchup, etiqueta roja) no debe bloquearse solo por tener alta
+    // concentración local si el global está por debajo del umbral.
     const flaggedGore =
-      (bloodRatio >= BLOOD_RATIO_BLOCK_THRESHOLD &&
-        maxBloodHotspotRatio >= BLOOD_HOTSPOT_RATIO_BLOCK_THRESHOLD) ||
-      maxBloodHotspotRatio >= BLOOD_HOTSPOT_RATIO_BLOCK_THRESHOLD * 1.35;
+      bloodRatio >= BLOOD_RATIO_BLOCK_THRESHOLD &&
+      maxBloodHotspotRatio >= BLOOD_HOTSPOT_RATIO_BLOCK_THRESHOLD;
     const flagged = flaggedAdult || flaggedAnimeAdult || flaggedGore;
 
     const labels = [];

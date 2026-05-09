@@ -9,7 +9,7 @@ scrape_configs:
   # ── Métricas personalizadas de NØSEE (Proceso 1 + 2) ──────────────────────
   - job_name: 'nosee-app'
     static_configs:
-      - targets: ['ingenieriasoftwareiii-production.up.railway.app']
+      - targets: ['lyc4nthrope-nosee-metrics.hf.space']
     scheme: https
     metrics_path: '/metrics'
     scrape_interval: 15s
@@ -26,7 +26,7 @@ scrape_configs:
   # Alerts útiles en Grafana:
   #   probe_success == 0         → ALERTA: endpoint caído
   #   probe_duration_seconds > 3 → ALERTA: latencia > 3 000 ms
-  - job_name: 'blackbox-http'
+  - job_name: 'nosee-frontend'
     metrics_path: /probe
     params:
       module: [http_2xx]
@@ -60,14 +60,57 @@ scrape_configs:
     static_configs:
       - targets: ['pushgateway:9091']
 
-  # ── Blackbox — Healthcheck estricto del metrics-server ────────────────────
-  - job_name: 'blackbox-metrics-server-health'
+  # ── Blackbox — Healthcheck estricto del metrics-server ───────────────────
+  #
+  # RNF 4.5.3 — nosee_api_health_up: probe_success{job="nosee-api-health"} == 1
+  - job_name: 'nosee-api-health'
     metrics_path: /probe
     params:
       module: [http_2xx_strict]
     static_configs:
       - targets:
           - https://ingenieriasoftwareiii-production.up.railway.app/health
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  # ── Blackbox — Tiempo de carga de la página principal ────────────────────
+  #
+  # RNF 4.3.5 — Tiempo de primera carga de la app < 4s
+  # PromQL: probe_duration_seconds{job="nosee-page-load"} <= 4
+  - job_name: 'nosee-page-load'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+          - https://noseecorp.com
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  # ── Blackbox — Disponibilidad de rutas SPA ────────────────────────────────
+  #
+  # RNF 4.5.1 — Disponibilidad de rutas críticas >= 99.5%
+  # PromQL: avg_over_time(probe_success{job="nosee-routes"}[30d]) >= 0.995
+  - job_name: 'nosee-routes'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+          - https://noseecorp.com/login
+          - https://noseecorp.com/register
+          - https://noseecorp.com/publicaciones
+          - https://noseecorp.com/dashboard
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target

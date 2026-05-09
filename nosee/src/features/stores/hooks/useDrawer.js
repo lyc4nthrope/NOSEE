@@ -55,8 +55,10 @@ export function useDrawer(drawerRef) {
   }, []);
 
   const onPointerDown = useCallback((e) => {
-    // Don't capture if the user is interacting with a link, button, or input
-    if (e.target.closest('a, button, input')) return;
+    // Don't capture if the user is interacting with a link or input.
+    // Buttons are also excluded UNLESS they carry data-drag-handle (e.g. the handle pill).
+    if (e.target.closest('a, input')) return;
+    if (e.target.closest('button') && !e.target.closest('[data-drag-handle]')) return;
 
     e.currentTarget.setPointerCapture(e.pointerId);
     dragStartY.current = e.clientY;

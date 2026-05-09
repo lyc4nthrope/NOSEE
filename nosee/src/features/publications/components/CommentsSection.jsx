@@ -33,14 +33,14 @@ const commentStyles = {
     background: "var(--surface-container, #1c2026)",
     borderRadius: "12px",
     padding: "16px",
-    border: "1px solid rgba(255,255,255,0.05)",
+    border: "1px solid var(--border, rgba(255,255,255,0.05))",
   },
 
   commentTextarea: {
     width: "100%",
     padding: "10px 14px",
     borderRadius: "var(--radius-md)",
-    border: "1px solid rgba(255,255,255,0.08)",
+    border: "1px solid var(--border, rgba(255,255,255,0.08))",
     background: "var(--bg-elevated, #1a2540)",
     color: "var(--text-primary)",
     fontSize: "14px",
@@ -68,7 +68,7 @@ const commentStyles = {
   cancelBtn: {
     padding: "8px 16px",
     borderRadius: "9999px",
-    border: "1px solid rgba(255,255,255,0.08)",
+    border: "1px solid var(--border, rgba(255,255,255,0.08))",
     background: "transparent",
     color: "var(--text-secondary)",
     fontSize: "13px",
@@ -114,19 +114,19 @@ const commentStyles = {
   commentName: {
     fontWeight: 700,
     fontSize: "13px",
-    color: "#dfe2eb",
+    color: "var(--text-primary)",
   },
 
   commentTime: {
     fontSize: "10px",
-    color: "rgba(255,255,255,0.3)",
+    color: "var(--text-muted)",
     textTransform: "uppercase",
     letterSpacing: "0.05em",
   },
 
   commentBody: {
     fontSize: "14px",
-    color: "rgba(255,255,255,0.7)",
+    color: "var(--text-secondary)",
     lineHeight: 1.6,
     margin: "0 0 8px",
   },
@@ -141,9 +141,9 @@ const commentStyles = {
   actionBtn: {
     padding: "3px 10px",
     borderRadius: "9999px",
-    border: "1px solid rgba(255,255,255,0.08)",
+    border: "1px solid var(--border, rgba(255,255,255,0.08))",
     background: "transparent",
-    color: "var(--primary-container, #22b1ec)",
+    color: "var(--accent, #22b1ec)",
     fontSize: "11px",
     fontWeight: 600,
     cursor: "pointer",
@@ -154,9 +154,9 @@ const commentStyles = {
   actionBtnMuted: {
     padding: "3px 10px",
     borderRadius: "9999px",
-    border: "1px solid rgba(255,255,255,0.06)",
+    border: "1px solid var(--border-soft, rgba(255,255,255,0.06))",
     background: "transparent",
-    color: "rgba(255,255,255,0.35)",
+    color: "var(--text-muted)",
     fontSize: "11px",
     fontWeight: 600,
     cursor: "pointer",
@@ -177,7 +177,7 @@ const commentStyles = {
 
   nestedWrapper: {
     marginLeft: "24px",
-    borderLeft: "2px solid rgba(121,209,255,0.15)",
+    borderLeft: "2px solid var(--border-soft, rgba(121,209,255,0.15))",
     paddingLeft: "16px",
     marginTop: "8px",
   },
@@ -188,7 +188,7 @@ const commentStyles = {
     padding: "8px",
     background: "var(--bg-elevated, #1a2540)",
     borderRadius: "var(--radius-md)",
-    border: "1px solid rgba(255,255,255,0.06)",
+    border: "1px solid var(--border, rgba(255,255,255,0.06))",
   },
 };
 

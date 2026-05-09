@@ -4,7 +4,7 @@ import { useGeoLocation } from './useGeoLocation';
 import { playSuccessSound } from '@/utils/celebrationSound';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { insertUserActivityLog } from '@/services/api/audit.api';
-import { recordPublicationCreated } from '@/services/metrics';
+import { recordPublicationCreated, recordPublicationAttempted } from '@/services/metrics';
 
 const initialFormData = {
   productId: '',
@@ -17,7 +17,7 @@ const initialFormData = {
 };
 
 export function usePublicationCreation({ publicationId = null, mode = 'create' } = {}) {
-  const { latitude, longitude } = useGeoLocation({ autoFetch: true });
+  const { latitude, longitude, refetch: requestLocation } = useGeoLocation({ autoFetch: false, timeout: 5000 });
 
   const [formData, setFormData] = useState(initialFormData);
   const currentUserId = useAuthStore(state => state.user?.id);
@@ -108,6 +108,9 @@ export function usePublicationCreation({ publicationId = null, mode = 'create' }
         photoModeration: formData.photoModeration || null,
       };
 
+      if (mode === 'create') {
+        recordPublicationAttempted();
+      }
       const result = mode === 'create'
         ? await publicationsApi.createPublication(payload)
         : await publicationsApi.updatePublication(publicationId, payload);
@@ -159,6 +162,7 @@ export function usePublicationCreation({ publicationId = null, mode = 'create' }
     isLoading,
     latitude,
     longitude,
+    requestLocation,
     updateField,
     setPhotoUrl,
     submit,

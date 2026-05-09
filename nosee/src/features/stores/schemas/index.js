@@ -42,7 +42,7 @@ export const StoreValidation = {
   name: (value) => Boolean(value && value.trim().length >= 3),
   type: (value) => [StoreTypeEnum.PHYSICAL, StoreTypeEnum.VIRTUAL].includes(value),
   coordinates: (latitude, longitude) => {
-    if (latitude == null || longitude == null) return false;
+    if (latitude === null || latitude === undefined || longitude === null || longitude === undefined) return false;
     return Number.isFinite(Number(latitude)) && Number.isFinite(Number(longitude));
   },
   websiteUrl: (value) => isValidHttpsUrl(value),

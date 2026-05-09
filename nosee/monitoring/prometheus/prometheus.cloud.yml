@@ -5,8 +5,19 @@ global:
     project: 'nosee'
     environment: 'production'
 
+# Las credenciales se inyectan en tiempo de ejecución desde variables de entorno.
+# Ver start.sh — sustituye REMOTE_WRITE_URL, REMOTE_WRITE_USERNAME, REMOTE_WRITE_PASSWORD
+# antes de arrancar Prometheus.
+remote_write:
+  - url: REMOTE_WRITE_URL
+    basic_auth:
+      username: "REMOTE_WRITE_USERNAME"
+      password: "REMOTE_WRITE_PASSWORD"
+    queue_config:
+      max_samples_per_send: 1000
+      max_shards: 5
+
 scrape_configs:
-  # Métricas personalizadas de NØSEE — metrics-server en Railway
   - job_name: 'nosee-app'
     scheme: https
     metrics_path: '/metrics'
@@ -14,4 +25,4 @@ scrape_configs:
     scrape_timeout: 10s
     honor_labels: true
     static_configs:
-      - targets: ['metrics-production-7ab7.up.railway.app']
+      - targets: ['lyc4nthrope-nosee-metrics.hf.space']

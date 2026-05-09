@@ -135,8 +135,16 @@ export function PublicationCard({
 
   useEffect(() => {
     if (!pubDate) return;
-    const update = () => setTimeAgo(formatDistanceToNow(pubDate, t.timeAgo));
-    const interval = setInterval(update, 30_000);
+    const ageMs = Date.now() - new Date(pubDate).getTime();
+    // Posts con más de 1 hora no cambian su "hace X tiempo" en segundos — no necesitan intervalo
+    if (ageMs > 60 * 60 * 1000) return;
+
+    const update = () => {
+      if (document.visibilityState === 'visible') {
+        setTimeAgo(formatDistanceToNow(pubDate, t.timeAgo));
+      }
+    };
+    const interval = setInterval(update, 60_000);
     return () => clearInterval(interval);
   }, [pubDate, t.timeAgo]);
 
@@ -190,20 +198,8 @@ export function PublicationCard({
     <article
       className="publication-card pub-card-hover"
       style={styles.card}
-      onMouseEnter={(e) => {
-        setCardHovered(true);
-        e.currentTarget.style.transform = 'translateY(-8px)';
-        e.currentTarget.style.boxShadow = '0 24px 48px rgba(0,0,0,0.60)';
-        const img = e.currentTarget.querySelector('[data-pub-img]');
-        if (img) img.style.transform = 'scale(1.10)';
-      }}
-      onMouseLeave={(e) => {
-        setCardHovered(false);
-        e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.boxShadow = 'none';
-        const img = e.currentTarget.querySelector('[data-pub-img]');
-        if (img) img.style.transform = 'scale(1)';
-      }}
+      onMouseEnter={() => setCardHovered(true)}
+      onMouseLeave={() => setCardHovered(false)}
     >
       {/* ── IMAGE SECTION ── */}
       <div style={styles.imageContainer}>
@@ -259,10 +255,9 @@ export function PublicationCard({
               <button
                 type="button"
                 role="menuitem"
+                className="pub-dropdown-item"
                 style={styles.dropdownItem}
                 onClick={() => { handleAddToList(); setShowMenu(false); }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
               >
                 {isInList ? tc.removeFromList : tc.addToList}
               </button>
@@ -274,14 +269,13 @@ export function PublicationCard({
                 <button
                   type="button"
                   role="menuitem"
+                  className="pub-dropdown-item-danger"
                   style={styles.dropdownItemDanger}
                   onClick={() => {
                     setShowMenu(false);
                     if (isAuthenticated === false) { onRequireAuth?.(); return; }
                     setShowReportModal(true);
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--error-soft)'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                 >
                   {tc.report}
                 </button>
@@ -294,12 +288,11 @@ export function PublicationCard({
                   <button
                     type="button"
                     role="menuitem"
+                    className="pub-dropdown-item-danger"
                     style={styles.dropdownItemDanger}
                     onClick={handleDelete}
                     disabled={isDeleting}
                     aria-busy={isDeleting || undefined}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--error-soft)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                   >
                     {isDeleting ? tc.deleting : tc.delete}
                   </button>
@@ -371,16 +364,11 @@ export function PublicationCard({
               type="button"
               aria-label={tc.validateLabel(productName)}
               aria-pressed={upActive}
+              data-active={upActive}
               disabled={isValidating || isDownvoting}
-              style={{
-                ...styles.chip,
-                color: upActive ? 'var(--success)' : 'var(--text-secondary)',
-              }}
+              className="pub-chip-up"
+              style={styles.chip}
               onClick={handleValidate}
-              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--accent)'; }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = upActive ? 'var(--success)' : 'var(--text-secondary)';
-              }}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill={upActive ? "currentColor" : "none"} stroke={upActive ? "none" : "currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={upActive ? styles.chipIconActive : styles.chipIcon} aria-hidden="true">
                 <path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14z"/>
@@ -394,16 +382,11 @@ export function PublicationCard({
               type="button"
               aria-label={tc.downvoteLabel?.(productName) ?? `Votar negativamente ${productName}`}
               aria-pressed={downActive}
+              data-active={downActive}
               disabled={isValidating || isDownvoting}
-              style={{
-                ...styles.chip,
-                color: downActive ? 'var(--error)' : 'var(--text-secondary)',
-              }}
+              className="pub-chip-down"
+              style={styles.chip}
               onClick={handleDownvote}
-              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--accent)'; }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = downActive ? 'var(--error)' : 'var(--text-secondary)';
-              }}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill={downActive ? "currentColor" : "none"} stroke={downActive ? "none" : "currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={downActive ? styles.chipIconActive : styles.chipIcon} aria-hidden="true">
                 <path d="M10 15v4a3 3 0 003 3l4-9V2H5.72a2 2 0 00-2 1.7l-1.38 9a2 2 0 002 2.3H10z"/>

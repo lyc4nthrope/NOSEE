@@ -12,11 +12,17 @@ L.Icon.Default.mergeOptions({
   shadowUrl:     'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-// Green icon for user position
-const userIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34],
+// Inline SVG icon — sin dependencia de red externa (raw.githubusercontent.com se bloquea)
+const userIcon = L.divIcon({
+  className: '',
+  html: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="42" viewBox="0 0 28 42">
+    <path d="M14 0C6.268 0 0 6.268 0 14c0 10.5 14 28 14 28S28 24.5 28 14C28 6.268 21.732 0 14 0z"
+      fill="#22c55e" stroke="#fff" stroke-width="2"/>
+    <circle cx="14" cy="14" r="5" fill="#fff"/>
+  </svg>`,
+  iconSize: [28, 42],
+  iconAnchor: [14, 42],
+  popupAnchor: [0, -42],
 });
 
 // Auto-fit bounds to all markers

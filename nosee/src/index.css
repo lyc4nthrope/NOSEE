@@ -109,6 +109,22 @@
 
 /* ── Publication Card hover + focus styles ── */
 .pub-card-hover { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+[data-pub-img] { transition: transform 0.3s ease; }
+
+@media (hover: hover) {
+  .pub-card-hover:hover { transform: translateY(-8px); box-shadow: 0 24px 48px rgba(0,0,0,0.60); }
+  .pub-card-hover:hover [data-pub-img] { transform: scale(1.10); }
+  .pub-dropdown-item:hover { background: var(--bg-hover) !important; }
+  .pub-dropdown-item-danger:hover { background: var(--error-soft) !important; }
+  .pub-chip-up:hover:not(:disabled) { color: var(--accent); }
+  .pub-chip-down:hover:not(:disabled) { color: var(--accent); }
+}
+
+.pub-chip-up { color: var(--text-secondary); }
+.pub-chip-up[data-active="true"] { color: var(--success); }
+.pub-chip-down { color: var(--text-secondary); }
+.pub-chip-down[data-active="true"] { color: var(--error); }
+
 @media (hover: none) { .pub-card-menu-trigger { opacity: 1 !important; } }
 .publication-card button:focus-visible,
 .pub-create-fab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }

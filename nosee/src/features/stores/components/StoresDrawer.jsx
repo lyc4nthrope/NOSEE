@@ -73,6 +73,7 @@ const StoresDrawer = memo(function StoresDrawer({
         {/* Handle pill — keyboard-accessible expand/collapse trigger */}
         <button
           type="button"
+          data-drag-handle
           style={styles.handlePillBtn}
           onClick={cycleSnap}
           aria-label={expandLabel}

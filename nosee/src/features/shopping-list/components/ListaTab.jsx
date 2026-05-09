@@ -12,6 +12,15 @@ import { useAuthStore, selectIsAuthenticated } from '@/features/auth/store/authS
 import { useShoppingListStore } from '@/features/shopping-list/store/shoppingListStore';
 import { createOrder } from '@/services/api/orders.api';
 import { DeliveryMapPicker } from './DeliveryMapPicker';
+import {
+  recordShoppingListOrderStarted,
+  recordShoppingListOrderAbandoned,
+  recordOptimizationRun,
+  recordOrderConfirmed,
+} from '@/services/metrics';
+
+const SORT_MODE_TO_STRATEGY = { cheapest: 'price', nearest: 'fewest_stores', balanced: 'balanced' };
+const toMetricsStrategy = (sortMode) => SORT_MODE_TO_STRATEGY[sortMode] ?? 'balanced';
 
 // ─── Pestaña Mi Lista ─────────────────────────────────────────────────────────
 export function ListaTab({ items, addItem, removeItem, clearList, saveList, addOrder, onSaved, onConfirmedDelivery, onConfirmedPickup }) {
@@ -192,7 +201,11 @@ export function ListaTab({ items, addItem, removeItem, clearList, saveList, addO
   const handleCalculate = useCallback(() => {
     if (items.length === 0) return;
 
+    recordShoppingListOrderStarted(items.length);
+
     const requestId = ++calcRequestRef.current;
+    const calcStart = Date.now();
+    let noResultCount = 0;
 
     setCalculating(true);
     setCalcError(null);
@@ -225,17 +238,22 @@ export function ListaTab({ items, addItem, removeItem, clearList, saveList, addO
           else if (prefs.storeType === 'online')  pubs = pubs.filter((p) => Number(p.store?.store_type_id) === 2);
           const sorted = [...pubs].sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
 
+          if (sorted.length === 0) noResultCount++;
           setCalcResults((prev) => (prev ? { ...prev, [item.id]: sorted } : { [item.id]: sorted }));
           if (sorted.length > 0) setSelectedPubs((prev) => ({ ...prev, [item.id]: sorted[0] }));
         })
         .catch(() => {
           if (requestId !== calcRequestRef.current) return;
+          noResultCount++;
           setCalcResults((prev) => (prev ? { ...prev, [item.id]: [] } : { [item.id]: [] }));
         })
         .finally(() => {
           setOptimizingItems((prev) => { const n = { ...prev }; delete n[item.id]; return n; });
           remaining -= 1;
-          if (remaining === 0 && requestId === calcRequestRef.current) setCalculating(false);
+          if (remaining === 0 && requestId === calcRequestRef.current) {
+            setCalculating(false);
+            recordOptimizationRun(toMetricsStrategy(prefs.sortMode), Date.now() - calcStart, noResultCount);
+          }
         });
     });
   }, [items, prefs, hasLocation, latitude, longitude]);
@@ -312,6 +330,8 @@ export function ListaTab({ items, addItem, removeItem, clearList, saveList, addO
       driverLocation:       null,
       cancellationCharged:  false,
     });
+
+    recordOrderConfirmed(toMetricsStrategy(prefs.sortMode), isDelivery, result.totalCost ?? 0, result.savingsPct ?? 0);
 
     setSaving(false);
 
@@ -616,7 +636,7 @@ export function ListaTab({ items, addItem, removeItem, clearList, saveList, addO
         <div style={modeSelection.actions}>
           <button
             type="button"
-            onClick={() => { setSelectedMode(null); setPhase('list'); }}
+            onClick={() => { recordShoppingListOrderAbandoned(); setSelectedMode(null); setPhase('list'); }}
             style={modeSelection.cancelBtn}
           >
             Cancelar

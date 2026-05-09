@@ -35,8 +35,12 @@ function getA11yTileTheme() {
   return 'dark';
 }
 
+// Cache CDN Leaflet — immune to npm Leaflet overwriting window.L (leaflet-src.js UMD sets window.L = exports)
+let _cdnL = null;
+let _cdnClusterReady = false;
+
 function ensureLeafletLoaded() {
-  if (window.L) return Promise.resolve(window.L);
+  if (_cdnL) return Promise.resolve(_cdnL);
   if (window.__leafletLoaderPromise) return window.__leafletLoaderPromise;
 
   window.__leafletLoaderPromise = new Promise((resolve, reject) => {
@@ -50,7 +54,7 @@ function ensureLeafletLoaded() {
 
     const existing = document.querySelector(`script[data-leaflet-js="${LEAFLET_JS_URL}"]`);
     if (existing) {
-      existing.addEventListener('load', () => resolve(window.L));
+      existing.addEventListener('load', () => { _cdnL = window.L; resolve(_cdnL); });
       existing.addEventListener('error', () => reject(new Error('No se pudo cargar Leaflet.')));
       return;
     }
@@ -61,7 +65,8 @@ function ensureLeafletLoaded() {
     script.dataset.leafletJs = LEAFLET_JS_URL;
     script.onload = () => {
       if (!window.L) { reject(new Error('Leaflet no disponible.')); return; }
-      resolve(window.L);
+      _cdnL = window.L;
+      resolve(_cdnL);
     };
     script.onerror = () => reject(new Error('No se pudo cargar Leaflet.'));
     document.body.appendChild(script);
@@ -74,7 +79,7 @@ function ensureLeafletLoaded() {
 }
 
 function ensureMarkerClusterLoaded() {
-  if (window.L?.MarkerClusterGroup) return Promise.resolve();
+  if (_cdnClusterReady) return Promise.resolve();
   if (window.__clusterLoaderPromise) return window.__clusterLoaderPromise;
 
   window.__clusterLoaderPromise = new Promise((resolve, reject) => {
@@ -97,7 +102,7 @@ function ensureMarkerClusterLoaded() {
     script.src = CLUSTER_JS_URL;
     script.async = true;
     script.dataset.clusterJs = CLUSTER_JS_URL;
-    script.onload = () => resolve();
+    script.onload = () => { _cdnClusterReady = true; resolve(); };
     script.onerror = () => reject(new Error('No se pudo cargar MarkerCluster.'));
     document.body.appendChild(script);
   }).catch((err) => {
@@ -277,7 +282,7 @@ export default function NearbyStoresPage() {
     if (!mapContainerRef.current) return;
     if (mapInstanceRef.current) return; // already initialized
 
-    const L = window.L;
+    const L = _cdnL;
     const center = userLocation || DEFAULT_CENTER;
 
     const map = L.map(mapContainerRef.current, {
@@ -323,7 +328,7 @@ export default function NearbyStoresPage() {
   useEffect(() => {
     const observer = new MutationObserver(() => {
       const map = mapInstanceRef.current;
-      const L = window.L;
+      const L = _cdnL;
       if (!map || !L || !tileLayerRef.current) return;
 
       const theme = getA11yTileTheme();
@@ -343,7 +348,7 @@ export default function NearbyStoresPage() {
   // Add user marker when map + location ready
   useEffect(() => {
     const map = mapInstanceRef.current;
-    const L = window.L;
+    const L = _cdnL;
     if (!map || !L || !userLocation) return;
 
     if (userMarkerRef.current) {
@@ -366,7 +371,7 @@ export default function NearbyStoresPage() {
   // Add store markers once cluster group is ready and stores are loaded
   useEffect(() => {
     const clusterGroup = clusterGroupRef.current;
-    const L = window.L;
+    const L = _cdnL;
     if (!clusterReady || !clusterGroup || !L || loadingStores) return;
     if (stores.length === 0) return;
 

@@ -29,6 +29,7 @@ import PublicationCard from "@/features/publications/components/PublicationCard"
 
 import { usePublications } from "@/features/publications/hooks";
 import * as publicationsApi from "@/services/api/publications.api";
+import { usePublicationsStore } from "@/features/publications/store/publicationsStore";
 import { INFINITE_SCROLL_CONFIG } from "@/config/infiniteScroll";
 import { useInfiniteScrollTrigger } from "@/hooks/useInfiniteScrollTrigger";
 
@@ -106,7 +107,8 @@ export default function PublicationsPage() {
   const [geolocationLoading, setGeolocationLoading] = useState(false);
   const cachedLocationRef = useRef(null);
   const [feedback, setFeedback] = useState(null);
-  const [categories, setCategories] = useState([]);
+  const categories = usePublicationsStore((s) => s.categories);
+  const loadCategories = usePublicationsStore((s) => s.loadCategories);
   const [searchSuggestions, setSearchSuggestions] = useState([]);
   const [searchFocused, setSearchFocused] = useState(false);
   const searchBoxRef = useRef(null);
@@ -323,33 +325,7 @@ export default function PublicationsPage() {
   }, [navigate]);
 
   // Abre el modal de detalle si la URL tiene ?pub=<id>
-  useEffect(() => {
-    let active = true;
-
-    const loadCategories = async () => {
-      const firstAttempt = await publicationsApi.getProductCategories();
-      if (firstAttempt.success) {
-        if (active) setCategories(firstAttempt.data || []);
-        return;
-      }
-
-      const secondAttempt = await publicationsApi.getProductCategories();
-      if (secondAttempt.success) {
-        if (active) setCategories(secondAttempt.data || []);
-        return;
-      }
-
-      console.error(
-        "No se pudieron cargar categorías en PublicationsPage:",
-        secondAttempt.error || firstAttempt.error,
-      );
-    };
-
-    loadCategories();
-    return () => {
-      active = false;
-    };
-  }, []);
+  useEffect(() => { loadCategories(); }, [loadCategories]);
 
   useEffect(() => {
     const pubId = searchParams.get("pub");

@@ -29,11 +29,10 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'vendor-react':    ['react', 'react-dom', 'react-router-dom'],
-          'vendor-supabase': ['@supabase/supabase-js'],
-          'vendor-state':    ['zustand'],
-          // Leaflet (~150 kB) en chunk propio: solo se descarga al abrir una página con mapa
-          'vendor-maps':     ['leaflet', 'react-leaflet'],
+          'vendor-react':       ['react', 'react-dom', 'react-router-dom'],
+          'vendor-supabase':    ['@supabase/supabase-js'],
+          'vendor-state':       ['zustand'],
+          'vendor-virtualizer': ['@tanstack/react-virtual'],
         },
       },
     },

@@ -219,8 +219,8 @@ export async function createStore(payload = {}) {
     };
 
     if (
-      latitude != null &&
-      longitude != null &&
+      latitude !== null && latitude !== undefined &&
+      longitude !== null && longitude !== undefined &&
       Number.isFinite(Number(latitude)) &&
       Number.isFinite(Number(longitude))
     ) {
@@ -518,13 +518,14 @@ export async function getStore(storeId) {
   try {
     const { data: store, error } = await supabase
       .from("stores")
-      .select("id, name, address, latitude, longitude, website_url, store_type_id, created_by")
+      .select("id, name, address, location, website_url, store_type_id, created_by")
       .eq("id", storeId)
       .single();
 
     if (error) return { success: false, error: error.message };
-    
+
     const uiType = getUiTypeByStoreTypeId(store.store_type_id);
+    const point = parsePointText(store.location);
 
     return {
       success: true,
@@ -533,15 +534,15 @@ export async function getStore(storeId) {
         name: store.name,
         type: uiType,
         address: store.address,
-        latitude: store.latitude,
-        longitude: store.longitude,
+        latitude: point?.latitude ?? null,
+        longitude: point?.longitude ?? null,
         websiteUrl: store.website_url,
       },
     };
   } catch (err) {
     return {
       success: false,
-      error: err.message || "Error obtainendo tienda",
+      error: err.message || "Error obteniendo tienda",
     };
   }
 }

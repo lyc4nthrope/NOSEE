@@ -7,7 +7,6 @@
  * UBICACIÓN: src/features/publications/hooks/usePublicationMutations.js
  *
  * @param {Object} params
- * @param {Array}    params.publications    - Array actual de publicaciones (read-only)
  * @param {Function} params.setPublications - Setter del estado de publicaciones en usePublications
  */
 
@@ -15,7 +14,7 @@ import { useCallback } from 'react';
 import * as publicationsApi from '@/services/api/publications.api';
 import { debugPublications } from '@/utils/debugLogger';
 
-export const usePublicationMutations = ({ publications, setPublications }) => {
+export const usePublicationMutations = ({ setPublications }) => {
   /**
    * Validar (upvote) una publicación
    * Optimistic: incrementa validated_count y fija user_vote = 1 antes de la llamada API.

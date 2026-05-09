@@ -14,12 +14,15 @@ const hydrateCommentUsers = async (comments) => {
   return comments.map((c) => ({ ...c, user: usersMap[c.user_id] || null }));
 };
 
+const COMMENTS_LIMIT = 150;
+
 const loadCommentsRows = async (publicationId) => {
   const baseQuery = supabase
     .from("comments")
     .select("id, content, created_at, user_id, parent_id, is_deleted")
     .eq("publication_id", publicationId)
-    .order("created_at", { ascending: true });
+    .order("created_at", { ascending: true })
+    .limit(COMMENTS_LIMIT);
 
   const withSoftDeleteFilter = await baseQuery.eq("is_deleted", false);
   if (!withSoftDeleteFilter.error) return withSoftDeleteFilter;
@@ -30,7 +33,8 @@ const loadCommentsRows = async (publicationId) => {
       .from("comments")
       .select("id, content, created_at, user_id, parent_id")
       .eq("publication_id", publicationId)
-      .order("created_at", { ascending: true });
+      .order("created_at", { ascending: true })
+      .limit(COMMENTS_LIMIT);
     return withoutSoftDeleteFilter;
   }
 
