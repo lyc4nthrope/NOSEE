@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import {
-  deactivatePublication, getAdminPublications, getBrandDetail, getCategories, getPublishedRefs, getAllStores, getAllProducts,
+  deactivatePublication, getAdminPublications, getBrandDetail, getPublishedRefs, getAllStores, getAllProducts,
   getStoreDetail, hideBrand, hideProduct, hidePublication, hideStore,
   updateAdminBrand, updateAdminProduct, updateAdminStore,
   updatePublication as updateAdminPublication,
@@ -126,17 +126,6 @@ export default function useAdminPublications() {
       setDeletingPub(null);
     }
   }, [publications, td, currentUserId]);
-
-  const handleDeletePublication = useCallback((publicationInput) => {
-    const publication = typeof publicationInput === 'object'
-      ? publicationInput
-      : publications.find((p) => p.id === publicationInput);
-    const pubId = publication?.id || publicationInput;
-    const isActive = publication?.is_active === true;
-    if (!pubId) return;
-
-    return { publication, pubId, isActive };
-  }, [publications]);
 
   const handleEditPublication = useCallback(async (pubId, dbUpdates, uiUpdates = {}) => {
     try {

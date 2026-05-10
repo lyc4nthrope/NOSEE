@@ -663,11 +663,9 @@ const enUS = {
     // ── Publication detail ────────────────────────────────────────────────────
     publicationDetail: {
       closeModal: "Close publication detail",
-      noName: "Unnamed product",
       unit: "Unit:",
       noDescription: "No description available",
       publishedBy: "Published by:",
-      unknownUser: "Unknown user",
       score: "Score:",
       votes: "Votes:",
       comments: "Comments",
@@ -681,9 +679,6 @@ const enUS = {
       replyingTo: "Replying to",
       loginToComment: "Sign in to comment.",
       storeLocation: "Store location",
-      openInGoogleMaps: "Open in Google Maps",
-      noCoordinates: "No coordinates available for this store.",
-      virtualStoreLink: "Go to the virtual store link",
       mapAria: "Store location map",
       mapError: "Map error:",
       mapErrorDetails: "Check the console (F12) for more details",
@@ -1282,8 +1277,14 @@ const enUS = {
         savedOk: "✓ Saved successfully",
         nameRequired: "Name is required.",
         closeBtn: "Close",
-        saveChangesBtn: "Save changes",
-      },
+      saveChangesBtn: "Save changes",
+      viewDetail: "View detail →",
+      errorUpdate: "Could not update the store",
+      successUpdate: "Store updated successfully",
+      editAddress: "Edit address",
+      saving: "Saving...",
+      saveLocation: "Save location",
+    },
       storeDetailModal: {
         idLabel: (id) => `ID: ${id}`,
         nameLabel: "Name",
@@ -1447,16 +1448,6 @@ const enUS = {
       nextEnCamino: "Arrived →",
       nextLlegando: "Mark delivered ✓",
       advance: "Advance →",
-    },
-
-    // ── StoreDetailModal ──────────────────────────────────────────────────────
-    storeDetailModal: {
-      viewDetail: "View detail →",
-      errorUpdate: "Could not update the store",
-      successUpdate: "Store updated successfully",
-      editAddress: "Edit address",
-      saving: "Saving...",
-      saveLocation: "Save location",
     },
 
     // ── StoreCreateModal ──────────────────────────────────────────────────────

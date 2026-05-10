@@ -26,7 +26,8 @@
 
 import { create } from 'zustand';
 
-import { authApi, usersApi } from '@/services/api';
+import * as authApi from '@/services/api/auth.api';
+import * as usersApi from '@/services/api/users.api';
 import { supabase }          from '@/services/supabase.client';
 import { AsyncStateEnum }    from '@/types';
 import { insertUserActivityLog } from '@/services/api/audit.api';

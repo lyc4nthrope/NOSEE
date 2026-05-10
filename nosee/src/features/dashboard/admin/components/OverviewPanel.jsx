@@ -9,7 +9,7 @@
 import { useState, useEffect } from 'react';
 import { getAdminOverviewMetrics } from '@/services/api/adminMetrics.api';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { s, ACCENT, MUTED, TEXT } from '../adminStyles';
+import { s, ACCENT, MUTED } from '../adminStyles';
 import { KpiCard } from './KpiCard';
 
 const KPI_ORDER = [
@@ -47,7 +47,7 @@ function LoadingSkeleton() {
   );
 }
 
-export default function OverviewPanel({ onNavigate }) {
+export default function OverviewPanel() {
   const { t } = useLanguage();
   const td = t.adminDashboard;
 

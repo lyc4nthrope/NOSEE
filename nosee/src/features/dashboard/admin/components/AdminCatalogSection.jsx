@@ -1,5 +1,4 @@
 import { lazy, Suspense } from 'react';
-import { s } from '../adminStyles';
 import { SectionHeader } from './AdminPrimitives';
 import { StoreDetailModal } from '../modals/StoreDetailModal';
 import { BrandDetailModal } from '../modals/BrandDetailModal';

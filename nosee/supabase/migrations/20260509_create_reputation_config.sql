@@ -72,7 +72,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS trg_reputation_config_updated_at ON public.reputation_config;
+-- DROP TRIGGER IF EXISTS trg_reputation_config_updated_at ON public.reputation_config;
 
 CREATE TRIGGER trg_reputation_config_updated_at
   BEFORE UPDATE ON public.reputation_config
@@ -81,6 +81,6 @@ CREATE TRIGGER trg_reputation_config_updated_at
 -- =============================================================================
 -- DOWN
 -- =============================================================================
-DROP TRIGGER IF EXISTS trg_reputation_config_updated_at ON public.reputation_config;
-DROP FUNCTION IF EXISTS public.set_updated_at();
-DROP TABLE IF EXISTS public.reputation_config CASCADE;
+-- DROP TRIGGER IF EXISTS trg_reputation_config_updated_at ON public.reputation_config;
+-- DROP FUNCTION IF EXISTS public.set_updated_at();
+-- DROP TABLE IF EXISTS public.reputation_config CASCADE;

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { alertsApi } from '@/services/api';
+import * as alertsApi from '@/services/api/alerts.api';
 import { inputStyle, btnStyle } from './profileStyles';
 
 // ─── Sección de alertas de precio ────────────────────────────────────────────

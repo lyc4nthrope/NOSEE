@@ -136,7 +136,7 @@ export default function RegisterForm({ onSubmit, onGoogleRegister, loading = fal
           localStorage.setItem('nosee_google_intent', 'register');
           onGoogleRegister();
         }}
-        disabled={loading}
+        disabled={loading || !termsAccepted}
       >
         {tf.googleRegister}
       </Button>
@@ -292,7 +292,7 @@ export default function RegisterForm({ onSubmit, onGoogleRegister, loading = fal
         </span>
       </label>
 
-      <Button type="submit" fullWidth loading={loading} disabled={loading} size="lg">
+      <Button type="submit" fullWidth loading={loading} disabled={loading || !termsAccepted} size="lg">
         {loading ? tf.creatingAccount : tf.createAccount}
       </Button>
 

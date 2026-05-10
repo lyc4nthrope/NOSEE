@@ -199,14 +199,14 @@ CREATE INDEX IF NOT EXISTS idx_price_publications_created_at_date
 -- =============================================================================
 -- DOWN
 -- =============================================================================
-DROP VIEW IF EXISTS public.admin_logs_summary;
-DROP VIEW IF EXISTS public.admin_reports_summary;
-DROP VIEW IF EXISTS public.admin_overview_summary;
-DROP INDEX IF EXISTS idx_admin_users_is_active;
-DROP INDEX IF EXISTS idx_admin_price_publications_active;
-DROP INDEX IF EXISTS idx_admin_orders_status;
-DROP INDEX IF EXISTS idx_admin_stores_is_active;
-DROP INDEX IF EXISTS idx_admin_products_is_active;
-DROP INDEX IF EXISTS idx_admin_dealer_applications_status;
-DROP INDEX IF EXISTS idx_admin_users_role_active;
-DROP INDEX IF EXISTS idx_admin_reports_reason;
+-- DROP VIEW IF EXISTS public.admin_logs_summary;
+-- DROP VIEW IF EXISTS public.admin_reports_summary;
+-- DROP VIEW IF EXISTS public.admin_overview_summary;
+-- DROP INDEX IF EXISTS idx_admin_users_is_active;
+-- DROP INDEX IF EXISTS idx_admin_price_publications_active;
+-- DROP INDEX IF EXISTS idx_admin_orders_status;
+-- DROP INDEX IF EXISTS idx_admin_stores_is_active;
+-- DROP INDEX IF EXISTS idx_admin_products_is_active;
+-- DROP INDEX IF EXISTS idx_admin_dealer_applications_status;
+-- DROP INDEX IF EXISTS idx_admin_users_role_active;
+-- DROP INDEX IF EXISTS idx_admin_reports_reason;

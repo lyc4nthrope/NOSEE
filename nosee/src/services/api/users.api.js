@@ -235,7 +235,7 @@ export async function getAdminOverviewStats() {
     supabase
       .from("reports")
       .select("id", { count: "exact", head: true })
-      .in("status", ["PENDING", "pending"]),
+      .in("status", ["PENDING", "pending", "IN_REVIEW", "in_review"]),
     supabase
       .from("publication_votes")
       .select("id", { count: "exact", head: true })
@@ -443,11 +443,11 @@ export async function getUserBasicInfo(userId) {
   try {
     const { data, error } = await supabase
       .from('users')
-      .select('id, full_name, email')
+      .select('id, full_name')
       .eq('id', userId)
       .single();
     if (error) return { success: false, error: error.message };
-    return { success: true, data };
+    return { success: true, data: { ...data, email: null } };
   } catch (err) {
     return { success: false, error: err.message };
   }

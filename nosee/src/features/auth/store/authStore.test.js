@@ -16,15 +16,12 @@ vi.mock("@/services/supabase.client", () => ({
   },
 }));
 
-vi.mock("@/services/api", () => ({
-  authApi: {
-    getSession: vi.fn(() => Promise.resolve({ success: false, data: null })),
-    login: vi.fn(),
-    logout: vi.fn(),
-  },
-  usersApi: {
-    getUserProfile: vi.fn(),
-  },
+vi.mock("@/services/api/auth.api", () => ({
+  getSession: vi.fn(() => Promise.resolve({ success: false, data: null })),
+}));
+
+vi.mock("@/services/api/users.api", () => ({
+  getUserProfile: vi.fn(),
 }));
 
 vi.mock("@/services/metrics", () => ({
@@ -117,7 +114,7 @@ describe("authStore — isRecoveryMode", () => {
 
 describe("authStore — initialize con sesión vacía", () => {
   it("setea isInitialized=true y status=IDLE cuando no hay sesión", async () => {
-    const { authApi } = await import("@/services/api");
+    const authApi = await import("@/services/api/auth.api");
     authApi.getSession.mockResolvedValueOnce({ success: true, data: null });
 
     await useAuthStore.getState().initialize();
@@ -129,7 +126,7 @@ describe("authStore — initialize con sesión vacía", () => {
   });
 
   it("setea status=ERROR cuando getSession falla", async () => {
-    const { authApi } = await import("@/services/api");
+    const authApi = await import("@/services/api/auth.api");
     authApi.getSession.mockResolvedValueOnce({
       success: false,
       error: "Network error",

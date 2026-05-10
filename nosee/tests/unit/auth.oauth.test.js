@@ -41,11 +41,10 @@ vi.mock('@/services/supabase.client', () => ({
   },
 }));
 
-vi.mock('@/services/api', () => ({
-  authApi:  {},
-  usersApi: {
-    getUserProfile: vi.fn().mockResolvedValue({ success: false }),
-  },
+vi.mock('@/services/api/auth.api', () => ({}));
+
+vi.mock('@/services/api/users.api', () => ({
+  getUserProfile: vi.fn().mockResolvedValue({ success: false }),
 }));
 
 vi.mock('@/types', () => ({

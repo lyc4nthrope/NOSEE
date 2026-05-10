@@ -84,11 +84,42 @@ BEGIN
            'photo_url', p.photo_url,
            'description', p.description,
            'is_active', p.is_active,
-           'product_name', pr.name
-         )
+           'product', jsonb_build_object(
+             'id', pr.id,
+             'name', pr.name,
+             'barcode', pr.barcode,
+             'base_quantity', pr.base_quantity,
+             'unit_type', CASE
+               WHEN ut.id IS NULL THEN NULL
+               ELSE jsonb_build_object(
+                 'id', ut.id,
+                 'name', ut.name,
+                 'abbreviation', ut.abbreviation
+               )
+             END,
+             'brand', CASE
+               WHEN b.id IS NULL THEN NULL
+               ELSE jsonb_build_object(
+                 'id', b.id,
+                 'name', b.name
+               )
+             END
+           ),
+           'store', CASE
+             WHEN s.id IS NULL THEN NULL
+             ELSE jsonb_build_object(
+               'id', s.id,
+               'name', s.name,
+               'address', s.address
+             )
+           END
+          )
          FROM public.price_publications p
          LEFT JOIN public.products pr ON pr.id = p.product_id
-         WHERE p.id::TEXT = rl.reported_id)
+         LEFT JOIN public.unit_types ut ON ut.id = pr.unit_type_id
+         LEFT JOIN public.brands b ON b.id = pr.brand_id
+         LEFT JOIN public.stores s ON s.id = p.store_id
+          WHERE p.id::TEXT = rl.reported_id)
       WHEN LOWER(rl.reported_type) = 'user' THEN
         (SELECT jsonb_build_object(
            'id', u.id,

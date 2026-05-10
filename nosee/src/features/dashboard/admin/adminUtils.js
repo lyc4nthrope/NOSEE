@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 
 export function useClientDateFormat(dateStr, locale = 'es-CO') {
   const [formatted, setFormatted] = useState('—');

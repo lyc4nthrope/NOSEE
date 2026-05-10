@@ -26,7 +26,7 @@ function buildGoogleMapsUrl(stores, userCoords) {
   return url;
 }
 
-export function VoyYoMapView({ result, userCoords, onAddProduct, onRemoveOrder, checkedKeys: externalCheckedKeys, onToggleCheck }) {
+export function VoyYoMapView({ result, userCoords, onAddProduct, checkedKeys: externalCheckedKeys, onToggleCheck }) {
   const [panelOpen, setPanelOpen]           = useState(true);
   const [internalCheckedKeys, setInternalCheckedKeys] = useState(new Set());
   const [newProductInput, setNewProductInput] = useState('');

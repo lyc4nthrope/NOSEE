@@ -663,11 +663,9 @@ const esMX = {
     // ── Detalle de publicación ────────────────────────────────────────────────
     publicationDetail: {
       closeModal: "Cerrar detalle de publicación",
-      noName: "Producto sin nombre",
       unit: "Unidad:",
       noDescription: "No hay descripción",
       publishedBy: "Publicado por:",
-      unknownUser: "Usuario desconocido",
       score: "Puntaje:",
       votes: "Votos:",
       comments: "Comentarios",
@@ -681,9 +679,6 @@ const esMX = {
       replyingTo: "Respondiendo a",
       loginToComment: "Inicia sesión para comentar.",
       storeLocation: "Ubicación de la tienda",
-      openInGoogleMaps: "Abrir en Google Maps",
-      noCoordinates: "No hay coordenadas disponibles para esta tienda.",
-      virtualStoreLink: "Ir al enlace de la tienda virtual",
       mapAria: "Mapa de ubicación de tienda",
       mapError: "Error en el mapa:",
       mapErrorDetails: "Revisa la consola (F12) para más detalles",
@@ -1300,6 +1295,12 @@ const esMX = {
         closeBtn: "Cerrar",
         saveChangesBtn: "Guardar cambios",
         closeAria: "Cerrar",
+        viewDetail: "Ver detalle →",
+        errorUpdate: "No se pudo actualizar la tienda",
+        successUpdate: "Tienda actualizada correctamente",
+        editAddress: "Editar dirección",
+        saving: "Guardando...",
+        saveLocation: "Guardar ubicación",
       },
       productDetailModal: {
         idLabel: (id) => `ID: ${id}`,
@@ -1447,16 +1448,6 @@ const esMX = {
       nextEnCamino: "Llegué →",
       nextLlegando: "Marcar entregado ✓",
       advance: "Avanzar →",
-    },
-
-    // ── StoreDetailModal ──────────────────────────────────────────────────────
-    storeDetailModal: {
-      viewDetail: "Ver detalle →",
-      errorUpdate: "No se pudo actualizar la tienda",
-      successUpdate: "Tienda actualizada correctamente",
-      editAddress: "Editar dirección",
-      saving: "Guardando...",
-      saveLocation: "Guardar ubicación",
     },
 
     // ── StoreCreateModal ──────────────────────────────────────────────────────

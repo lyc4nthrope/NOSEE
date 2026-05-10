@@ -4,7 +4,7 @@ import { PaymentView } from './PaymentView';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { getDealerBankAccounts } from '@/services/api/bankAccounts.api';
 import { useDeliveryTimer } from '@/features/orders/hooks/useDeliveryTimer';
-import { confirmOrderPayment, submitUpfrontReceipt, confirmCompromisoPago, requestDealerChange } from '@/services/api/orders.api';
+import { confirmCompromisoPago, requestDealerChange } from '@/services/api/orders.api';
 import { CardPayment } from '@mercadopago/sdk-react';
 import { supabase } from '@/services/supabase.client';
 
@@ -113,9 +113,6 @@ export function DeliveryCard({ order, onCancel, onPaymentSubmitted }) {
   const [bankAccounts, setBankAccounts] = useState([]);
   const [loadingBank, setLoadingBank] = useState(false);
   const [confirmingPayment, setConfirmingPayment] = useState(false);
-  const [receiptFile, setReceiptFile] = useState(null);
-  const [receiptPreview, setReceiptPreview] = useState(null);
-  const [receiptError, setReceiptError] = useState(null);
   const [mpError, setMpError]           = useState(null);
   const [mpCustomerId, setMpCustomerId] = useState(null);
   const [mpCustomerReady, setMpCustomerReady] = useState(false);
@@ -180,16 +177,6 @@ export function DeliveryCard({ order, onCancel, onPaymentSubmitted }) {
 
   const cfg = STATUS_CONFIGS[deliveryStatus];
   if (!cfg) return null;
-
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setReceiptFile(file);
-    setReceiptError(null);
-    const reader = new FileReader();
-    reader.onload = (ev) => setReceiptPreview(ev.target.result);
-    reader.readAsDataURL(file);
-  };
 
   // Pago final con pasarela (estado llegando) — usa la tarjeta guardada del pago de servicio
   const handleFinalMPSubmit = async (formData) => {

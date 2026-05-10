@@ -75,7 +75,6 @@ ALTER TABLE public.login_audit_logs ENABLE ROW LEVEL SECURITY;
 -- SELECT: solo admins (role_id = 3) y moderadores (role_id = 2) pueden leer
 CREATE POLICY "admin_content_audit_log_select"
   ON public.admin_content_audit_log
-  AS SECURITY_INVOKER
   FOR SELECT
   TO authenticated
   USING (
@@ -90,7 +89,6 @@ CREATE POLICY "admin_content_audit_log_select"
 -- INSERT: admins y moderadores pueden insertar (deben coincidir con actor_user_id)
 CREATE POLICY "admin_content_audit_log_insert"
   ON public.admin_content_audit_log
-  AS SECURITY_INVOKER
   FOR INSERT
   TO authenticated
   WITH CHECK (
@@ -112,7 +110,6 @@ CREATE POLICY "admin_content_audit_log_insert"
 -- SELECT: solo admins y moderadores pueden leer logs de login
 CREATE POLICY "login_audit_logs_select"
   ON public.login_audit_logs
-  AS SECURITY_INVOKER
   FOR SELECT
   TO authenticated
   USING (
@@ -128,7 +125,6 @@ CREATE POLICY "login_audit_logs_select"
 -- authenticated puede insertar sus propios eventos
 CREATE POLICY "login_audit_logs_insert"
   ON public.login_audit_logs
-  AS SECURITY_INVOKER
   FOR INSERT
   TO anon, authenticated
   WITH CHECK (

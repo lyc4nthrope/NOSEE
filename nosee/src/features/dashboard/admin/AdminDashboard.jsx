@@ -1,6 +1,5 @@
 import { useState, useEffect, lazy } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuthStore } from '@/features/auth/store/authStore';
 import { s } from './adminStyles';
 
 import AdminSidebar from './components/AdminSidebar';
@@ -24,7 +23,6 @@ import useAdminPublications from './hooks/useAdminPublications';
 import useAdminReports from './hooks/useAdminReports';
 import useAdminLogs from './hooks/useAdminLogs';
 import useAdminDealers from './hooks/useAdminDealers';
-import useAdminCategories from './hooks/useAdminCategories';
 import useAdminConfirmHandlers from './hooks/useAdminConfirmHandlers';
 import { useAdminSessionTimeout } from './hooks/useAdminSessionTimeout';
 
@@ -32,17 +30,9 @@ export default function AdminDashboard() {
   useAdminSessionTimeout();
   const { t } = useLanguage();
   const td = t.adminDashboard;
-  const currentUser = useAuthStore(s => s.user);
-  const currentUserId = currentUser?.id;
 
   const [activeSection, setActiveSection] = useState('overview');
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null, actions: null });
-
-  const {
-    users, setUsers, usersLoading, usersError,
-    changingRole, banModal, setBanModal,
-    loadUsers, handleRoleChange, handleBanToggle, confirmBan,
-  } = useAdminUsers({ pubsLoaded, setPublications, setConfirmModal });
 
   const {
     publications, setPublications, pubsLoading, pubsLoaded,
@@ -62,18 +52,24 @@ export default function AdminDashboard() {
   } = useAdminPublications();
 
   const {
-    reports, setReports, reportsLoading, reportsLoaded,
+    users, usersLoading, usersError,
+    changingRole, banModal, setBanModal,
+    loadUsers, handleRoleChange, handleBanToggle, confirmBan,
+  } = useAdminUsers({ pubsLoaded, setPublications, setConfirmModal });
+
+  const {
+    reports, reportsLoaded,
     reportStatusFilter, setReportStatusFilter,
     reportTypeFilter, setReportTypeFilter,
     reportSort, setReportSort,
     selectedReport, setSelectedReport,
-    resolvedCount, reportTypeOptions,
+    reportTypeOptions,
     filteredReports,
     loadReports, updateReportData, handleQuickAction,
   } = useAdminReports();
 
   const {
-    actionLogs, loginLogs, logsLoading, activityLogs, usersMap,
+    actionLogs, loginLogs, logsLoading, logsLoaded, activityLogs, usersMap,
     logFilter, setLogFilter,
     logCatFilter, setLogCatFilter,
     logSourceFilter, setLogSourceFilter,
@@ -87,14 +83,6 @@ export default function AdminDashboard() {
     loadApplications, setApplicationsLoaded,
   } = useAdminDealers();
 
-  const {
-    categories, catsLoading, catsLoaded,
-    newCatName, setNewCatName, savingCat,
-    loadCategories, handleAddCategory,
-    repParams, repParamsLoaded, repEditing, repDraft,
-    loadReputationConfig, startEditRep, cancelEditRep, saveRep,
-  } = useAdminCategories();
-
   useEffect(() => {
     loadUsers();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -103,11 +91,9 @@ export default function AdminDashboard() {
     if (activeSection === 'content'  && !pubsLoaded)     loadPublications();
     if (activeSection === 'content'  && pubFilter === 'unpublished' && !unpublishedLoaded) loadUnpublishedResources();
     if (activeSection === 'reports'  && !reportsLoaded)  loadReports();
-    if (activeSection === 'config'   && !catsLoaded)     loadCategories();
-    if (activeSection === 'config'   && !repParamsLoaded) loadReputationConfig();
     if (activeSection === 'logs'     && !logsLoaded)     loadLogs();
     if (activeSection === 'dealers'  && !applicationsLoaded) loadApplications();
-  }, [activeSection, pubFilter, pubsLoaded, unpublishedLoaded, reportsLoaded, catsLoaded, repParamsLoaded, logsLoaded, applicationsLoaded]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [activeSection, pubFilter, pubsLoaded, unpublishedLoaded, reportsLoaded, logsLoaded, applicationsLoaded]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { handleDeletePublication, handleDeleteStore, handleDeleteBrand, handleDeleteProduct } = useAdminConfirmHandlers({
     publications, td,
@@ -118,7 +104,7 @@ export default function AdminDashboard() {
     setConfirmModal,
   });
 
-  const reportsBadge = reports.filter(r => r.status === 'pending').length || null;
+  const reportsBadge = reports.filter(r => ['PENDING', 'IN_REVIEW'].includes(String(r.status).toUpperCase())).length || null;
   const navSections = [
     { key: 'overview', icon: '▦', label: td.navOverview },
     { key: 'users',    icon: '◉', label: td.navUsers },
@@ -126,7 +112,7 @@ export default function AdminDashboard() {
     { key: 'catalog',  icon: '📋', label: 'Catálogo' },
     { key: 'orders',   icon: '📦', label: 'Pedidos' },
     { key: 'reports',  icon: '⚠', label: td.navReports, badge: reportsBadge },
-    { key: 'dealers',  icon: '🛵', label: 'Repartidores', badge: applications.filter(a => a.status === 'pending').length || null },
+    { key: 'dealers',  icon: '🛵', label: 'Repartidores', badge: applications.filter(a => String(a.status || '').toLowerCase() === 'pending').length || null },
     { key: 'config',   icon: '⚙', label: td.navConfig },
     { key: 'logs',     icon: '◎', label: td.navLogs },
   ];
@@ -138,7 +124,7 @@ export default function AdminDashboard() {
       <main aria-label="Panel de administración" style={s.main} className="admin-main">
 
         {activeSection === 'overview' && (
-          <AdminPanelSection title={td.overviewTitle} sub={td.overviewSub} Panel={OverviewPanel} />
+          <AdminPanelSection title={td.overviewTitle} sub={td.overviewSub} PanelComponent={OverviewPanel} />
         )}
 
         {activeSection === 'users' && (
@@ -214,13 +200,12 @@ export default function AdminDashboard() {
         )}
 
         {activeSection === 'orders' && (
-          <AdminPanelSection title="Pedidos" sub="Gestión de pedidos y pagos" Panel={OrdersPanel} />
+          <AdminPanelSection title="Pedidos" sub="Gestión de pedidos y pagos" PanelComponent={OrdersPanel} />
         )}
 
         {activeSection === 'reports' && (
           <AdminReportsSection
             reports={reports}
-            reportsLoading={reportsLoading}
             reportStatusFilter={reportStatusFilter}
             setReportStatusFilter={setReportStatusFilter}
             reportTypeFilter={reportTypeFilter}
@@ -238,7 +223,7 @@ export default function AdminDashboard() {
         )}
 
         {activeSection === 'config' && (
-          <AdminPanelSection title={td.configTitle} sub={td.configSub} Panel={SettingsPanel} />
+          <AdminPanelSection title={td.configTitle} sub={td.configSub} PanelComponent={SettingsPanel} />
         )}
 
         {activeSection === 'logs' && (

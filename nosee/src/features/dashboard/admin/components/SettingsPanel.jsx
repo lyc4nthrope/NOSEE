@@ -62,26 +62,6 @@ export default function SettingsPanel() {
     return () => { isMounted = false; };
   }, []);
 
-  const loadRepConfig = async () => {
-    setRepLoading(true);
-    setRepError(null);
-    const result = await getReputationConfig();
-    if (result.success) {
-      setRepParams(result.data || []);
-    } else {
-      setRepError(result.error);
-    }
-    setRepLoading(false);
-  };
-
-  const loadCategories = async () => {
-    setCatsLoading(true);
-    const result = await getCategories();
-    if (!result.success) { console.error('[SettingsPanel] loadCategories:', result.error); setCatsLoading(false); return; }
-    setCategories(result.data || []);
-    setCatsLoading(false);
-  };
-
   const startEditRep = () => {
     setRepDraft(repParams.map(p => ({ ...p })));
     setRepEditing(true);

@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { getAdminReports, updateReportReview, updateUserStatus } from '@/services/api/users.api';
-import { insertActionLog, getActionLogs } from '@/services/api/audit.api';
+import { insertActionLog } from '@/services/api/audit.api';
 import { hidePublication, hideStore, hideProduct, hideBrand } from '@/services/api/adminCatalog.api';
 import { deleteComment } from '@/services/api/comments.api';
 import { useAuthStore } from '@/features/auth/store/authStore';

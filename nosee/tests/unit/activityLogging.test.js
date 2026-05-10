@@ -52,16 +52,14 @@ vi.mock('@/utils/celebrationSound', () => ({
 
 // ─── Mocks de módulos para useStoreCreation ──────────────────────────────────
 
-vi.mock('@/services/api', () => ({
-  storesApi: {
-    createStore:              vi.fn(),
-    updateStore:              vi.fn(),
-    getStore:                 vi.fn(),
-    searchNearbyStores:       vi.fn(),
-    detectMapPlaceAtLocation: vi.fn(),
-    findNearestPhysicalStore: vi.fn(),
-    uploadStoreEvidence:      vi.fn(),
-  },
+vi.mock('@/services/api/stores.api', () => ({
+  createStore:              vi.fn(),
+  updateStore:              vi.fn(),
+  getStore:                 vi.fn(),
+  searchNearbyStores:       vi.fn(),
+  detectMapPlaceAtLocation: vi.fn(),
+  findNearestPhysicalStore: vi.fn(),
+  uploadStoreEvidence:      vi.fn(),
 }));
 
 vi.mock('@/features/stores/schemas', async (importOriginal) => {
@@ -76,7 +74,7 @@ vi.mock('@/features/stores/schemas', async (importOriginal) => {
 
 import { insertUserActivityLog } from '@/services/api/audit.api';
 import * as publicationsApi from '@/services/api/publications.api';
-import { storesApi } from '@/services/api';
+import * as storesApi from '@/services/api/stores.api';
 import { validateStoreForm } from '@/features/stores/schemas';
 import { usePublicationCreation } from '../../src/features/publications/hooks/usePublicationCreation.js';
 import { useStoreCreation }        from '../../src/features/stores/hooks/useStoreCreation.js';

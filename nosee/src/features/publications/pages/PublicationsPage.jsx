@@ -85,7 +85,7 @@ export default function PublicationsPage() {
   // PASO 2: Hooks de navegación
   // ─────────────────────────────────────────────────────────────
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
 
   // ─────────────────────────────────────────────────────────────
   // PASO 3: Estado local de la página

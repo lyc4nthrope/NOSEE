@@ -17,26 +17,8 @@
 // Ejemplo: 'https://tu-n8n.com/webhook/chat'
 const N8N_WEBHOOK_URL = import.meta.env.VITE_N8N_CHAT_WEBHOOK_URL || '';
 const TIMEOUT_MS = 60000; // 60 segundos
-const POLL_INTERVAL_MS = 2000; // 2 segundos entre intentos
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
-
-/**
- * Hace polling hasta que el workflow complete o timeout
- */
-async function waitForWorkflow(executionId, maxTime = TIMEOUT_MS) {
-  const startTime = Date.now();
-  
-  while (Date.now() - startTime < maxTime) {
-    await new Promise(r => setTimeout(r, POLL_INTERVAL_MS));
-    
-    // Aquí podrías implementar polling del estado del workflow
-    // Por ahora usamos un delay fijo
-    return true;
-  }
-  
-  return false;
-}
 
 /**
  * Envía un mensaje al webhook de n8n y espera la respuesta del asistente.

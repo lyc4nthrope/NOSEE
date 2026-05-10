@@ -26,7 +26,7 @@
  * Ejecutar: npm test -- forgotPassword.test.js
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from 'vitest';
 
 // ─── Mocks hoisted (deben declararse antes de cualquier import) ───────────────
 
@@ -52,19 +52,18 @@ vi.mock('@/services/supabase.client', () => ({
   },
 }));
 
-vi.mock('@/services/api', () => ({
-  authApi: {
-    resetPassword:    vi.fn(),
-    signOut:          vi.fn().mockResolvedValue({ success: true }),
-    getSession:       vi.fn().mockResolvedValue({ success: true, data: null }),
-    signInWithGoogle: vi.fn(),
-    signUp:           vi.fn(),
-    signIn:           vi.fn(),
-  },
-  usersApi: {
-    getUserProfile: vi.fn().mockResolvedValue({ success: false }),
-    updateUserProfile: vi.fn(),
-  },
+vi.mock('@/services/api/auth.api', () => ({
+  resetPassword:    vi.fn(),
+  signOut:          vi.fn().mockResolvedValue({ success: true }),
+  getSession:       vi.fn().mockResolvedValue({ success: true, data: null }),
+  signInWithGoogle: vi.fn(),
+  signUp:           vi.fn(),
+  signIn:           vi.fn(),
+}));
+
+vi.mock('@/services/api/users.api', () => ({
+  getUserProfile: vi.fn().mockResolvedValue({ success: false }),
+  updateUserProfile: vi.fn(),
 }));
 
 vi.mock('@/types', () => ({
@@ -89,9 +88,15 @@ vi.mock('@/services/api/audit.api', () => ({
 
 // ─── Imports (después de los mocks) ──────────────────────────────────────────
 
-import { resetPassword }  from '../../src/services/api/auth.api.js';
 import { useAuthStore }   from '../../src/features/auth/store/authStore.js';
-import { authApi }        from '@/services/api';
+import * as authApi        from '@/services/api/auth.api';
+
+let realResetPassword;
+
+beforeAll(async () => {
+  const actualAuthApi = await vi.importActual('../../src/services/api/auth.api.js');
+  realResetPassword = actualAuthApi.resetPassword;
+});
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // PARTE 1 — auth.api.resetPassword
@@ -113,7 +118,7 @@ describe('auth.api — resetPassword', () => {
   it('llama a supabase con el email correcto', async () => {
     mockResetPasswordForEmail.mockResolvedValueOnce({ error: null });
 
-    await resetPassword('usuario@ejemplo.com');
+    await realResetPassword('usuario@ejemplo.com');
 
     expect(mockResetPasswordForEmail).toHaveBeenCalledWith(
       'usuario@ejemplo.com',
@@ -124,7 +129,7 @@ describe('auth.api — resetPassword', () => {
   it('redirectTo usa window.location.origin (no localhost hardcodeado)', async () => {
     mockResetPasswordForEmail.mockResolvedValueOnce({ error: null });
 
-    await resetPassword('usuario@ejemplo.com');
+    await realResetPassword('usuario@ejemplo.com');
 
     const [, options] = mockResetPasswordForEmail.mock.calls[0];
     expect(options.redirectTo).toContain(PROD_ORIGIN);
@@ -134,7 +139,7 @@ describe('auth.api — resetPassword', () => {
   it('redirectTo incluye /auth/callback?flow=recovery', async () => {
     mockResetPasswordForEmail.mockResolvedValueOnce({ error: null });
 
-    await resetPassword('usuario@ejemplo.com');
+    await realResetPassword('usuario@ejemplo.com');
 
     const [, options] = mockResetPasswordForEmail.mock.calls[0];
     expect(options.redirectTo).toContain('/auth/callback');
@@ -144,7 +149,7 @@ describe('auth.api — resetPassword', () => {
   it('retorna { success: true } cuando Supabase no falla', async () => {
     mockResetPasswordForEmail.mockResolvedValueOnce({ error: null });
 
-    const result = await resetPassword('usuario@ejemplo.com');
+    const result = await realResetPassword('usuario@ejemplo.com');
 
     expect(result).toEqual({ success: true });
   });
@@ -154,7 +159,7 @@ describe('auth.api — resetPassword', () => {
       error: { message: 'Email rate limit exceeded' },
     });
 
-    const result = await resetPassword('demasiados@intentos.com');
+    const result = await realResetPassword('demasiados@intentos.com');
 
     expect(result.success).toBe(false);
     expect(result.error).toBe('Email rate limit exceeded');

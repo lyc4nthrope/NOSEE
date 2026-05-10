@@ -130,7 +130,6 @@ export default function HomePage() {
 
   const hasInitializedRef = useRef(false);
   const lastLocationCoordsRef = useRef(null);
-  const hasStoreNameInitRef = useRef(false);
 
   // ── Virtualización ────────────────────────────────────────────────────────
   const columnCount = useColumnCount();

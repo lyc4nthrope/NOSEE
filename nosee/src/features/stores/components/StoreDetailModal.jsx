@@ -429,10 +429,11 @@ export default function StoreDetailModal({ store, onClose, onStoreUpdated }) {
       if (typeof window !== 'undefined') {
         const detail = { storeId: updatedStore.id, updatedStore, updatedAt: Date.now() };
         window.dispatchEvent(new CustomEvent('nosee:store-updated', { detail }));
-        try { window.localStorage.setItem('NOSEE_STORE_UPDATED_AT', String(detail.updatedAt)); } catch {}
+        try { window.localStorage.setItem('NOSEE_STORE_UPDATED_AT', String(detail.updatedAt)); } catch (_err) { /* ignore storage quota/private mode errors */ }
       }
       setSaveMessage(ts.successUpdate);
     } catch (err) {
+      console.error('[StoreDetailModal] updateStore:', err);
       setSaveMessage(ts.errorUpdate);
     } finally {
       setSavingStore(false);

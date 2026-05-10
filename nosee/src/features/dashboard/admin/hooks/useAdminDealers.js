@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import { getApplications } from '@/services/api/dealerApplications.api';
-import { useLanguage } from '@/contexts/LanguageContext';
 
 /**
  * Hook de administración de solicitudes de repartidores.
@@ -16,9 +15,6 @@ import { useLanguage } from '@/contexts/LanguageContext';
  * }}
  */
 export default function useAdminDealers() {
-  const { t } = useLanguage();
-  const td = t.adminDashboard;
-
   const [applications, setApplications] = useState([]);
   const [applicationsLoading, setApplicationsLoading] = useState(false);
   const [applicationsLoaded, setApplicationsLoaded] = useState(false);

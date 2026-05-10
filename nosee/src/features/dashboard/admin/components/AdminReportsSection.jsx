@@ -7,7 +7,7 @@ import { ReportDetailsModal } from '../modals/ReportDetailsModal';
 const ReportsPanel = lazy(() => import('./ReportsPanel'));
 
 export default function AdminReportsSection({
-  reports, reportsLoading,
+  reports,
   reportStatusFilter, setReportStatusFilter,
   reportTypeFilter, setReportTypeFilter,
   reportSort, setReportSort,

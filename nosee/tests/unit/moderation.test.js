@@ -17,7 +17,7 @@
  *   ❌ Hentai / anime adulto                          → bloqueado
  */
 
-import { describe, it, expect, vi, beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeAll, afterAll, afterEach } from 'vitest';
 import {
   detectRestrictedContentText,
   detectInappropriateText,

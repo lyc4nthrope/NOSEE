@@ -144,7 +144,8 @@ export function PublicationCard({
         setTimeAgo(formatDistanceToNow(pubDate, t.timeAgo));
       }
     };
-    const interval = setInterval(update, 60_000);
+    // Recalculamos cada 30s para que los saltos de "segundos" → "minutos" se reflejen a tiempo.
+    const interval = setInterval(update, 30_000);
     return () => clearInterval(interval);
   }, [pubDate, t.timeAgo]);
 
@@ -181,7 +182,6 @@ export function PublicationCard({
         tc.noUnit;
 
   const storeName = publication.store?.name || tc.noStore;
-  const metaParts = [productBrand, unitValue].filter(Boolean).join(' · ');
 
   const upActive = publication.user_vote === 1;
   const downActive = publication.user_vote === -1;

@@ -57,25 +57,25 @@ export function PublicationDetailModal({ pub, onClose, onSave, onDelete }) {
 
   useEffect(() => {
     let cancelled = false;
-    setProductSearch({ results: [], searching: productQuery.length >= 2 });
-    if (productQuery.length >= 2) {
+    setProductSearch((prev) => ({ ...prev, results: [], searching: productQuery.length >= 2 }));
+    if (productQuery.length >= 2 && !productId) {
       searchProductsLight(productQuery).then(result => {
-        if (!cancelled) setProductSearch({ searching: false, results: result.data || [] });
+        if (!cancelled) setProductSearch((prev) => ({ ...prev, searching: false, results: result.data || [] }));
       });
     }
     return () => { cancelled = true; };
-  }, [productQuery]);
+  }, [productQuery, productId]);
 
   useEffect(() => {
     let cancelled = false;
-    setStoreSearch({ results: [], searching: storeQuery.length >= 2 });
-    if (storeQuery.length >= 2) {
+    setStoreSearch((prev) => ({ ...prev, results: [], searching: storeQuery.length >= 2 }));
+    if (storeQuery.length >= 2 && !storeId) {
       searchStoresLight(storeQuery).then(result => {
-        if (!cancelled) setStoreSearch({ searching: false, results: result.data || [] });
+        if (!cancelled) setStoreSearch((prev) => ({ ...prev, searching: false, results: result.data || [] }));
       });
     }
     return () => { cancelled = true; };
-  }, [storeQuery]);
+  }, [storeQuery, storeId]);
 
   const save = async () => {
     setSaveState({ saving: true, saved: false });
@@ -88,7 +88,7 @@ export function PublicationDetailModal({ pub, onClose, onSave, onDelete }) {
     const ui = {};
     if (db.product_id) { ui.productId = productId; ui.productName = productQuery; }
     if (db.store_id) { ui.storeId = storeId; ui.storeName = storeQuery; }
-    if (db.photo_url !== undefined) ui.photoUrl = form.photo_url;
+    if (db.photo_url !== undefined) ui.photoUrl = form.photoUrl;
     const ok = await onSave({ db, ui });
     setSaveState({ saving: false, saved: ok !== false });
   };
@@ -174,7 +174,7 @@ export function PublicationDetailModal({ pub, onClose, onSave, onDelete }) {
                 <div style={SEARCH_DROPDOWN_STYLE}>
                   {productSearch.results.map(pr => (
                     <button key={pr.id} style={SEARCH_RESULT_BTN_STYLE}
-                      onClick={() => { setProductId(pr.id); setProductQuery(pr.name); setProductSearch({ results: [], searching: false }); }}>
+                      onClick={() => { setProductSearch((prev) => ({ ...prev, id: pr.id, query: pr.name, results: [], searching: false })); }}>
                       <strong>{sanitizeHTML(pr.name)}</strong>
                       {pr.brand?.name && <span style={{ color: MUTED, marginLeft: 6, fontSize: 12 }}>{sanitizeHTML(pr.brand.name)}</span>}
                       {pr.barcode && <span style={{ color: MUTED, marginLeft: 6, fontSize: 12 }}>{sanitizeHTML(pr.barcode)}</span>}
@@ -191,7 +191,7 @@ export function PublicationDetailModal({ pub, onClose, onSave, onDelete }) {
             <div style={{ position: 'relative' }}>
               <input
                 value={storeQuery}
-                onChange={(e) => { setStoreQuery(e.target.value); setStoreId(null); }}
+                onChange={(e) => { setStoreSearch((prev) => ({ ...prev, query: e.target.value, id: null })); }}
                 style={{ ...s.filterSelect, fontFamily: 'inherit' }}
                 placeholder={td.publicationDetailModal.storePlaceholder}
               />
@@ -200,7 +200,7 @@ export function PublicationDetailModal({ pub, onClose, onSave, onDelete }) {
                 <div style={SEARCH_DROPDOWN_STYLE}>
                   {storeSearch.results.map(sr => (
                     <button key={sr.id} style={SEARCH_RESULT_BTN_STYLE}
-                      onClick={() => { setStoreId(sr.id); setStoreQuery(sr.name); setStoreSearch({ results: [], searching: false }); }}>
+                      onClick={() => { setStoreSearch((prev) => ({ ...prev, id: sr.id, query: sr.name, results: [], searching: false })); }}>
                       <strong>{sanitizeHTML(sr.name)}</strong>
                       {sr.address && <span style={{ color: MUTED, marginLeft: 6, fontSize: 12 }}>{sanitizeHTML(sr.address)}</span>}
                     </button>

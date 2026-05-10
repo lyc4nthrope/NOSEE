@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { storesApi } from '@/services/api';
+import * as storesApi from '@/services/api/stores.api';
 import { StoreTypeEnum, validateStoreForm } from '@/features/stores/schemas';
 import { uploadImageToCloudinary } from '@/services/cloudinary';
 import { useAuthStore } from '@/features/auth/store/authStore';

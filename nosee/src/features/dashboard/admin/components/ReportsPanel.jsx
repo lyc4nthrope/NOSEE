@@ -9,7 +9,7 @@
 import { useState, useEffect } from 'react';
 import { getAdminReportsMetrics } from '@/services/api/adminMetrics.api';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { s, ACCENT, MUTED, TEXT } from '../adminStyles';
+import { s, MUTED } from '../adminStyles';
 import { SummaryCard } from './SummaryCard';
 
 export default function ReportsPanel() {

@@ -6,7 +6,7 @@
  *
  * UBICACIÓN: src/features/dashboard/admin/components/CatalogPanel.jsx
  */
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { getCatalogStores, getCatalogProducts, getCatalogBrands } from '@/services/api/adminCatalog.api';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { s, ACCENT, MUTED, TEXT, BORDER } from '../adminStyles';

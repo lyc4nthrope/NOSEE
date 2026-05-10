@@ -1,4 +1,5 @@
 import { useFocusTrap } from '../hooks/useFocusTrap';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // ─── Modal de confirmación de baneo ──────────────────────────────────────────
 export function BanModal({ user, onConfirm, onCancel }) {
