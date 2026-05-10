@@ -92,11 +92,11 @@ export default function useAdminReports() {
           publicationSummary,
         };
       }));
+      setReportsLoaded(true);
     } finally {
       setReportsLoading(false);
-      setReportsLoaded(true);
     }
-  }, [td]);
+  }, [td, lang]);
 
   const updateReportData = useCallback(async (report, updates = {}) => {
     const nextStatus = normalizeReportStatus(updates.status || report.status);

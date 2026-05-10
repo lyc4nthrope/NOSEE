@@ -272,8 +272,10 @@ export async function getAdminOverviewStats() {
  * @returns {Promise<{success: boolean, data: Array, count: number, error?: string}>}
  */
 export async function getAdminReports(page = 1, pageSize = 20) {
+  const safePageSize = Math.min(pageSize, 100);
+
+  // Primary: RPC server-side con datos del target hidratados
   try {
-    const safePageSize = Math.min(pageSize, 100);
     const { data, error } = await supabase
       .rpc('get_admin_reports_detail', { 
         p_page: page, 
@@ -288,9 +290,47 @@ export async function getAdminReports(page = 1, pageSize = 20) {
       data: reports,
       count: reports[0]?.total_count || 0,
     };
-  } catch (error) {
-    console.error('Error loading admin reports:', error);
-    return { success: false, data: [], count: 0, error: error.message };
+  } catch (rpcError) {
+    console.warn('[getAdminReports] RPC falló, usando fallback query directa:', rpcError.message);
+  }
+
+  // Fallback: query directa a reports si la RPC no existe
+  try {
+    const offset = (page - 1) * safePageSize;
+    const { data: reportsData, error: reportsError, count } = await supabase
+      .from('reports')
+      .select('*', { count: 'exact' })
+      .order('created_at', { ascending: false })
+      .range(offset, offset + safePageSize - 1);
+
+    if (reportsError) throw reportsError;
+
+    const reports = (reportsData || []).map(r => ({
+      id: r.id,
+      reported_type: r.reported_type,
+      reported_id: r.reported_id,
+      reported_user_id: r.reported_user_id,
+      reporter_user_id: r.reporter_user_id,
+      reason: r.reason,
+      status: r.status,
+      reviewed_by: r.reviewed_by,
+      created_at: r.created_at,
+      resolved_at: r.resolved_at,
+      description: r.description,
+      evidence_url: r.evidence_url,
+      mod_notes: r.mod_notes,
+      action_taken: r.action_taken,
+      reporter_name: null,
+      reported_name: null,
+      reviewer_name: null,
+      target: null,
+      total_count: count || 0,
+    }));
+
+    return { success: true, data: reports, count: count || 0 };
+  } catch (fallbackError) {
+    console.error('[getAdminReports] Fallback también falló:', fallbackError);
+    return { success: false, data: [], count: 0, error: fallbackError.message };
   }
 }
 
