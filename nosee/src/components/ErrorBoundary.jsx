@@ -1,4 +1,5 @@
 import { Component } from "react";
+import * as Sentry from "@sentry/react";
 import { TRANSLATIONS } from "@/contexts/LanguageContext";
 
 export default class ErrorBoundary extends Component {
@@ -15,7 +16,7 @@ export default class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error, info) {
-    // Se mantiene log en consola para debugging local.
+    Sentry.captureException(error);
     console.error("ErrorBoundary capturó un error:", error, info);
   }
 

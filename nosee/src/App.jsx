@@ -39,6 +39,9 @@ const AdminDashboard = lazy(
 const ModeratorDashboard = lazy(
   () => import("@/features/dashboard/moderator/ModeratorDashboard")
 );
+const UserDashboard = lazy(
+  () => import("@/features/dashboard/user/UserDashboard")
+);
 const DealerDashboard = lazy(
   () => import("@/features/dashboard/dealer/DealerDashboard")
 );
@@ -244,6 +247,14 @@ function AppContent() {
           }
         />
 
+        <Route
+          path="/dashboard/user"
+          element={
+            <ProtectedRoute allowedRoles={["Usuario"]}>
+              <UserDashboard />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/dashboard/admin"
           element={

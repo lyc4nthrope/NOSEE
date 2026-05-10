@@ -2,47 +2,53 @@ import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { s, CLOSE_BTN_STYLE, TEXT, BORDER } from '../adminStyles';
 import { DetailRow } from '../components/AdminPrimitives';
+import { useClientDateFormat } from '../adminUtils';
+import { useFocusTrap } from '../hooks/useFocusTrap';
+import { sanitizeHTML } from '@/services/utils/sanitize';
 
 export function StoreDetailModal({ store, onClose, onDelete, isDeleting, onSave }) {
   const { t } = useLanguage();
   const td = t.adminDashboard;
-  const [name, setName]           = useState(store.name || '');
-  const [storeTypeId, setStoreTypeId] = useState(String(store.store_type_id || '1'));
-  const [address, setAddress]     = useState(store.address || '');
-  const [websiteUrl, setWebsiteUrl] = useState(store.website_url || '');
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved]   = useState(false);
+  const modalRef = useFocusTrap(true);
+  const [form, setForm] = useState({
+    name: store.name || '',
+    storeTypeId: String(store.store_type_id || '1'),
+    address: store.address || '',
+    websiteUrl: store.website_url || '',
+  });
+  const [ui, setUi] = useState({ saving: false, saved: false, errorMsg: '' });
+  const createdAt = useClientDateFormat(store.created_at);
 
-  const isPhysical = storeTypeId === '1';
+  const isPhysical = form.storeTypeId === '1';
+  const setField = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
 
   const save = async () => {
-    if (!name.trim()) { alert('El nombre es obligatorio.'); return; }
-    setSaving(true);
-    setSaved(false);
-    const updates = { name: name.trim(), store_type_id: Number(storeTypeId) };
-    if (isPhysical) updates.address = address.trim() || null;
-    else updates.website_url = websiteUrl.trim() || null;
+    if (!form.name.trim()) { setUi(prev => ({ ...prev, errorMsg: td.storeDetailModal.nameRequired })); return; }
+    setUi({ saving: true, saved: false, errorMsg: '' });
+    const updates = { name: form.name.trim(), store_type_id: Number(form.storeTypeId) };
+    if (isPhysical) updates.address = form.address.trim() || null;
+    else updates.website_url = form.websiteUrl.trim() || null;
     const ok = await onSave(store.id, updates);
-    setSaving(false);
-    if (ok !== false) setSaved(true);
+    setUi({ saving: false, saved: ok !== false, errorMsg: '' });
   };
+
   return (
-    <div role="button" tabIndex={0} style={s.modalOverlay} onClick={onClose} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}>
-      <div role="button" tabIndex={0} style={{ ...s.modalCard, maxWidth: 560 }} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+    <div role="presentation" style={s.modalOverlay} onClick={onClose} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}>
+      <div ref={modalRef} role="dialog" aria-modal="true" aria-labelledby="store-detail-title" style={{ ...s.modalCard, maxWidth: 560 }} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
           <div>
-            <h2 style={{ margin: 0, fontSize: 18, color: TEXT }}>{td.storeDetailTitle}</h2>
+            <h2 id="store-detail-title" style={{ margin: 0, fontSize: 18, color: TEXT }}>{td.storeDetailTitle}</h2>
             <p style={{ ...s.headerSub, margin: '4px 0 0' }}>ID: {store.id}</p>
           </div>
-          <button onClick={onClose} style={CLOSE_BTN_STYLE}>✕</button>
+          <button onClick={onClose} aria-label={td.storeDetailModal.closeAria} title={td.storeDetailModal.closeAria} style={CLOSE_BTN_STYLE}>✕</button>
         </div>
 
         <div style={s.detailGrid}>
-          <DetailRow label={td.labelName} value={store.name || '—'} />
-          <DetailRow label={td.labelType} value={store.typeLabel || '—'} />
-          <DetailRow label={td.labelAddress} value={store.address || '—'} />
-          <DetailRow label={td.labelWeb} value={store.website_url || '—'} />
-          <DetailRow label={td.labelCreatedAt} value={store.created_at ? new Date(store.created_at).toLocaleString('es-CO') : '—'} />
+          <DetailRow label={td.labelName} value={sanitizeHTML(store.name) || '—'} />
+          <DetailRow label={td.labelType} value={sanitizeHTML(store.typeLabel) || '—'} />
+          <DetailRow label={td.labelAddress} value={sanitizeHTML(store.address) || '—'} />
+          <DetailRow label={td.labelWeb} value={sanitizeHTML(store.website_url) || '—'} />
+          <DetailRow label={td.labelCreatedAt} value={createdAt} />
           <DetailRow label={td.labelRelatedPubs} value={store.relatedCount ?? 0} />
         </div>
 
@@ -50,41 +56,42 @@ export function StoreDetailModal({ store, onClose, onDelete, isDeleting, onSave 
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <label style={s.filterLabelWrap}>
-            <span style={s.filterLabel}>Nombre</span>
-            <input value={name} onChange={(e) => setName(e.target.value)} style={{ ...s.filterSelect, fontFamily: 'inherit' }} placeholder="Nombre de la tienda" />
+            <span style={s.filterLabel}>{td.storeDetailModal.nameLabel}</span>
+            <input value={form.name} onChange={(e) => setField('name', e.target.value)} style={{ ...s.filterSelect, fontFamily: 'inherit' }} placeholder={td.storeDetailModal.namePlaceholder} />
           </label>
 
           <label style={s.filterLabelWrap}>
-            <span style={s.filterLabel}>Tipo</span>
-            <select value={storeTypeId} onChange={(e) => setStoreTypeId(e.target.value)} style={s.filterSelect}>
-              <option value="1">Física</option>
-              <option value="2">Virtual</option>
+            <span style={s.filterLabel}>{td.storeDetailModal.typeLabel}</span>
+            <select value={form.storeTypeId} onChange={(e) => setField('storeTypeId', e.target.value)} style={s.filterSelect}>
+              <option value="1">{td.storeDetailModal.physicalOption}</option>
+              <option value="2">{td.storeDetailModal.virtualOption}</option>
             </select>
           </label>
 
           {isPhysical ? (
             <label style={s.filterLabelWrap}>
-              <span style={s.filterLabel}>Dirección</span>
-              <input value={address} onChange={(e) => setAddress(e.target.value)} style={{ ...s.filterSelect, fontFamily: 'inherit' }} placeholder="Dirección física" />
+              <span style={s.filterLabel}>{td.storeDetailModal.addressLabel}</span>
+              <input value={form.address} onChange={(e) => setField('address', e.target.value)} style={{ ...s.filterSelect, fontFamily: 'inherit' }} placeholder={td.storeDetailModal.addressPlaceholder} />
             </label>
           ) : (
             <label style={s.filterLabelWrap}>
-              <span style={s.filterLabel}>Sitio web</span>
-              <input value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} style={{ ...s.filterSelect, fontFamily: 'inherit' }} placeholder="https://..." />
+              <span style={s.filterLabel}>{td.storeDetailModal.websiteLabel}</span>
+              <input value={form.websiteUrl} onChange={(e) => setField('websiteUrl', e.target.value)} style={{ ...s.filterSelect, fontFamily: 'inherit' }} placeholder={td.storeDetailModal.websitePlaceholder} />
             </label>
           )}
         </div>
 
-        {saved && <p style={{ margin: '10px 0 0', fontSize: 13, color: 'var(--success)', textAlign: 'right' }}>✓ Guardado correctamente</p>}
+        {ui.errorMsg && <p style={{ margin: '10px 0 0', fontSize: 13, color: 'var(--error)', textAlign: 'right' }}>{ui.errorMsg}</p>}
+        {ui.saved && <p style={{ margin: '10px 0 0', fontSize: 13, color: 'var(--success)', textAlign: 'right' }}>{td.storeDetailModal.savedOk}</p>}
 
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 16, gap: 10 }}>
           <button onClick={onDelete} style={s.btnDelete} disabled={isDeleting}>
             {isDeleting ? td.hidingBtn : td.hideStoreBtn}
           </button>
           <div style={{ display: 'flex', gap: 10 }}>
-            <button onClick={onClose} style={s.btnDismiss}>Cerrar</button>
-            <button onClick={save} style={{ ...s.filterBtn, ...s.filterBtnActive }} disabled={saving}>
-              {saving ? '...' : 'Guardar cambios'}
+            <button onClick={onClose} style={s.btnDismiss}>{td.storeDetailModal.closeBtn}</button>
+            <button onClick={save} style={{ ...s.filterBtn, ...s.filterBtnActive }} disabled={ui.saving}>
+              {ui.saving ? '...' : td.storeDetailModal.saveChangesBtn}
             </button>
           </div>
         </div>

@@ -1,116 +1,131 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/services/supabase.client';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { searchProductsLight, searchStoresLight } from '@/services/api/adminCatalog.api';
 import { s, CLOSE_BTN_STYLE, TEXT, BORDER, SURFACE, MUTED } from '../adminStyles';
 import { DetailRow, SectionHeader, StatusBadge } from '../components/AdminPrimitives';
+import { useFocusTrap } from '../hooks/useFocusTrap';
+import { sanitizeHTML } from '@/services/utils/sanitize';
+
+const SEARCH_DROPDOWN_STYLE = {
+  position: 'absolute', zIndex: 10, top: '100%', left: 0, right: 0,
+  background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 8,
+  overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+};
+const SEARCH_RESULT_BTN_STYLE = {
+  display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px',
+  background: 'none', border: 'none', color: TEXT, cursor: 'pointer',
+  fontSize: 13, borderBottom: `1px solid ${BORDER}`,
+};
+const SPINNER_STYLE = {
+  position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
+  fontSize: 12, color: MUTED,
+};
 
 export function PublicationDetailModal({ pub, onClose, onSave, onDelete }) {
   const { t } = useLanguage();
   const td = t.adminDashboard;
-  const [isActive, setIsActive]       = useState(pub.is_active !== false);
-  const [price, setPrice]             = useState(pub.price ?? '');
-  const [description, setDescription] = useState(pub.description || '');
-  const [photoUrl, setPhotoUrl]       = useState(pub.photoUrl || pub.photo_url || '');
+  const modalRef = useFocusTrap(true);
+  const [form, setForm] = useState({
+    isActive: pub.is_active !== false,
+    price: pub.price ?? '',
+    description: pub.description || '',
+    photoUrl: pub.photoUrl || pub.photo_url || '',
+  });
 
-  // Búsqueda de producto
-  const [productQuery, setProductQuery]     = useState(pub.productName || pub.product?.name || '');
-  const [productId, setProductId]           = useState(pub.productId || pub.product_id || null);
-  const [productResults, setProductResults] = useState([]);
-  const [searchingProduct, setSearchingProduct] = useState(false);
+  const [productSearch, setProductSearch] = useState({
+    query: pub.productName || pub.product?.name || '',
+    id: pub.productId || pub.product_id || null,
+    results: [], searching: false,
+  });
 
-  // Búsqueda de tienda
-  const [storeQuery, setStoreQuery]         = useState(pub.storeName || pub.store?.name || '');
-  const [storeId, setStoreId]               = useState(pub.storeId || pub.store_id || null);
-  const [storeResults, setStoreResults]     = useState([]);
-  const [searchingStore, setSearchingStore] = useState(false);
+  const [storeSearch, setStoreSearch] = useState({
+    query: pub.storeName || pub.store?.name || '',
+    id: pub.storeId || pub.store_id || null,
+    results: [], searching: false,
+  });
 
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved]   = useState(false);
+  const { query: productQuery, id: productId } = productSearch;
+  const { query: storeQuery, id: storeId } = storeSearch;
 
-  const authorName = pub.authorName || pub.userName || pub.user?.full_name || '—';
-  const createdAt  = pub.createdAt  ? new Date(pub.createdAt).toLocaleString('es-CO') : '—';
-  const confidence = typeof pub.confidenceScore === 'number' ? pub.confidenceScore.toFixed(2) : '—';
-  const productBarcode = pub.productBarcode || pub.product?.barcode || 'Sin código';
-  const brandName      = pub.brandName || pub.product?.brand?.name || 'Sin marca';
+  const [saveState, setSaveState] = useState({ saving: false, saved: false });
 
-  // Buscar productos al escribir
+  const authorName = pub.authorName || pub.userName || pub.user?.full_name || '\u2014';
+  const createdAt = pub.createdAt ? new Date(pub.createdAt).toLocaleString('es-CO') : '\u2014';
+  const confidence = typeof pub.confidenceScore === 'number' ? pub.confidenceScore.toFixed(2) : '\u2014';
+  const productBarcode = pub.productBarcode || pub.product?.barcode || 'Sin c\u00f3digo';
+  const brandName = pub.brandName || pub.product?.brand?.name || 'Sin marca';
+
   useEffect(() => {
-    if (productQuery.length < 2) { setProductResults([]); return; }
-    const timer = setTimeout(async () => {
-      setSearchingProduct(true);
-      const { data } = await supabase.from('products').select('id, name, barcode, brand:brands(name)').ilike('name', `%${productQuery}%`).limit(8);
-      setProductResults(data || []);
-      setSearchingProduct(false);
-    }, 300);
-    return () => clearTimeout(timer);
+    let cancelled = false;
+    setProductSearch({ results: [], searching: productQuery.length >= 2 });
+    if (productQuery.length >= 2) {
+      searchProductsLight(productQuery).then(result => {
+        if (!cancelled) setProductSearch({ searching: false, results: result.data || [] });
+      });
+    }
+    return () => { cancelled = true; };
   }, [productQuery]);
 
-  // Buscar tiendas al escribir
   useEffect(() => {
-    if (storeQuery.length < 2) { setStoreResults([]); return; }
-    const timer = setTimeout(async () => {
-      setSearchingStore(true);
-      const { data } = await supabase.from('stores').select('id, name, address, store_type_id').ilike('name', `%${storeQuery}%`).limit(8);
-      setStoreResults(data || []);
-      setSearchingStore(false);
-    }, 300);
-    return () => clearTimeout(timer);
+    let cancelled = false;
+    setStoreSearch({ results: [], searching: storeQuery.length >= 2 });
+    if (storeQuery.length >= 2) {
+      searchStoresLight(storeQuery).then(result => {
+        if (!cancelled) setStoreSearch({ searching: false, results: result.data || [] });
+      });
+    }
+    return () => { cancelled = true; };
   }, [storeQuery]);
 
   const save = async () => {
-    setSaving(true);
-    setSaved(false);
-    const db = { is_active: isActive, description: description?.trim() || null };
-    const parsedPrice = Number(price);
+    setSaveState({ saving: true, saved: false });
+    const db = { is_active: form.isActive, description: form.description?.trim() || null };
+    const parsedPrice = Number(form.price);
     if (!isNaN(parsedPrice) && parsedPrice > 0) db.price = parsedPrice;
     if (productId && productId !== (pub.productId || pub.product_id)) db.product_id = productId;
     if (storeId && storeId !== (pub.storeId || pub.store_id)) db.store_id = storeId;
-    if (photoUrl.trim() !== (pub.photoUrl || pub.photo_url || '')) db.photo_url = photoUrl.trim() || null;
+    if (form.photoUrl.trim() !== (pub.photoUrl || pub.photo_url || '')) db.photo_url = form.photoUrl.trim() || null;
     const ui = {};
     if (db.product_id) { ui.productId = productId; ui.productName = productQuery; }
-    if (db.store_id)   { ui.storeId = storeId; ui.storeName = storeQuery; }
-    if (db.photo_url !== undefined) ui.photoUrl = db.photo_url;
+    if (db.store_id) { ui.storeId = storeId; ui.storeName = storeQuery; }
+    if (db.photo_url !== undefined) ui.photoUrl = form.photo_url;
     const ok = await onSave({ db, ui });
-    setSaving(false);
-    if (ok !== false) setSaved(true);
+    setSaveState({ saving: false, saved: ok !== false });
   };
 
   return (
-    <div role="button" tabIndex={0} style={s.modalOverlay} onClick={onClose} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}>
-      <div role="button" tabIndex={0} style={{ ...s.modalCard, maxHeight: '90vh', overflowY: 'auto' }} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
-        {/* Cabecera */}
+    <div role="presentation" style={s.modalOverlay} onClick={onClose} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}>
+      <div ref={modalRef} role="dialog" aria-modal="true" aria-labelledby="pub-detail-title" style={{ ...s.modalCard, maxHeight: '90vh', overflowY: 'auto' }} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
           <div>
-            <h2 style={{ margin: 0, fontSize: 18, color: TEXT }}>{td.pubDetailTitle}</h2>
+            <h2 id="pub-detail-title" style={{ margin: 0, fontSize: 18, color: TEXT }}>{td.pubDetailTitle}</h2>
             <p style={{ ...s.headerSub, margin: '4px 0 0' }}>ID: {pub.id}</p>
           </div>
-          <button onClick={onClose} style={CLOSE_BTN_STYLE}>✕</button>
+          <button onClick={onClose} aria-label={td.publicationDetailModal.closeAria} title={td.publicationDetailModal.closeAria} style={CLOSE_BTN_STYLE}>✕</button>
         </div>
 
-        {/* Detalle */}
         <div style={{ ...s.section, marginBottom: 16, marginTop: 0 }}>
           <div style={{ ...s.sectionHead, marginBottom: 10 }}>
             <span style={s.sectionTitle}>{td.pubDetailTitle}</span>
             <StatusBadge status={pub.is_active ? 'active' : 'hidden'} />
           </div>
           <div style={s.detailGrid}>
-            <DetailRow label={td.pubProductLabel} value={productQuery || '—'} />
+            <DetailRow label={td.pubProductLabel} value={productQuery || '\u2014'} />
             <DetailRow label={td.pubBarcodeLabel} value={productBarcode} />
             <DetailRow label={td.pubBrandLabel} value={brandName} />
-            <DetailRow label={td.pubStoreLabel}   value={storeQuery || '—'} />
-            <DetailRow label={td.pubPriceLabel}   value={`$${typeof pub.price === 'number' ? pub.price.toLocaleString('es-CO') : pub.price || '—'}`} />
-            <DetailRow label={td.pubAuthorLabel}  value={authorName} />
-            <DetailRow label={td.pubDateLabel}    value={createdAt} />
+            <DetailRow label={td.pubStoreLabel} value={storeQuery || '\u2014'} />
+            <DetailRow label={td.pubPriceLabel} value={`$${typeof pub.price === 'number' ? pub.price.toLocaleString('es-CO') : pub.price || '\u2014'}`} />
+            <DetailRow label={td.pubAuthorLabel} value={authorName} />
+            <DetailRow label={td.pubDateLabel} value={createdAt} />
             <DetailRow label={td.pubConfidenceLabel} value={confidence} />
-            <DetailRow label={td.pubDescriptionLabel} value={pub.description || '—'} />
+            <DetailRow label={td.pubDescriptionLabel} value={pub.description || '\u2014'} />
           </div>
         </div>
 
-        {/* Imagen */}
         {pub.photoUrl && (
           <div style={{ marginBottom: 16 }}>
             <img
-              src={pub.photoUrl}
+              src={sanitizeHTML(pub.photoUrl)}
               alt={td.pubPhotoAlt}
               style={{ width: '100%', maxHeight: 220, objectFit: 'cover', borderRadius: 8, border: `1px solid ${BORDER}` }}
               onError={(e) => { e.currentTarget.style.display = 'none'; }}
@@ -120,13 +135,12 @@ export function PublicationDetailModal({ pub, onClose, onSave, onDelete }) {
 
         <hr style={{ border: 'none', borderTop: `1px solid ${BORDER}`, margin: '0 0 16px' }} />
 
-        {/* Edición */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <label style={s.filterLabelWrap}>
             <span style={s.filterLabel}>{td.pubVisibilityLabel}</span>
             <select
-              value={isActive ? 'visible' : 'hidden'}
-              onChange={(e) => setIsActive(e.target.value === 'visible')}
+              value={form.isActive ? 'visible' : 'hidden'}
+              onChange={(e) => setForm(prev => ({ ...prev, isActive: e.target.value === 'visible' }))}
               style={s.filterSelect}
             >
               <option value="visible">{td.pubIsActiveLabel}</option>
@@ -138,82 +152,80 @@ export function PublicationDetailModal({ pub, onClose, onSave, onDelete }) {
             <span style={s.filterLabel}>{td.pubPriceLabel}</span>
             <input
               type="number"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
+              value={form.price}
+              onChange={(e) => setForm(prev => ({ ...prev, price: e.target.value }))}
               style={{ ...s.filterSelect, fontFamily: 'inherit' }}
               min={0}
               placeholder={td.pricePlaceholder}
             />
           </label>
 
-          {/* Producto */}
           <div style={s.filterLabelWrap}>
-            <span style={s.filterLabel}>Producto</span>
+            <span style={s.filterLabel}>{td.publicationDetailModal.productLabel}</span>
             <div style={{ position: 'relative' }}>
               <input
                 value={productQuery}
-                onChange={(e) => { setProductQuery(e.target.value); setProductId(null); }}
+                onChange={(e) => { setProductSearch(prev => ({ ...prev, query: e.target.value, id: null })); }}
                 style={{ ...s.filterSelect, fontFamily: 'inherit' }}
-                placeholder="Buscar producto..."
+                placeholder={td.publicationDetailModal.productPlaceholder}
               />
-              {searchingProduct && <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 11, color: MUTED }}>...</span>}
-              {productResults.length > 0 && (
-                <div style={{ position: 'absolute', zIndex: 10, top: '100%', left: 0, right: 0, background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 8, overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-                  {productResults.map(pr => (
-                    <button key={pr.id} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', background: 'none', border: 'none', color: TEXT, cursor: 'pointer', fontSize: 13, borderBottom: `1px solid ${BORDER}` }}
-                      onClick={() => { setProductId(pr.id); setProductQuery(pr.name); setProductResults([]); }}>
-                      <strong>{pr.name}</strong>
-                      {pr.brand?.name && <span style={{ color: MUTED, marginLeft: 6 }}>— {pr.brand.name}</span>}
-                      {pr.barcode && <span style={{ color: MUTED, marginLeft: 6, fontSize: 11 }}>{pr.barcode}</span>}
+              {productSearch.searching && <span style={SPINNER_STYLE}>…</span>}
+              {productSearch.results.length > 0 && (
+                <div style={SEARCH_DROPDOWN_STYLE}>
+                  {productSearch.results.map(pr => (
+                    <button key={pr.id} style={SEARCH_RESULT_BTN_STYLE}
+                      onClick={() => { setProductId(pr.id); setProductQuery(pr.name); setProductSearch({ results: [], searching: false }); }}>
+                      <strong>{sanitizeHTML(pr.name)}</strong>
+                      {pr.brand?.name && <span style={{ color: MUTED, marginLeft: 6, fontSize: 12 }}>{sanitizeHTML(pr.brand.name)}</span>}
+                      {pr.barcode && <span style={{ color: MUTED, marginLeft: 6, fontSize: 12 }}>{sanitizeHTML(pr.barcode)}</span>}
                     </button>
                   ))}
                 </div>
               )}
             </div>
-            {productId && <span style={{ fontSize: 11, color: 'var(--success)', marginTop: 4 }}>✓ ID: {productId}</span>}
+            {productId && <span style={{ fontSize: 12, color: 'var(--success)', marginTop: 4 }}>{td.publicationDetailModal.idSelected(productId)}</span>}
           </div>
 
-          {/* Tienda */}
           <div style={s.filterLabelWrap}>
-            <span style={s.filterLabel}>Tienda</span>
+            <span style={s.filterLabel}>{td.publicationDetailModal.storeLabel}</span>
             <div style={{ position: 'relative' }}>
               <input
                 value={storeQuery}
                 onChange={(e) => { setStoreQuery(e.target.value); setStoreId(null); }}
                 style={{ ...s.filterSelect, fontFamily: 'inherit' }}
-                placeholder="Buscar tienda..."
+                placeholder={td.publicationDetailModal.storePlaceholder}
               />
-              {searchingStore && <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 11, color: MUTED }}>...</span>}
-              {storeResults.length > 0 && (
-                <div style={{ position: 'absolute', zIndex: 10, top: '100%', left: 0, right: 0, background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 8, overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-                  {storeResults.map(sr => (
-                    <button key={sr.id} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', background: 'none', border: 'none', color: TEXT, cursor: 'pointer', fontSize: 13, borderBottom: `1px solid ${BORDER}` }}
-                      onClick={() => { setStoreId(sr.id); setStoreQuery(sr.name); setStoreResults([]); }}>
-                      <strong>{sr.name}</strong>
-                      {sr.address && <span style={{ color: MUTED, marginLeft: 6, fontSize: 11 }}>{sr.address}</span>}
+              {storeSearch.searching && <span style={SPINNER_STYLE}>…</span>}
+              {storeSearch.results.length > 0 && (
+                <div style={SEARCH_DROPDOWN_STYLE}>
+                  {storeSearch.results.map(sr => (
+                    <button key={sr.id} style={SEARCH_RESULT_BTN_STYLE}
+                      onClick={() => { setStoreId(sr.id); setStoreQuery(sr.name); setStoreSearch({ results: [], searching: false }); }}>
+                      <strong>{sanitizeHTML(sr.name)}</strong>
+                      {sr.address && <span style={{ color: MUTED, marginLeft: 6, fontSize: 12 }}>{sanitizeHTML(sr.address)}</span>}
                     </button>
                   ))}
                 </div>
               )}
             </div>
-            {storeId && <span style={{ fontSize: 11, color: 'var(--success)', marginTop: 4 }}>✓ ID: {storeId}</span>}
+            {storeId && <span style={{ fontSize: 12, color: 'var(--success)', marginTop: 4 }}>{td.publicationDetailModal.idSelected(storeId)}</span>}
           </div>
 
           <label style={s.filterLabelWrap}>
-            <span style={s.filterLabel}>URL de foto</span>
+            <span style={s.filterLabel}>{td.publicationDetailModal.photoUrlLabel}</span>
             <input
-              value={photoUrl}
-              onChange={(e) => setPhotoUrl(e.target.value)}
+              value={form.photoUrl}
+              onChange={(e) => setForm(prev => ({ ...prev, photoUrl: e.target.value }))}
               style={{ ...s.filterSelect, fontFamily: 'inherit' }}
-              placeholder="https://..."
+              placeholder={td.publicationDetailModal.photoUrlPlaceholder}
             />
           </label>
 
           <label style={s.filterLabelWrap}>
             <span style={s.filterLabel}>{td.pubDescriptionLabel}</span>
             <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              value={form.description}
+              onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
               rows={4}
               style={{ ...s.filterSelect, fontFamily: 'inherit', resize: 'vertical' }}
               placeholder={td.descriptionPlaceholder}
@@ -221,7 +233,7 @@ export function PublicationDetailModal({ pub, onClose, onSave, onDelete }) {
           </label>
         </div>
 
-        {saved && (
+        {saveState.saved && (
           <p style={{ margin: '10px 0 0', fontSize: 13, color: 'var(--success)', textAlign: 'right' }}>
             ✓ {td.pubSavedOk}
           </p>
@@ -231,8 +243,8 @@ export function PublicationDetailModal({ pub, onClose, onSave, onDelete }) {
           <button onClick={onDelete} style={s.btnDelete}>{td.deletePublicationBtn}</button>
           <div style={{ display: 'flex', gap: 10 }}>
             <button onClick={onClose} style={s.btnDismiss}>{td.cancel}</button>
-            <button onClick={save} style={{ ...s.filterBtn, ...s.filterBtnActive }} disabled={saving}>
-              {saving ? '...' : td.savePubBtn}
+            <button onClick={save} style={{ ...s.filterBtn, ...s.filterBtnActive }} disabled={saveState.saving}>
+              {saveState.saving ? '…' : td.savePubBtn}
             </button>
           </div>
         </div>

@@ -21,17 +21,17 @@ export function UnpublishedResourcesTable({
 
   return (
     <div style={{ display: 'grid', gap: 16 }}>
-      <div style={s.table}>
-        <div style={{ ...s.tableHead, gridTemplateColumns: '2fr 1fr 1fr' }}>
+      <div style={s.table} role="grid" aria-label="Tiendas no publicadas">
+        <div style={{ ...s.tableHead, gridTemplateColumns: '2fr 1fr 1fr' }} role="row">
           {[td.colUnpublishedStores, td.labelType, td.colActions].map((h) => (
-            <div key={h} style={s.th}>{h}</div>
+            <div key={h} style={s.th} role="columnheader">{h}</div>
           ))}
         </div>
         {(stores || []).length === 0 ? (
           <div style={{ padding: '14px 20px', color: MUTED, fontSize: 13 }}>{td.noUnpublishedStores}</div>
         ) : (
           (stores || []).map((store) => (
-            <div key={store.id} style={{ ...s.tableRow, gridTemplateColumns: '2fr 1fr 1fr' }}>
+            <div key={store.id} style={{ ...s.tableRow, gridTemplateColumns: '2fr 1fr 1fr' }} role="row">
               <div style={s.td}>
                 <div>
                   <div style={s.rowName}>{store.name || '—'}</div>
@@ -56,17 +56,17 @@ export function UnpublishedResourcesTable({
         )}
       </div>
 
-      <div style={s.table}>
-        <div style={{ ...s.tableHead, gridTemplateColumns: '2fr 1fr 1fr' }}>
+      <div style={s.table} role="grid" aria-label="Productos no publicados">
+        <div style={{ ...s.tableHead, gridTemplateColumns: '2fr 1fr 1fr' }} role="row">
           {[td.colUnpublishedProducts, td.colBrand, td.colActions].map((h) => (
-            <div key={h} style={s.th}>{h}</div>
+            <div key={h} style={s.th} role="columnheader">{h}</div>
           ))}
         </div>
         {(products || []).length === 0 ? (
           <div style={{ padding: '14px 20px', color: MUTED, fontSize: 13 }}>{td.noUnpublishedProducts}</div>
         ) : (
           (products || []).map((product) => (
-            <div key={product.id} style={{ ...s.tableRow, gridTemplateColumns: '2fr 1fr 1fr' }}>
+            <div key={product.id} style={{ ...s.tableRow, gridTemplateColumns: '2fr 1fr 1fr' }} role="row">
               <div style={s.td}>
                 <div>
                   <div style={s.rowName}>{product.name || '—'}</div>

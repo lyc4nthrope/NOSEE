@@ -1,9 +1,24 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import * as Sentry from "@sentry/react"
 import './index.css'
 import App from './App.jsx'
 import { initAnalytics } from './services/analytics.js'
 import { initMercadoPago } from '@mercadopago/sdk-react'
+
+Sentry.init({
+  dsn: import.meta.env.VITE_SENTRY_DSN || '',
+  environment: import.meta.env.MODE,
+  release: `nosee@${import.meta.env.VITE_APP_VERSION || '1.0.0'}`,
+  integrations: [
+    Sentry.browserTracingIntegration(),
+    Sentry.replayIntegration(),
+    Sentry.captureConsoleIntegration({ levels: ['error', 'warn'] }),
+  ],
+  tracesSampleRate: import.meta.env.MODE === 'production' ? 0.1 : 1.0,
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1.0,
+})
 
 // Inicializar Google Analytics 4 al arrancar la app
 initAnalytics()

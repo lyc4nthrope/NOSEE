@@ -22,7 +22,8 @@ export const DEFAULT_REPUTATION_PARAMS = [
   { param: 'Umbral para rol Moderador',         value: '500', note: 'Puntos mínimos para asignación automática' },
   { param: 'Penalización por reporte aceptado', value: '-10', note: 'Cuando un reporte contra el usuario es validado' },
 ];
-export const LS_KEY = 'nosee_reputation_params';
+// NOTA: reputation_params se migró a Supabase tabla reputation_config.
+// DEFAULT_REPUTATION_PARAMS se mantiene como fallback si la tabla está vacía.
 
 export const ALL_ROLES = [UserRoleEnum.USUARIO, UserRoleEnum.MODERADOR, UserRoleEnum.ADMIN, UserRoleEnum.REPARTIDOR];
 export const REPORT_STATUS_OPTIONS = ['PENDING', 'IN_REVIEW', 'RESOLVED', 'REJECTED'];
@@ -59,7 +60,7 @@ export const getReportTargetDisplay = (report) => {
   return `ID: ${report?.reported_id || 'N/A'}`;
 };
 
-export const formatPublicationSummary = (publication) => {
+export const formatPublicationSummary = (publication, locale = 'es-CO') => {
   if (!publication) return null;
 
   const productName = publication.product?.name || 'N/A';
@@ -74,7 +75,7 @@ export const formatPublicationSummary = (publication) => {
     unit: quantity && unit ? `${quantity} ${unit}` : 'N/A',
     brand,
     store,
-    price: typeof price === 'number' ? price.toLocaleString('es-CO', { style: 'currency', currency: 'COP' }) : 'N/A',
+    price: typeof price === 'number' ? price.toLocaleString(locale, { style: 'currency', currency: 'COP' }) : 'N/A',
   };
 };
 

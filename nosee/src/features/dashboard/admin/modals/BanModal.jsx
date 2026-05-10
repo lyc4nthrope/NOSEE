@@ -1,21 +1,22 @@
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 // ─── Modal de confirmación de baneo ──────────────────────────────────────────
 export function BanModal({ user, onConfirm, onCancel }) {
+  const modalRef = useFocusTrap(true);
   const { t } = useLanguage();
   const td = t.adminDashboard;
   const isBanning = user.status === 'activo';
   return (
-    <div style={{
+    <div role="presentation" style={{
       position: 'fixed', inset: 0, background: 'var(--overlay)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       zIndex: 1000,
     }}>
-      <div style={{
+      <div ref={modalRef} role="dialog" aria-modal="true" aria-labelledby="ban-modal-title" style={{
         background: 'var(--bg-surface)', border: '1px solid #1E2D4A', borderRadius: 14,
         padding: '28px 32px', width: 420, maxWidth: '90vw',
       }}>
-        <h2 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>
+        <h2 id="ban-modal-title" style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>
           {isBanning ? td.banTitle : td.unbanTitle}
         </h2>
         <p style={{ margin: '0 0 20px', fontSize: 14, color: 'var(--text-secondary)' }}>

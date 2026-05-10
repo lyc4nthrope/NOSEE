@@ -20,15 +20,15 @@ export function PublicationsTable({
     return <EmptyMsg text={td.noPubsView} />;
   }
   return (
-    <div style={s.table} className="admin-table admin-table-pubs">
-      <div style={{ ...s.tableHead, gridTemplateColumns: '2fr 1fr 1fr 0.8fr 0.8fr 1.2fr' }}>
+    <div style={s.table} className="admin-table admin-table-pubs" role="grid" aria-label="Lista de publicaciones">
+      <div style={{ ...s.tableHead, gridTemplateColumns: '2fr 1fr 1fr 0.8fr 0.8fr 1.2fr' }} role="row">
         {[td.colProduct, td.colStore, td.colPrice, td.colAuthor, td.colDate, td.colAction].map(h => (
-          <div key={h} style={s.th}>{h}</div>
+          <div key={h} style={s.th} role="columnheader">{h}</div>
         ))}
       </div>
       {publications.map(p => (
-        <div key={p.id} style={{ ...s.tableRow, gridTemplateColumns: '2fr 1fr 1fr 0.8fr 0.8fr 1.2fr' }}>
-          <div style={s.td}>
+        <div key={p.id} style={{ ...s.tableRow, gridTemplateColumns: '2fr 1fr 1fr 0.8fr 0.8fr 1.2fr' }} role="row">
+          <div style={s.td} role="gridcell">
             <div>
               <div style={s.rowName}>{p.productName || p.product?.name || '—'}</div>
               <div style={{ fontSize: 12, color: MUTED, marginTop: 2 }}>
@@ -55,7 +55,7 @@ export function PublicationsTable({
               </div>
             </div>
           </div>
-          <div style={s.td}>
+          <div style={s.td} role="gridcell">
             <div>
               <div style={s.rowName}>{p.storeName || p.store?.name || '—'}</div>
               <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
@@ -75,14 +75,14 @@ export function PublicationsTable({
               </div>
             </div>
           </div>
-          <div style={{ ...s.td, ...s.tdNum }}>
+          <div style={{ ...s.td, ...s.tdNum }} role="gridcell">
             ${typeof p.price === 'number' ? p.price.toLocaleString('es-CO') : p.price || '—'}
           </div>
-          <div style={{ ...s.td, fontSize: 13, color: MUTED }}>{p.authorName || p.userName || p.user?.full_name || '—'}</div>
-          <div style={{ ...s.td, fontSize: 12, color: MUTED }}>
+          <div style={{ ...s.td, fontSize: 13, color: MUTED }} role="gridcell">{p.authorName || p.userName || p.user?.full_name || '—'}</div>
+          <div style={{ ...s.td, fontSize: 12, color: MUTED }} role="gridcell">
             {p.createdAt ? new Date(p.createdAt).toLocaleDateString('es-CO') : '—'}
           </div>
-          <div style={{ ...s.td, gap: 6 }}>
+          <div style={{ ...s.td, gap: 6 }} role="gridcell">
             <button
               style={{ ...s.filterBtn, padding: '5px 10px', fontSize: 12 }}
               onClick={() => onView(p)}

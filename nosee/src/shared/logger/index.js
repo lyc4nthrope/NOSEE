@@ -5,6 +5,8 @@
  * Facilita migración a servicios como Sentry, LogRocket, etc.
  */
 
+import * as Sentry from "@sentry/react";
+
 const isDev = import.meta.env.DEV;
 
 /**
@@ -39,10 +41,9 @@ class Logger {
       console.log(`${prefix} ${message}`, data || '');
     }
 
-    // Aquí iría envío a servicio remoto (Sentry, etc.)
-    // if (level === LogLevel.ERROR) {
-    //   sentryClient.captureException(new Error(message), { data });
-    // }
+    if (!isDev && level === LogLevel.ERROR) {
+      Sentry.captureException(new Error(message), { extra: data || {} });
+    }
   }
 
   debug(message, data) {

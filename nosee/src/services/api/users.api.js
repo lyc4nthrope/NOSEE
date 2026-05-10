@@ -161,7 +161,8 @@ export async function getAllUsers() {
   const { data, error } = await supabase
     .from("users")
     .select("*, roles(name)")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(5000);
 
   if (error) return { success: false, error: error.message };
   return { success: true, data: data.map((row) => mapDBUserToUI(row)) };
@@ -265,159 +266,32 @@ export async function getAdminOverviewStats() {
 }
 
 /**
- * Obtiene todos los reportes para moderación/admin.
- * Incluye detalles de la entidad reportada (publicación, tienda, producto, marca o usuario).
+ * Obtiene reportes paginados para moderación/admin con datos del target resueltos server-side.
+ * @param {number} page - Número de página (default: 1)
+ * @param {number} pageSize - Tamaño de página (default: 20, max: 100)
+ * @returns {Promise<{success: boolean, data: Array, count: number, error?: string}>}
  */
-export async function getAdminReports() {
-  const { data, error } = await supabase
-    .from("reports")
-    .select(`
-      id,
-      reported_type,
-      reported_id,
-      reported_user_id,
-      reporter_user_id,
-      reason,
-      status,
-      reviewed_by,
-      created_at,
-      resolved_at,
-      description,
-      evidence_url,
-      mod_notes,
-      action_taken,
-      reporter:reporter_user_id(full_name),
-      reported:reported_user_id(full_name),
-      reviewer:reviewed_by(full_name)
-    `)
-    .order("created_at", { ascending: false });
+export async function getAdminReports(page = 1, pageSize = 20) {
+  try {
+    const safePageSize = Math.min(pageSize, 100);
+    const { data, error } = await supabase
+      .rpc('get_admin_reports_detail', { 
+        p_page: page, 
+        p_page_size: safePageSize,
+      });
 
-  if (error) return { success: false, error: error.message };
+    if (error) throw error;
 
-  const reports = data ?? [];
-  if (reports.length === 0) return { success: true, data: [] };
-
-  const publicationIds = [...new Set(
-    reports
-      .filter((r) => String(r.reported_type || "").toLowerCase() === "publication")
-      .map((r) => Number(r.reported_id))
-      .filter((id) => Number.isFinite(id)),
-  )];
-
-  const userIds = [...new Set(
-    reports
-      .filter((r) => String(r.reported_type || "").toLowerCase() === "user")
-      .map((r) => r.reported_id)
-      .filter(Boolean),
-  )];
-
-  const storeIds = [...new Set(
-    reports
-      .filter((r) => String(r.reported_type || "").toLowerCase() === "store")
-      .map((r) => r.reported_id)
-      .filter(Boolean),
-  )];
-
-  const productIds = [...new Set(
-    reports
-      .filter((r) => String(r.reported_type || "").toLowerCase() === "product")
-      .map((r) => Number(r.reported_id))
-      .filter((id) => Number.isFinite(id)),
-  )];
-
-  const brandIds = [...new Set(
-    reports
-      .filter((r) => String(r.reported_type || "").toLowerCase() === "brand")
-      .map((r) => Number(r.reported_id))
-      .filter((id) => Number.isFinite(id)),
-  )];
-
-  const commentIds = [...new Set(
-    reports
-      .filter((r) => String(r.reported_type || "").toLowerCase() === "comment")
-      .map((r) => r.reported_id)
-      .filter(Boolean),
-  )];
-
-  const [
-    publicationsResult,
-    usersResult,
-    storesResult,
-    productsResult,
-    brandsResult,
-    commentsResult,
-  ] = await Promise.all([
-    publicationIds.length === 0
-      ? Promise.resolve({ data: [], error: null })
-      : supabase
-          .from("price_publications")
-          .select(`
-            id,
-            price,
-            is_active,
-            product:products(
-              id,
-              name,
-              base_quantity,
-              brand:brands(id, name),
-              unit_type:unit_types(id, name, abbreviation)
-            ),
-            store:stores(id, name)
-          `)
-          .in("id", publicationIds),
-    userIds.length === 0
-      ? Promise.resolve({ data: [], error: null })
-      : supabase.from("users").select("id, full_name, role_id, is_active").in("id", userIds),
-    storeIds.length === 0
-      ? Promise.resolve({ data: [], error: null })
-      : supabase.from("stores").select("id, name, address, is_active, is_admin_hidden").in("id", storeIds),
-    productIds.length === 0
-      ? Promise.resolve({ data: [], error: null })
-      : supabase.from("products").select("id, name, barcode, is_active, is_admin_hidden").in("id", productIds),
-    brandIds.length === 0
-      ? Promise.resolve({ data: [], error: null })
-      : supabase.from("brands").select("id, name, is_active, is_admin_hidden").in("id", brandIds),
-    commentIds.length === 0
-      ? Promise.resolve({ data: [], error: null })
-      : supabase.from("comments").select("id, content, is_deleted, publication_id, user_id").in("id", commentIds),
-  ]);
-
-  const firstHydrationError = [
-    publicationsResult.error,
-    usersResult.error,
-    storesResult.error,
-    productsResult.error,
-    brandsResult.error,
-    commentsResult.error,
-  ].find(Boolean);
-
-  if (firstHydrationError) {
-    return { success: false, error: firstHydrationError.message };
+    const reports = data || [];
+    return {
+      success: true,
+      data: reports,
+      count: reports[0]?.total_count || 0,
+    };
+  } catch (error) {
+    console.error('Error loading admin reports:', error);
+    return { success: false, data: [], count: 0, error: error.message };
   }
-
-  const publicationsById = new Map((publicationsResult.data || []).map((item) => [String(item.id), item]));
-  const usersById = new Map((usersResult.data || []).map((item) => [String(item.id), item]));
-  const storesById = new Map((storesResult.data || []).map((item) => [String(item.id), item]));
-  const productsById = new Map((productsResult.data || []).map((item) => [String(item.id), item]));
-  const brandsById = new Map((brandsResult.data || []).map((item) => [String(item.id), item]));
-  const commentsById = new Map((commentsResult.data || []).map((item) => [String(item.id), item]));
-
-  const hydrated = reports.map((report) => {
-    const reportType = String(report.reported_type || "").toLowerCase();
-    const reportId = String(report.reported_id || "");
-
-    let target = null;
-    if (reportType === "publication") target = publicationsById.get(reportId) || null;
-    if (reportType === "user") target = usersById.get(reportId) || null;
-    if (reportType === "store") target = storesById.get(reportId) || null;
-    if (reportType === "product") target = productsById.get(reportId) || null;
-    if (reportType === "brand") target = brandsById.get(reportId) || null;
-    if (reportType === "comment") target = commentsById.get(reportId) || null;
-
-    return { ...report, target };
-  });
-
-  return { success: true, data: hydrated };
 }
 
 /**
@@ -559,6 +433,24 @@ export async function updateReportReview(reportId, payload) {
 
   if (error) return { success: false, error: error.message };
   return { success: true };
+}
+
+/**
+ * Obtiene información básica de un usuario por ID (nombre, email).
+ * Usado por el panel admin para mapear userIds a nombres en logs.
+ */
+export async function getUserBasicInfo(userId) {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('id, full_name, email')
+      .eq('id', userId)
+      .single();
+    if (error) return { success: false, error: error.message };
+    return { success: true, data };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
 }
 
 /**

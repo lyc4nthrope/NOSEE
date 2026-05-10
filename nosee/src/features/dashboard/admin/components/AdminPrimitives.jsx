@@ -42,7 +42,7 @@ export function StatusBadge({ status }) {
 
 export function LoadingState({ label }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '60px 20px', gap: 12 }}>
+    <div role="status" aria-live="polite" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '60px 20px', gap: 12 }}>
       <Spinner size={28} />
       {label && <p style={{ color: MUTED, fontSize: 14, margin: 0 }}>{label}</p>}
     </div>
@@ -61,7 +61,7 @@ export function ErrorBar({ msg, onRetry }) {
   const { t } = useLanguage();
   const td = t.adminDashboard;
   return (
-    <div style={{
+    <div role="alert" aria-live="assertive" style={{
       padding: '12px 16px',
       borderRadius: 'var(--radius-md, 8px)',
       background: 'var(--error-soft)',
@@ -70,7 +70,7 @@ export function ErrorBar({ msg, onRetry }) {
       fontSize: 13,
       marginBottom: 20,
     }}>
-      ⚠️ {msg}
+      <span aria-hidden="true">⚠️</span> {msg}
       <button onClick={onRetry} style={{ background: 'none', border: 'none', color: 'var(--error)', cursor: 'pointer', textDecoration: 'underline', marginLeft: 12, fontWeight: 600 }}>
         {td.retry}
       </button>

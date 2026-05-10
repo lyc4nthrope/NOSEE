@@ -6,22 +6,22 @@ export function UsersTable({ users, onRoleChange, onBanToggle, changingRole }) {
   const { t } = useLanguage();
   const td = t.adminDashboard;
   return (
-    <div style={s.table} className="admin-table">
-      <div style={s.tableHead}>
+    <div style={s.table} className="admin-table" role="grid" aria-label="Lista de usuarios">
+      <div style={s.tableHead} role="row">
         {[td.colUser, td.colRole, td.colRep, td.colStatus, td.colActions].map((h) => (
-          <div key={h} style={s.th}>{h}</div>
+          <div key={h} style={s.th} role="columnheader">{h}</div>
         ))}
       </div>
       {users.map((u) => (
-        <div key={u.id} style={s.tableRow}>
-          <div style={s.td}>
+        <div key={u.id} style={s.tableRow} role="row">
+          <div style={s.td} role="gridcell">
             <div style={s.rowAvatar}>{(u.name || td.noName).charAt(0)}</div>
             <div>
               <div style={s.rowName}>{u.name || td.noName}</div>
               <div style={s.rowEmail}>{u.email}</div>
             </div>
           </div>
-          <div style={s.td}>
+          <div style={s.td} role="gridcell">
             <select
               style={s.roleSelect}
               value={u.role}
@@ -36,8 +36,8 @@ export function UsersTable({ users, onRoleChange, onBanToggle, changingRole }) {
               <span style={{ marginLeft: 8, fontSize: 12, color: ACCENT }}>{td.savingRole}</span>
             )}
           </div>
-          <div style={{ ...s.td, ...s.tdNum }}>{u.rep}</div>
-          <div style={s.td}>
+          <div style={{ ...s.td, ...s.tdNum }} role="gridcell">{u.rep}</div>
+          <div style={s.td} role="gridcell">
             <span style={{
               ...s.badge,
               background: u.status === 'activo' ? `${ACCENT}18` : '#F8717120',
@@ -46,7 +46,7 @@ export function UsersTable({ users, onRoleChange, onBanToggle, changingRole }) {
               {u.status === 'activo' ? td.statusActive : td.statusBanned}
             </span>
           </div>
-          <div style={s.td}>
+          <div style={s.td} role="gridcell">
             <button
               style={{ ...s.actionBtn, ...(u.status === 'baneado' ? s.actionBtnDanger : {}) }}
               onClick={() => onBanToggle(u.id)}

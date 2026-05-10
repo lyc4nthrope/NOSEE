@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import { VitePWA } from 'vite-plugin-pwa'
+import { sentryVitePlugin } from "@sentry/vite-plugin"
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -8,8 +10,40 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 // https://vite.dev/config/
-export default defineConfig({
-  plugins: [react(), tailwindcss()],
+export default defineConfig(({ mode }) => ({
+  plugins: [
+    react(),
+    tailwindcss(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
+        runtimeCaching: [
+          {
+            urlPattern: /^https?:\/\/.*\/supabase\/.*/i,
+            handler: 'NetworkFirst',
+            options: { cacheName: 'supabase-cache', expiration: { maxEntries: 50, maxAgeSeconds: 300 } }
+          }
+        ]
+      },
+      manifest: {
+        name: 'NØSEE',
+        short_name: 'NØSEE',
+        start_url: '/',
+        display: 'standalone',
+        background_color: '#0f1729',
+        theme_color: '#0f1729',
+      }
+    }),
+    ...(mode === 'production' ? [
+      sentryVitePlugin({
+        org: "nosee",
+        project: "nosee-react",
+        authToken: process.env.SENTRY_AUTH_TOKEN,
+        telemetry: false,
+      }),
+    ] : []),
+  ],
   esbuild: {
     loader: 'jsx',
     include: /(\.jsx?|\.(tests?|spec?)\/.*\.jsx?)$/,
@@ -26,6 +60,7 @@ export default defineConfig({
   build: {
     // ES2020+ genera bundles ~10-15% más pequeños — cubre >96% de navegadores actuales
     target: 'es2020',
+    sourcemap: 'hidden',
     rollupOptions: {
       output: {
         manualChunks: {
@@ -64,4 +99,4 @@ export default defineConfig({
       },
     },
   },
-})
+}))
