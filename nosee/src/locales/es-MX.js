@@ -1188,6 +1188,34 @@ const esMX = {
         confirmRejectBtn: "Confirmar rechazo",
         cancelBtn: "Cancelar",
       },
+      reportsPanel: {
+        loading: "Cargando reportes...",
+        errorLoad: "Error al cargar reportes",
+        labelPending: "Pendientes",
+        labelResolved: "Resueltos",
+        labelTotal: "Total",
+        recentPending: "Últimos reportes pendientes",
+      },
+      logsPanel: {
+        in24h: "en 24h",
+        in7d: "en 7d",
+        errorLoad: "Error al cargar logs",
+        loading: "Cargando eventos...",
+        loginEvents: "Eventos de inicio",
+        userActivity: "Actividad de usuarios",
+        adminActions: "Acciones de admin",
+        recentEvents: "Eventos recientes",
+      },
+      settingsPanel: {
+        sectionAria: "Configuración",
+        repAria: "Configuración de reputación",
+        savingLabel: "Guardando...",
+        catsAria: "Configuración de categorías",
+        categoriesLabel: "categorías",
+        creatingLabel: "Creando...",
+        noCategories: "Sin categorías",
+        productsLabel: "productos",
+      },
     },
 
       brandDetailModal: {
@@ -1261,53 +1289,6 @@ const esMX = {
         sourceLabelAdmin: "Admin",
       },
 
-      reportsPanel: {
-        loading: "Cargando reportes...",
-        errorLoading: (e) => `Error al cargar reportes${e ? `: ${e}` : ''}`,
-        summaryPendingLabel: "Pendientes",
-        summaryResolvedLabel: "Resueltos",
-        summaryTotalLabel: "Total",
-        recentReports: "Últimos reportes pendientes",
-      },
-
-      settingsPanel: {
-        repTitle: "Parámetros de reputación",
-        repLoading: "Cargando...",
-        repEditBtn: "Editar",
-        repCancelBtn: "Cancelar",
-        repSaveBtn: "Guardar",
-        repSavingBtn: "Guardando...",
-        catsTitle: "Categorías de productos",
-        catsCount: (n) => `${n} categorías`,
-        catsNewPlaceholder: "Nombre de la nueva categoría",
-        catsCreateBtn: "Crear",
-
-        catsLoading: "Cargando...",
-        catsEmpty: "No hay categorías",
-        productsCount: (n) => `${n} productos`,
-        savedOk: "✓ Guardado correctamente",
-        nameRequired: "El nombre es obligatorio.",
-        closeBtn: "Cerrar",
-      },
-
-      catalogPanel: {
-        title: "Catálogo",
-        subtitle: "Gestión de tiendas, productos y marcas",
-        loading: "Cargando catálogo...",
-        searchPlaceholder: "Buscar...",
-        tabStores: "Tiendas",
-        tabProducts: "Productos",
-        tabBrands: "Marcas",
-        totalStores: "Total tiendas",
-        activeStores: "Activas",
-        totalProducts: "Total productos",
-        activeProducts: "Activos",
-        withBarcode: "Con barcode",
-        totalBrands: "Total marcas",
-        activeBrands: "Activas",
-
-    },
-
       storeDetailModal: {
         idLabel: (id) => `ID: ${id}`,
         nameLabel: "Nombre",
@@ -1373,15 +1354,6 @@ const esMX = {
         idSelected: (id) => `✓ ID: ${id}`,
         closeAria: "Cerrar",
       },
-      reportsPanel: {
-        loading: "Cargando reportes...",
-        errorLoading: (e) => `Error al cargar reportes${e ? `: ${e}` : ''}`,
-        summaryPendingLabel: "Pendientes",
-        summaryResolvedLabel: "Resueltos",
-        summaryTotalLabel: "Total",
-        recentReports: "Últimos reportes pendientes",
-      },
-
     // ── Dashboard Moderador ───────────────────────────────────────────────────
     moderatorDashboard: {
       navReports: "Reportes",

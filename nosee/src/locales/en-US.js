@@ -1188,6 +1188,34 @@ const enUS = {
         confirmRejectBtn: "Confirm rejection",
         cancelBtn: "Cancel",
       },
+      reportsPanel: {
+        loading: "Loading reports...",
+        errorLoad: "Error loading reports",
+        labelPending: "Pending",
+        labelResolved: "Resolved",
+        labelTotal: "Total",
+        recentPending: "Latest pending reports",
+      },
+      logsPanel: {
+        in24h: "in 24h",
+        in7d: "in 7d",
+        errorLoad: "Error loading logs",
+        loading: "Loading events...",
+        loginEvents: "Login events",
+        userActivity: "User activity",
+        adminActions: "Admin actions",
+        recentEvents: "Recent events",
+      },
+      settingsPanel: {
+        sectionAria: "Settings",
+        repAria: "Reputation settings",
+        savingLabel: "Saving...",
+        catsAria: "Category settings",
+        categoriesLabel: "categories",
+        creatingLabel: "Creating...",
+        noCategories: "No categories",
+        productsLabel: "products",
+      },
     },
 
       brandDetailModal: {
@@ -1267,53 +1295,6 @@ const enUS = {
         sourceLabelAdmin: "Admin",
       },
 
-      reportsPanel: {
-        loading: "Loading reports...",
-        errorLoading: (e) => `Error loading reports${e ? `: ${e}` : ''}`,
-        summaryPendingLabel: "Pending",
-        summaryResolvedLabel: "Resolved",
-        summaryTotalLabel: "Total",
-        recentReports: "Latest pending reports",
-      },
-
-      settingsPanel: {
-        repTitle: "Reputation parameters",
-        repLoading: "Loading...",
-        repEditBtn: "Edit",
-        repCancelBtn: "Cancel",
-        repSaveBtn: "Save",
-        repSavingBtn: "Saving...",
-        catsTitle: "Product categories",
-        catsCount: (n) => `${n} categories`,
-        catsNewPlaceholder: "New category name",
-        catsCreateBtn: "Create",
-
-        catsLoading: "Loading...",
-        catsEmpty: "No categories",
-        productsCount: (n) => `${n} products`,
-        savedOk: "✓ Saved successfully",
-        nameRequired: "Name is required.",
-        closeBtn: "Close",
-      },
-
-      catalogPanel: {
-        title: "Catalog",
-        subtitle: "Manage stores, products and brands",
-        loading: "Loading catalog...",
-        searchPlaceholder: "Search...",
-        tabStores: "Stores",
-        tabProducts: "Products",
-        tabBrands: "Brands",
-        totalStores: "Total stores",
-        activeStores: "Active",
-        totalProducts: "Total products",
-        activeProducts: "Active",
-        withBarcode: "With barcode",
-        totalBrands: "Total brands",
-        activeBrands: "Active",
-
-    },
-
       storeDetailModal: {
         idLabel: (id) => `ID: ${id}`,
         nameLabel: "Name",
@@ -1373,15 +1354,6 @@ const enUS = {
         idSelected: (id) => `✓ ID: ${id}`,
         closeAria: "Close",
       },
-      reportsPanel: {
-        loading: "Loading reports...",
-        errorLoading: (e) => `Error loading reports${e ? `: ${e}` : ''}`,
-        summaryPendingLabel: "Pending",
-        summaryResolvedLabel: "Resolved",
-        summaryTotalLabel: "Total",
-        recentReports: "Latest pending reports",
-      },
-
     // ── Moderator Dashboard ───────────────────────────────────────────────────
     moderatorDashboard: {
       navReports: "Reports",
