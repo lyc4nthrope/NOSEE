@@ -1073,66 +1073,32 @@ const enUS = {
       actionTakenPlaceholder: "E.g.: Content hidden, user warned...",
       modNotesPlaceholder: "Internal moderator notes (not visible to user)...",
 
-      logsPanel: {
-        in24h: "in 24h",
-        in7d: "in 7 days",
-        loading: "Loading log summary...",
-        errorLoad: "Error loading logs",
-        loginEvents: "Login events",
-        userActivity: "User activity",
-        adminActions: "Admin actions",
-        recentEvents: "Recent events",
-      },
-
       adminLogTable: {
+
         source: "Source",
+
         searchUser: "Search user...",
+
         allActions: "All actions",
+
         catSession: "Session",
+
         catCreate: "Creation",
+
         catEdit: "Edit",
+
         catDelete: "Delete/Report",
+
         catModerate: "Moderation",
+
         catSecurity: "Security",
+
         allSources: "All sources",
+
         srcSession: "Only sessions",
+
         srcActivity: "Only activity",
-        srcAdmin: "Only admin/mod",
-        dateFrom: "From",
-        dateTo: "To",
-        clearFilters: "Clear filters",
-        records: "records",
-        labelSession: "Session:",
-        labelActivity: "Activity:",
-        labelAdmin: "Admin/Mod:",
-        liveLabel: "Live",
-        gridAria: "Activity log",
-        srcLabelSession: "Session",
-        srcLabelActivity: "Activity",
-        srcLabelAdmin: "Admin",
       },
-
-      reportsPanel: {
-        loading: "Loading reports...",
-        errorLoad: "Error loading reports",
-        labelPending: "Pending",
-        labelResolved: "Resolved",
-        labelTotal: "Total",
-        recentPending: "Latest pending reports",
-      },
-
-      settingsPanel: {
-        sectionAria: "System configuration",
-        repAria: "Reputation parameters",
-        savingLabel: "Saving...",
-        catsAria: "Product categories",
-        categoriesLabel: "categories",
-        noCategories: "No categories",
-        productsLabel: "products",
-        creatingLabel: "...",
-      },
-    },
-
       catalogPanel: {
         title: "Catalog",
         subtitle: "Manage stores, products and brands",
@@ -1203,7 +1169,6 @@ const enUS = {
         },
       },
       dealerApplicationsTable: {
-        title: "🛵 Dealer Applications",
         empty: "No dealer applications.",
         sectionPending: (n) => `Pending (${n})`,
         sectionReviewed: (n) => `Reviewed (${n})`,
@@ -1222,44 +1187,95 @@ const enUS = {
         rejectReasonPlaceholder: "Ex: Does not meet minimum requirements...",
         confirmRejectBtn: "Confirm rejection",
         cancelBtn: "Cancel",
-        errorApprove: (e) => `Error approving: ${e}`,
-        errorReject: (e) => `Error rejecting: ${e}`,
       },
-      logsPanel: {
-        title: "Logs summary",
-        loading: "Loading logs summary...",
-        statLogins: "Sign ins",
-        statActivity: "User activity",
-        statAdminActions: "Admin actions",
-        in24h: "in 24h",
-        in7days: (n) => `${n} in 7 days`,
-        latestEvents: "Latest events",
+    },
+
+      brandDetailModal: {
+        idLabel: (id) => `ID: ${id}`,
+        nameLabel: "Brand name",
+        namePlaceholder: "Brand name",
+        nameRequired: "Name is required.",
+        savedOk: "✓ Saved successfully",
+        closeBtn: "Close",
+
+        emptyOrders: "No orders",
+        noSearchResults: "No results for that search",
+        prevPage: "← Previous",
+        nextPage: "Next →",
+        pageLabel: (n) => `Page ${n}`,
+        statusLabels: {
+          pendiente_pago: "Pending payment",
+          pendiente_repartidor: "Pending delivery person",
+          aceptado: "Accepted",
+          pendiente_compromiso: "Pending commitment",
+          comprando: "Shopping",
+          en_camino: "On the way",
+          llegando: "Arriving",
+          comprobante_subido: "Receipt uploaded",
+          entregado: "Delivered",
+          cancelado: "Cancelled",
+          cancelado_no_pago: "Cancelled (no payment)",
       },
-      adminLogTable: {
+
+        srcLabelActivity: "Activity",
+
+        srcLabelAdmin: "Admin",
+
         filterUserPlaceholder: "Search user...",
+
         filterCategoryAll: "All actions",
+
         filterCategorySession: "Session",
+
         filterCategoryCreate: "Creation",
+
         filterCategoryEdit: "Editing",
+
         filterCategoryDelete: "Deletion/Report",
+
         filterCategoryModerate: "Moderation",
+
         filterCategorySecurity: "Security",
+
         filterSourceAll: "All sources",
+
         filterSourceSession: "Sessions only",
+
         filterSourceActivity: "Activity only",
+
         filterSourceAdmin: "Admin/mod only",
+
         filterDateFrom: "From",
+
         filterDateTo: "To",
-        clearFilters: "Clear filters",
+
         recordsCount: (n, total) => `${n} / ${total} records`,
+
+
         sourceSession: "Session:",
+
         sourceActivity: "Activity:",
+
         sourceAdmin: "Admin/Mod:",
+
         liveIndicator: "Live",
+
         sourceLabelSession: "Session",
+
         sourceLabelActivity: "Activity",
+
         sourceLabelAdmin: "Admin",
       },
+
+      reportsPanel: {
+        loading: "Loading reports...",
+        errorLoading: (e) => `Error loading reports${e ? `: ${e}` : ''}`,
+        summaryPendingLabel: "Pending",
+        summaryResolvedLabel: "Resolved",
+        summaryTotalLabel: "Total",
+        recentReports: "Latest pending reports",
+      },
+
       settingsPanel: {
         repTitle: "Reputation parameters",
         repLoading: "Loading...",
@@ -1271,20 +1287,33 @@ const enUS = {
         catsCount: (n) => `${n} categories`,
         catsNewPlaceholder: "New category name",
         catsCreateBtn: "Create",
+
         catsLoading: "Loading...",
         catsEmpty: "No categories",
         productsCount: (n) => `${n} products`,
         savedOk: "✓ Saved successfully",
         nameRequired: "Name is required.",
         closeBtn: "Close",
-      saveChangesBtn: "Save changes",
-      viewDetail: "View detail →",
-      errorUpdate: "Could not update the store",
-      successUpdate: "Store updated successfully",
-      editAddress: "Edit address",
-      saving: "Saving...",
-      saveLocation: "Save location",
+      },
+
+      catalogPanel: {
+        title: "Catalog",
+        subtitle: "Manage stores, products and brands",
+        loading: "Loading catalog...",
+        searchPlaceholder: "Search...",
+        tabStores: "Stores",
+        tabProducts: "Products",
+        tabBrands: "Brands",
+        totalStores: "Total stores",
+        activeStores: "Active",
+        totalProducts: "Total products",
+        activeProducts: "Active",
+        withBarcode: "With barcode",
+        totalBrands: "Total brands",
+        activeBrands: "Active",
+
     },
+
       storeDetailModal: {
         idLabel: (id) => `ID: ${id}`,
         nameLabel: "Name",

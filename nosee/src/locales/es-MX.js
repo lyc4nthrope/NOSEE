@@ -1073,66 +1073,32 @@ const esMX = {
       actionTakenPlaceholder: "Ej: Contenido ocultado, usuario advertido...",
       modNotesPlaceholder: "Notas internas del moderador (no visibles al usuario)...",
 
-      logsPanel: {
-        in24h: "en 24h",
-        in7d: "en 7 días",
-        loading: "Cargando resumen de logs...",
-        errorLoad: "Error al cargar logs",
-        loginEvents: "Inicios de sesión",
-        userActivity: "Actividad de usuarios",
-        adminActions: "Acciones de admin",
-        recentEvents: "Últimos eventos",
-      },
-
       adminLogTable: {
+
         source: "Fuente",
+
         searchUser: "Buscar usuario...",
+
         allActions: "Todas las acciones",
+
         catSession: "Sesión",
+
         catCreate: "Creación",
+
         catEdit: "Edición",
+
         catDelete: "Eliminación/Reporte",
+
         catModerate: "Moderación",
+
         catSecurity: "Seguridad",
+
         allSources: "Todas las fuentes",
+
         srcSession: "Solo sesiones",
+
         srcActivity: "Solo actividad",
-        srcAdmin: "Solo admin/mod",
-        dateFrom: "Desde",
-        dateTo: "Hasta",
-        clearFilters: "Limpiar filtros",
-        records: "registros",
-        labelSession: "Sesión:",
-        labelActivity: "Actividad:",
-        labelAdmin: "Admin/Mod:",
-        liveLabel: "En vivo",
-        gridAria: "Registro de actividad",
-        srcLabelSession: "Sesión",
-        srcLabelActivity: "Actividad",
-        srcLabelAdmin: "Admin",
       },
-
-      reportsPanel: {
-        loading: "Cargando reportes...",
-        errorLoad: "Error al cargar reportes",
-        labelPending: "Pendientes",
-        labelResolved: "Resueltos",
-        labelTotal: "Total",
-        recentPending: "Últimos reportes pendientes",
-      },
-
-      settingsPanel: {
-        sectionAria: "Configuración del sistema",
-        repAria: "Parámetros de reputación",
-        savingLabel: "Guardando...",
-        catsAria: "Categorías de productos",
-        categoriesLabel: "categorías",
-        noCategories: "No hay categorías",
-        productsLabel: "productos",
-        creatingLabel: "...",
-      },
-    },
-
       catalogPanel: {
         title: "Catálogo",
         subtitle: "Gestión de tiendas, productos y marcas",
@@ -1203,7 +1169,6 @@ const esMX = {
         },
       },
       dealerApplicationsTable: {
-        title: "🛵 Solicitudes de Repartidor",
         empty: "No hay solicitudes de repartidor.",
         sectionPending: (n) => `Pendientes (${n})`,
         sectionReviewed: (n) => `Revisadas (${n})`,
@@ -1222,44 +1187,89 @@ const esMX = {
         rejectReasonPlaceholder: "Ej: No cumple con los requisitos mínimos...",
         confirmRejectBtn: "Confirmar rechazo",
         cancelBtn: "Cancelar",
-        errorApprove: (e) => `Error al aprobar: ${e}`,
-        errorReject: (e) => `Error al rechazar: ${e}`,
       },
-      logsPanel: {
-        title: "Resumen de logs",
-        loading: "Cargando resumen de logs...",
-        statLogins: "Inicios de sesión",
-        statActivity: "Actividad de usuarios",
-        statAdminActions: "Acciones de admin",
-        in24h: "en 24h",
-        in7days: (n) => `${n} en 7 días`,
-        latestEvents: "Últimos eventos",
+    },
+
+      brandDetailModal: {
+
+        emptyOrders: "No hay pedidos",
+        noSearchResults: "Sin resultados para esa búsqueda",
+        prevPage: "← Anterior",
+        nextPage: "Siguiente →",
+        pageLabel: (n) => `Página ${n}`,
+        statusLabels: {
+          pendiente_pago: "Pendiente pago",
+          pendiente_repartidor: "Pendiente repartidor",
+          aceptado: "Aceptado",
+          pendiente_compromiso: "Pendiente compromiso",
+          comprando: "Comprando",
+          en_camino: "En camino",
+          llegando: "Llegando",
+          comprobante_subido: "Comprobante subido",
+          entregado: "Entregado",
+          cancelado: "Cancelado",
+          cancelado_no_pago: "Cancelado (no pago)",
       },
-      adminLogTable: {
+
+        srcLabelActivity: "Actividad",
+
+        srcLabelAdmin: "Admin",
+
         filterUserPlaceholder: "Buscar usuario...",
+
         filterCategoryAll: "Todas las acciones",
+
         filterCategorySession: "Sesión",
+
         filterCategoryCreate: "Creación",
+
         filterCategoryEdit: "Edición",
+
         filterCategoryDelete: "Eliminación/Reporte",
+
         filterCategoryModerate: "Moderación",
+
         filterCategorySecurity: "Seguridad",
+
         filterSourceAll: "Todas las fuentes",
+
         filterSourceSession: "Solo sesiones",
+
         filterSourceActivity: "Solo actividad",
+
         filterSourceAdmin: "Solo admin/mod",
+
         filterDateFrom: "Desde",
+
         filterDateTo: "Hasta",
-        clearFilters: "Limpiar filtros",
+
         recordsCount: (n, total) => `${n} / ${total} registros`,
+
+
         sourceSession: "Sesión:",
+
         sourceActivity: "Actividad:",
+
         sourceAdmin: "Admin/Mod:",
+
         liveIndicator: "En vivo",
+
         sourceLabelSession: "Sesión",
+
         sourceLabelActivity: "Actividad",
+
         sourceLabelAdmin: "Admin",
       },
+
+      reportsPanel: {
+        loading: "Cargando reportes...",
+        errorLoading: (e) => `Error al cargar reportes${e ? `: ${e}` : ''}`,
+        summaryPendingLabel: "Pendientes",
+        summaryResolvedLabel: "Resueltos",
+        summaryTotalLabel: "Total",
+        recentReports: "Últimos reportes pendientes",
+      },
+
       settingsPanel: {
         repTitle: "Parámetros de reputación",
         repLoading: "Cargando...",
@@ -1271,14 +1281,33 @@ const esMX = {
         catsCount: (n) => `${n} categorías`,
         catsNewPlaceholder: "Nombre de la nueva categoría",
         catsCreateBtn: "Crear",
+
         catsLoading: "Cargando...",
         catsEmpty: "No hay categorías",
         productsCount: (n) => `${n} productos`,
         savedOk: "✓ Guardado correctamente",
         nameRequired: "El nombre es obligatorio.",
         closeBtn: "Cerrar",
-        saveChangesBtn: "Guardar cambios",
       },
+
+      catalogPanel: {
+        title: "Catálogo",
+        subtitle: "Gestión de tiendas, productos y marcas",
+        loading: "Cargando catálogo...",
+        searchPlaceholder: "Buscar...",
+        tabStores: "Tiendas",
+        tabProducts: "Productos",
+        tabBrands: "Marcas",
+        totalStores: "Total tiendas",
+        activeStores: "Activas",
+        totalProducts: "Total productos",
+        activeProducts: "Activos",
+        withBarcode: "Con barcode",
+        totalBrands: "Total marcas",
+        activeBrands: "Activas",
+
+    },
+
       storeDetailModal: {
         idLabel: (id) => `ID: ${id}`,
         nameLabel: "Nombre",
