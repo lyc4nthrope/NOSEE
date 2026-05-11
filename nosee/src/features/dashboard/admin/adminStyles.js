@@ -11,7 +11,7 @@ export const s = {
   root:    { display: 'flex', height: '100vh', overflow: 'hidden', background: BG, color: TEXT, fontFamily: "'DM Sans', 'Inter', sans-serif" },
   sidebar: { width: 224, background: SURFACE, borderRight: `1px solid ${BORDER}`, display: 'flex', flexDirection: 'column', padding: '24px 16px', height: '100%', flexShrink: 0 },
   nav:     { display: 'flex', flexDirection: 'column', gap: 4, flex: 1 },
-  navItem: { display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 8, background: 'none', border: 'none', cursor: 'pointer', color: MUTED, fontSize: 14, fontWeight: 500, textAlign: 'left', transition: 'all 0.15s', minHeight: 44, minWidth: 44 },
+  navItem: { display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 8, background: 'none', border: 'none', cursor: 'pointer', color: MUTED, fontSize: 14, fontWeight: 500, textAlign: 'left', transition: 'background 0.15s, color 0.15s', minHeight: 44, minWidth: 44 },
   navActive:  { background: `${ACCENT}18`, color: ACCENT },
   navBadge:   { marginLeft: 'auto', background: 'var(--error)', color: '#ffffff', borderRadius: 10, padding: '1px 7px', fontSize: 11, fontWeight: 700 },
 
@@ -21,14 +21,14 @@ export const s = {
   headerSub:  { color: MUTED, fontSize: 14, margin: '4px 0 0' },
 
   statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 },
-  statCard:  { background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 12, padding: '18px 20px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', transition: 'all 0.2s ease', cursor: 'default' },
+  statCard:  { background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 12, padding: '18px 20px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', transition: 'box-shadow 0.2s, transform 0.2s', cursor: 'default' },
   statIcon:  { width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, marginBottom: 12 },
   statValue: { fontSize: 26, fontWeight: 800, letterSpacing: '-0.5px', color: TEXT, lineHeight: 1.1, marginBottom: 4 },
   statLabel: { fontSize: 12, color: MUTED, fontWeight: 500, letterSpacing: '0.3px', textWrap: 'balance' },
 
   kpiSection:     { marginBottom: 32 },
   kpiSectionLabel:{ fontSize: 12, fontWeight: 600, color: MUTED, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 12, paddingLeft: 2, textWrap: 'balance' },
-  kpiAlertCard:   { background: 'var(--warning-soft)', border: '1px solid var(--warning)', borderRadius: 12, padding: '18px 20px', display: 'flex', alignItems: 'center', gap: 14, boxShadow: '0 1px 3px rgba(0,0,0,0.04)', transition: 'all 0.2s ease' },
+  kpiAlertCard:   { background: 'var(--warning-soft)', border: '1px solid var(--warning)', borderRadius: 12, padding: '18px 20px', display: 'flex', alignItems: 'center', gap: 14, boxShadow: '0 1px 3px rgba(0,0,0,0.04)', transition: 'box-shadow 0.2s' },
   kpiAlertIcon:   { fontSize: 20, width: 40, height: 40, borderRadius: 10, background: 'var(--warning)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   kpiAlertValue:  { fontSize: 24, fontWeight: 800, letterSpacing: '-0.5px', color: 'var(--warning)', lineHeight: 1.1 },
   kpiAlertLabel:  { fontSize: 12, fontWeight: 600, color: 'var(--warning)', letterSpacing: '0.3px' },
