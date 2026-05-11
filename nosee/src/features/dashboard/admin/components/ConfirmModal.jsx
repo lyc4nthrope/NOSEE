@@ -30,7 +30,7 @@ export function ConfirmModal({ isOpen, title, message, onConfirm, onCancel, conf
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
           {actions ? (
             <>
-              {actions.map((action, i) => (
+              {actions.map((action) => (
                 <button
                   key={action.label}
                   onClick={() => { action.onClick?.(); onCancel(); }}
