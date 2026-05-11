@@ -18,7 +18,7 @@ export const s = {
 
   main:       { flex: 1, padding: '32px 40px', overflowY: 'auto', height: '100%' },
   header:     { marginBottom: 28 },
-  headerTitle:{ fontSize: 26, fontWeight: 700, margin: 0, letterSpacing: '-0.5px' },
+  headerTitle:{ fontSize: 26, fontWeight: 700, margin: 0, letterSpacing: '-0.5px', textWrap: 'balance' },
   headerSub:  { color: MUTED, fontSize: 14, margin: '4px 0 0' },
 
   statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 },
@@ -28,7 +28,7 @@ export const s = {
   statLabel: { fontSize: 12, color: MUTED, fontWeight: 500, letterSpacing: '0.3px', textWrap: 'balance' },
 
   kpiSection:     { marginBottom: 32 },
-  kpiSectionLabel:{ fontSize: 12, fontWeight: 600, color: MUTED, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 12, paddingLeft: 2 },
+  kpiSectionLabel:{ fontSize: 12, fontWeight: 600, color: MUTED, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 12, paddingLeft: 2, textWrap: 'balance' },
   kpiAlertCard:   { background: 'var(--warning-soft)', border: '1px solid var(--warning)', borderRadius: 12, padding: '18px 20px', display: 'flex', alignItems: 'center', gap: 14, boxShadow: '0 1px 3px rgba(0,0,0,0.04)', transition: 'all 0.2s ease' },
   kpiAlertIcon:   { fontSize: 20, width: 40, height: 40, borderRadius: 10, background: 'var(--warning)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   kpiAlertValue:  { fontSize: 24, fontWeight: 800, letterSpacing: '-0.5px', color: 'var(--warning)', lineHeight: 1.1 },
@@ -37,7 +37,7 @@ export const s = {
 
   section:     { marginTop: 32 },
   sectionHead: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-  sectionTitle:{ fontSize: 16, fontWeight: 600 },
+  sectionTitle:{ fontSize: 16, fontWeight: 600, textWrap: 'balance' },
   linkBtn:     { background: 'none', border: 'none', color: ACCENT, cursor: 'pointer', fontSize: 13, fontWeight: 600, minHeight: 44, minWidth: 44 },
 
   filterRow: { display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' },
