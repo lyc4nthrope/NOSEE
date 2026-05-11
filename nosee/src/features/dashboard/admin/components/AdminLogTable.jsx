@@ -16,11 +16,11 @@ function fmtDate(iso) {
 }
 
 const CAT_COLOR = {
-  session: '#94a3b8', create: 'var(--success)', edit: ACCENT,
-  delete: 'var(--error, #e53e3e)', moderate: '#f59e0b', security: '#dc2626', other: '#94a3b8',
+  session: 'var(--text-muted)', create: 'var(--success)', edit: ACCENT,
+  delete: 'var(--error)', moderate: 'var(--warning)', security: 'var(--error)', other: 'var(--text-muted)',
 };
 
-const COLORS = { session: '#64748b', activity: ACCENT, admin: '#f59e0b' };
+const COLORS = { session: MUTED, activity: ACCENT, admin: 'var(--warning)' };
 const COLS = '90px 70px 140px 150px 140px 1fr';
 
 export default function AdminLogTable({
@@ -101,7 +101,7 @@ export default function AdminLogTable({
   const actionLabel = (type) => _getActionLabel(type, AL);
   const objectInfo = (type, d) => _getObjectInfo(type, d);
   const description = (type, d, ip, ua) => _getDescription(type, d, ip, ua);
-  const actionColor = (type) => CAT_COLOR[getActionCategory(type)] || '#94a3b8';
+  const actionColor = (type) => CAT_COLOR[getActionCategory(type)] || 'var(--text-muted)';
   const srcLabels = { session: td.adminLogTable.srcLabelSession, activity: td.adminLogTable.srcLabelActivity, admin: td.adminLogTable.srcLabelAdmin };
   const headers = [td.logsColDate, td.adminLogTable.source, td.logsColUserName, td.logsColActionDone, td.logsColObjectAffected, td.logsColDescriptionDetail];
 
@@ -133,9 +133,9 @@ export default function AdminLogTable({
         <span style={{ fontSize: 12, color: MUTED }}>
           <strong style={{ color: TEXT }}>{visibleRows.length}</strong> / {rows.length} {td.adminLogTable.records}
         </span>
-        <span style={{ fontSize: 12, color: '#64748b' }}>{td.adminLogTable.labelSession} {stats.session}</span>
+        <span style={{ fontSize: 12, color: MUTED }}>{td.adminLogTable.labelSession} {stats.session}</span>
         <span style={{ fontSize: 12, color: ACCENT }}>{td.adminLogTable.labelActivity} {stats.activity}</span>
-        <span style={{ fontSize: 12, color: '#f59e0b' }}>{td.adminLogTable.labelAdmin} {stats.admin}</span>
+        <span style={{ fontSize: 12, color: 'var(--warning)' }}>{td.adminLogTable.labelAdmin} {stats.admin}</span>
         <span style={{ fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}>
           <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--success)', display: 'inline-block' }} />
           <span style={{ color: MUTED }}>{td.adminLogTable.liveLabel}</span>

@@ -3,26 +3,19 @@ import { Icon } from '@/components/ui/Icon';
 import { reviewApplication } from '@/services/api/dealerApplications.api';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useClientDateOnlyFormat } from '../adminUtils';
+import { s } from '../adminStyles';
 
-const STATUS_BADGE_STYLES = {
-  pending:  { bg: '#fef3c7', color: '#92400e', border: '#fde68a' },
-  approved: { bg: '#d1fae5', color: '#065f46', border: '#6ee7b7' },
-  rejected: { bg: '#fee2e2', color: '#991b1b', border: '#fca5a5' },
+const statusStyleMap = {
+  pending:  s.dealerBadgePending,
+  approved: s.dealerBadgeApproved,
+  rejected: s.dealerBadgeRejected,
 };
 
 function StatusBadge({ status, td }) {
-  const s = STATUS_BADGE_STYLES[status] ?? STATUS_BADGE_STYLES.pending;
+  const variant = statusStyleMap[status] ?? statusStyleMap.pending;
   const labels = { pending: td.dealerApplicationsTable.statusPending, approved: td.dealerApplicationsTable.statusApproved, rejected: td.dealerApplicationsTable.statusRejected };
   return (
-    <span style={{
-      padding: '3px 10px',
-      borderRadius: '999px',
-      fontSize: '12px',
-      fontWeight: '600',
-      background: s.bg,
-      color: s.color,
-      border: `1px solid ${s.border}`,
-    }}>
+    <span style={{ ...s.dealerBadge, ...variant }}>
       {labels[status] || status}
     </span>
   );
@@ -32,11 +25,11 @@ function ApplicationRow({ app, processing, onApprove, onOpenReject, td }) {
   const dateStr = useClientDateOnlyFormat(app.created_at);
 
   return (
-    <div style={rowStyles.container}>
-      <div style={rowStyles.header}>
+    <div style={s.dealerRow}>
+      <div style={s.dealerRowHeader}>
         <div>
-          <p style={rowStyles.name}>{app.full_name}</p>
-          <p style={rowStyles.phone}>
+          <p style={s.dealerName}>{app.full_name}</p>
+          <p style={s.dealerPhone}>
             <Icon name="Phone" size={16} /> {app.phone}
             {app.applicant?.reputation_points > 0 && (
               <span style={{ marginLeft: '12px' }}><Icon name="Star" size={16} /> {app.applicant.reputation_points} pts</span>
@@ -47,22 +40,22 @@ function ApplicationRow({ app, processing, onApprove, onOpenReject, td }) {
       </div>
 
       {app.motivation && (
-        <p style={rowStyles.motivation}>
+        <p style={s.dealerMotivation}>
           &ldquo;{app.motivation}&rdquo;
         </p>
       )}
 
-      <p style={rowStyles.date}>
+      <p style={s.dealerDate}>
         {td.dealerApplicationsTable.requestedOn} {dateStr}
       </p>
 
       {app.status === 'pending' && (
-        <div style={rowStyles.actions}>
+        <div style={s.dealerActions}>
           <button
             onClick={() => onApprove(app)}
             disabled={processing === app.id}
             style={{
-              ...actionBtnStyles.approve,
+              ...s.dealerBtnApprove,
               opacity: processing === app.id ? 0.6 : 1,
               cursor: processing === app.id ? 'not-allowed' : 'pointer',
             }}
@@ -73,7 +66,7 @@ function ApplicationRow({ app, processing, onApprove, onOpenReject, td }) {
           <button
             onClick={() => onOpenReject(app)}
             disabled={processing === app.id}
-            style={actionBtnStyles.reject}
+            style={s.dealerBtnReject}
             aria-label={td.dealerApplicationsTable.rejectAria}
           >
             {td.dealerApplicationsTable.rejectBtn}
@@ -82,141 +75,13 @@ function ApplicationRow({ app, processing, onApprove, onOpenReject, td }) {
       )}
 
       {app.status === 'rejected' && app.rejection_reason && (
-        <p style={rowStyles.rejectionReason}>
+        <p style={s.dealerRejectionReason}>
           {td.dealerApplicationsTable.motivationPrefix} {app.rejection_reason}
         </p>
       )}
     </div>
   );
 }
-
-const rowStyles = {
-  container: {
-    padding: '16px',
-    border: '1px solid var(--border)',
-    borderRadius: 'var(--radius-lg)',
-    background: 'var(--bg-surface)',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-  },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    gap: '12px',
-    flexWrap: 'wrap',
-  },
-  name: {
-    margin: 0,
-    fontWeight: '600',
-    fontSize: '14px',
-    color: 'var(--text-primary)',
-  },
-  phone: {
-    margin: '2px 0 0',
-    fontSize: '13px',
-    color: 'var(--text-secondary)',
-  },
-  motivation: {
-    margin: 0,
-    fontSize: '13px',
-    color: 'var(--text-secondary)',
-    fontStyle: 'italic',
-  },
-  date: {
-    margin: 0,
-    fontSize: '12px',
-    color: 'var(--text-muted, var(--text-secondary))',
-  },
-  actions: {
-    display: 'flex',
-    gap: '8px',
-    marginTop: '4px',
-  },
-  rejectionReason: {
-    margin: 0,
-    fontSize: '12px',
-    color: '#991b1b',
-  },
-};
-
-const actionBtnStyles = {
-  approve: {
-    padding: '7px 16px',
-    borderRadius: 'var(--radius-md)',
-    border: 'none',
-    background: '#065f46',
-    color: '#fff',
-    fontSize: '13px',
-    fontWeight: '600',
-  },
-  reject: {
-    padding: '7px 16px',
-    borderRadius: 'var(--radius-md)',
-    border: '1px solid #fca5a5',
-    background: 'transparent',
-    color: '#991b1b',
-    fontSize: '13px',
-    fontWeight: '600',
-    cursor: 'pointer',
-  },
-};
-
-const modalStyles = {
-  overlay: {
-    position: 'fixed',
-    inset: 0,
-    background: 'rgba(0,0,0,0.5)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 100,
-    padding: '16px',
-  },
-  card: {
-    background: 'var(--bg-surface)',
-    borderRadius: 'var(--radius-xl)',
-    padding: '24px',
-    width: '100%',
-    maxWidth: '400px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '14px',
-  },
-  input: {
-    width: '100%',
-    boxSizing: 'border-box',
-    padding: '9px 12px',
-    borderRadius: 'var(--radius-md)',
-    border: '1px solid var(--border)',
-    background: 'var(--bg-elevated)',
-    color: 'var(--text-primary)',
-    fontSize: '14px',
-    minHeight: '72px',
-    resize: 'vertical',
-    fontFamily: 'inherit',
-  },
-  confirmBtn: {
-    flex: 1,
-    padding: '10px',
-    borderRadius: 'var(--radius-md)',
-    border: 'none',
-    background: '#991b1b',
-    color: '#fff',
-    fontWeight: '600',
-    cursor: 'pointer',
-  },
-  cancelBtn: {
-    flex: 1,
-    padding: '10px',
-    borderRadius: 'var(--radius-md)',
-    border: '1px solid var(--border)',
-    background: 'transparent',
-    color: 'var(--text-primary)',
-    cursor: 'pointer',
-  },
-};
 
 export function DealerApplicationsTable({ applications, onReviewed }) {
   const { t } = useLanguage();
@@ -259,7 +124,7 @@ export function DealerApplicationsTable({ applications, onReviewed }) {
 
   if (applications.length === 0) {
     return (
-      <p style={{ color: 'var(--text-secondary)', fontSize: '14px', padding: '24px 0' }}>
+      <p style={s.dealerEmpty}>
         {td.dealerApplicationsTable.empty}
       </p>
     );
@@ -267,15 +132,14 @@ export function DealerApplicationsTable({ applications, onReviewed }) {
 
   return (
     <>
-      {/* Modal de rechazo */}
       {rejectionModal && (
-        <div style={modalStyles.overlay}>
-          <div style={modalStyles.card}>
-            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: 'var(--text-primary)' }}>
+        <div style={s.dealerModalOverlay}>
+          <div style={s.dealerModalCard}>
+            <h3 style={s.dealerModalTitle}>
               {td.dealerApplicationsTable.rejectModalTitle}
             </h3>
             <div>
-              <label htmlFor="rejectionReason" style={{ fontSize: '13px', fontWeight: '500', color: 'var(--text-primary)', display: 'block', marginBottom: '6px' }}>
+              <label htmlFor="rejectionReason" style={s.dealerModalLabel}>
                 {td.dealerApplicationsTable.rejectReasonLabel}
               </label>
               <textarea
@@ -283,20 +147,20 @@ export function DealerApplicationsTable({ applications, onReviewed }) {
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
                 placeholder={td.dealerApplicationsTable.rejectReasonPlaceholder}
-                style={modalStyles.input}
+                style={s.dealerModalInput}
               />
             </div>
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={s.dealerModalBtnRow}>
               <button
                 onClick={handleRejectConfirm}
-                style={modalStyles.confirmBtn}
+                style={s.dealerModalConfirm}
                 aria-label={td.dealerApplicationsTable.confirmRejectBtn}
               >
                 {td.dealerApplicationsTable.confirmRejectBtn}
               </button>
               <button
                 onClick={() => { setRejectionModal(null); setRejectionReason(''); }}
-                style={modalStyles.cancelBtn}
+                style={s.dealerModalCancel}
                 aria-label={td.dealerApplicationsTable.cancelBtn}
               >
                 {td.dealerApplicationsTable.cancelBtn}
@@ -307,16 +171,16 @@ export function DealerApplicationsTable({ applications, onReviewed }) {
       )}
 
       {errorMsg && (
-        <p style={{ color: '#991b1b', fontSize: 13, textAlign: 'center', margin: '8px 0' }}>{errorMsg}</p>
+        <p style={s.dealerError}>{errorMsg}</p>
       )}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <div style={s.dealerList}>
         {pending.length > 0 && (
           <section>
-            <h3 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '12px' }}>
+            <h3 style={s.dealerSectionTitle}>
               {td.dealerApplicationsTable.sectionPending(pending.length)}
             </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={s.dealerSubList}>
                 {pending.map((app) => (
                   <ApplicationRow
                     key={app.id}
@@ -333,10 +197,10 @@ export function DealerApplicationsTable({ applications, onReviewed }) {
 
         {reviewed.length > 0 && (
           <section>
-            <h3 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '12px', marginTop: pending.length > 0 ? '8px' : 0 }}>
+            <h3 style={{ ...s.dealerSectionTitle, marginTop: pending.length > 0 ? '8px' : 0 }}>
               {td.dealerApplicationsTable.sectionReviewed(reviewed.length)}
             </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={s.dealerSubList}>
                 {reviewed.map((app) => (
                   <ApplicationRow
                     key={app.id}

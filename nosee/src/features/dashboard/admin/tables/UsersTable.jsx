@@ -40,7 +40,7 @@ export function UsersTable({ users, onRoleChange, onBanToggle, changingRole }) {
           <div style={s.td} role="gridcell">
             <span style={{
               ...s.badge,
-              background: u.status === 'activo' ? `${ACCENT}18` : '#F8717120',
+              background: u.status === 'activo' ? `${ACCENT}18` : 'var(--error-soft)',
               color:      u.status === 'activo' ? ACCENT : 'var(--error)',
             }}>
               {u.status === 'activo' ? td.statusActive : td.statusBanned}
