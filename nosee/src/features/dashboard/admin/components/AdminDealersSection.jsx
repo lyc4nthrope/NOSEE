@@ -1,3 +1,4 @@
+import { Icon } from '@/components/ui/Icon';
 import { Spinner } from '@/components/ui/Spinner';
 import { s } from '../adminStyles';
 import { DealerApplicationsTable } from '../tables/DealerApplicationsTable';
@@ -10,7 +11,7 @@ export default function AdminDealersSection({
     <section style={s.main} className="admin-main">
       <div style={s.section}>
         <div style={s.sectionHead}>
-          <span style={s.sectionTitle}>🛵 Solicitudes de Repartidor</span>
+          <span style={s.sectionTitle}><Icon name="Bike" size={20} /> Solicitudes de Repartidor</span>
         </div>
         {applicationsLoading ? (
           <Spinner />
