@@ -1,6 +1,6 @@
 # Skill Registry — Ingenieria_Software_III
 
-Generated: 2026-03-26
+Generated: 2026-05-10
 
 ## User Skills
 
@@ -15,10 +15,12 @@ Generated: 2026-03-26
 | `frontend-ui-pattern` | React UI implementation work |
 | `github-pr` | GitHub PR workflows |
 | `go-testing` | Writing Go tests, using teatest, adding test coverage |
+| `impeccable` | Design critique, audit, polish, UI/UX refinement, visual design review |
 | `issue-creation` | Creating a GitHub issue, reporting a bug, requesting a feature |
 | `judgment-day` | "judgment day", "judgment-day", "review adversarial", "dual review", "doble review", "juzgar", "que lo juzguen" |
 | `playwright-testing` | E2E or Playwright changes |
 | `project-structure` | File/folder organization decisions |
+| `ui-ux-pro-max` | UI/UX design, design systems, CSS/styling, layouts, frontend design |
 | `react-19` | React 19-specific implementation |
 | `react-doctor` | Post-change React validation |
 | `responsive-layout` | Responsive/mobile layout work |

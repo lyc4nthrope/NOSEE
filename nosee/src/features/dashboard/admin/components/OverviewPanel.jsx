@@ -1,55 +1,78 @@
-/**
- * OverviewPanel.jsx
- *
- * Panel de resumen del sistema (12 KPIs) para el admin dashboard.
- * Consume getAdminOverviewMetrics() desde adminMetrics.api.js.
- *
- * UBICACIÓN: src/features/dashboard/admin/components/OverviewPanel.jsx
- */
 import { useState, useEffect } from 'react';
 import { getAdminOverviewMetrics } from '@/services/api/adminMetrics.api';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { s, ACCENT, MUTED } from '../adminStyles';
+import { s } from '../adminStyles';
 import { KpiCard } from './KpiCard';
 
-const KPI_ORDER = [
-  { key: 'totalUsers',            icon: '◉', labelKey: 'kpiTotalUsers' },
-  { key: 'totalActiveUsers',     icon: '◉', labelKey: 'kpiActiveUsers' },
-  { key: 'publicationsToday',    icon: '◈', labelKey: 'kpiPubsToday' },
-  { key: 'totalPublications',    icon: '◈', labelKey: 'kpiTotalPubs' },
-  { key: 'activePublications',   icon: '◈', labelKey: 'kpiActivePubs' },
-  { key: 'validationsToday',     icon: '✓', labelKey: 'kpiValidationsToday' },
-  { key: 'pendingReports',       icon: '⚠', labelKey: 'kpiPendingReports' },
-  { key: 'totalOrders',          icon: '📦', labelKey: 'kpiTotalOrders' },
-  { key: 'activeOrders',         icon: '📦', labelKey: 'kpiActiveOrders' },
-  { key: 'activeStores',         icon: '🏪', labelKey: 'kpiActiveStores' },
-  { key: 'activeProducts',       icon: '📋', labelKey: 'kpiActiveProducts' },
-  { key: 'activeDealers',        icon: '🛵', labelKey: 'kpiActiveDealers' },
-  { key: 'pendingDealerApplications', icon: '🛵', labelKey: 'kpiPendingDealerApps' },
-  { key: 'loginsLast24h',        icon: '◎', labelKey: 'kpiLogins24h' },
+const KPI_SECTIONS = [
+  {
+    key: 'users',
+    labelKey: 'titleUsers',
+    accent: 'var(--accent)',
+    items: [
+      { key: 'totalUsers', icon: '👥', labelKey: 'totalUsers' },
+      { key: 'totalActiveUsers', icon: '✓', labelKey: 'activeUsers' },
+      { key: 'loginsLast24h', icon: '🔑', labelKey: 'logins24h' },
+    ],
+  },
+  {
+    key: 'content',
+    labelKey: 'titleContent',
+    accent: '#0891b2',
+    items: [
+      { key: 'totalPublications', icon: '📄', labelKey: 'totalPublications' },
+      { key: 'activePublications', icon: '📋', labelKey: 'activePublications' },
+      { key: 'publicationsToday', icon: '📝', labelKey: 'publicationsToday' },
+      { key: 'validationsToday', icon: '✓', labelKey: 'validationsToday' },
+    ],
+  },
+  {
+    key: 'commerce',
+    labelKey: 'titleCommerce',
+    accent: '#7c3aed',
+    items: [
+      { key: 'totalOrders', icon: '📦', labelKey: 'totalOrders' },
+      { key: 'activeOrders', icon: '🛒', labelKey: 'activeOrders' },
+    ],
+  },
+  {
+    key: 'platform',
+    labelKey: 'titlePlatform',
+    accent: '#059669',
+    items: [
+      { key: 'activeStores', icon: '🏪', labelKey: 'activeStores' },
+      { key: 'activeProducts', icon: '🏷️', labelKey: 'activeProducts' },
+      { key: 'activeDealers', icon: '🛵', labelKey: 'activeDealers' },
+      { key: 'pendingDealerApplications', icon: '📋', labelKey: 'pendingDealerApps' },
+    ],
+  },
 ];
 
 function LoadingSkeleton() {
   return (
-    <div style={s.statsGrid}>
-      {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} style={{
-          ...s.statCard,
-          background: 'var(--bg-elevated)',
-          animation: 'pulse 1.5s ease-in-out infinite',
-        }}>
-          <div style={{ height: 16, width: '40%', background: 'var(--border)', borderRadius: 4, marginBottom: 12 }} />
-          <div style={{ height: 28, width: '60%', background: 'var(--border)', borderRadius: 6, marginBottom: 4 }} />
-          <div style={{ height: 12, width: '30%', background: 'var(--border)', borderRadius: 4 }} />
+    <>
+      {[1, 2, 3, 4].map((sectionIdx) => (
+        <div key={sectionIdx} style={s.kpiSection}>
+          <div style={{ height: 14, width: 100, background: 'var(--border)', borderRadius: 4, marginBottom: 12 }} />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} style={{ ...s.kpiLoadingSkeleton, padding: '18px 20px' }}>
+                <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--border)', marginBottom: 12 }} />
+                <div style={{ height: 26, width: '60%', background: 'var(--border)', borderRadius: 6, marginBottom: 4 }} />
+                <div style={{ height: 12, width: '40%', background: 'var(--border)', borderRadius: 4 }} />
+              </div>
+            ))}
+          </div>
         </div>
       ))}
-    </div>
+    </>
   );
 }
 
 export default function OverviewPanel() {
   const { t } = useLanguage();
   const td = t.adminDashboard;
+  const kpiT = td?.overviewKpi || {};
 
   const [metrics, setMetrics] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -57,15 +80,11 @@ export default function OverviewPanel() {
 
   useEffect(() => {
     let isMounted = true;
-
     async function load() {
       setIsLoading(true);
       setError(null);
-
       const result = await getAdminOverviewMetrics();
-
       if (!isMounted) return;
-
       if (result.success) {
         setMetrics(result.data);
       } else {
@@ -73,7 +92,6 @@ export default function OverviewPanel() {
       }
       setIsLoading(false);
     }
-
     load();
     return () => { isMounted = false; };
   }, []);
@@ -82,64 +100,60 @@ export default function OverviewPanel() {
 
   if (error) {
     return (
-      <div style={{ ...s.statCard, textAlign: 'center', padding: 32 }}>
+      <div style={{ textAlign: 'center', padding: 40, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
         <div style={{ fontSize: 14, color: 'var(--error)', marginBottom: 12 }}>{error}</div>
         <button
           onClick={() => window.location.reload()}
-          style={{ background: 'none', border: `1px solid ${ACCENT}`, color: ACCENT, borderRadius: 7, padding: '6px 14px', fontSize: 13, cursor: 'pointer' }}
+          style={{ background: 'none', border: '1px solid var(--accent)', color: 'var(--accent)', borderRadius: 7, padding: '8px 16px', fontSize: 13, cursor: 'pointer', fontWeight: 600, minHeight: 44, minWidth: 44 }}
         >
-          Reintentar
+          {td.retry || 'Reintentar'}
         </button>
       </div>
     );
   }
 
-  return (
-    <section aria-label="Resumen de métricas" role="region">
-      <div style={s.statsGrid}>
-        {KPI_ORDER.map((kpi) => (
-          <KpiCard
-            key={kpi.key}
-            icon={kpi.icon}
-            label={td?.[kpi.labelKey] || kpi.key}
-            value={metrics?.[kpi.key]}
-          />
-        ))}
-      </div>
+  const pendingReports = metrics?.pendingReports ?? 0;
 
-      {/* Resumen contextual */}
-      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 24 }}>
-        <div style={{ ...s.statCard, flex: '1 1 200px', padding: '14px 18px' }}>
-          <div style={{ fontSize: 12, color: MUTED, marginBottom: 4 }}>{td.kpiTotalUsers}</div>
-          <div style={{ ...s.statValue, fontSize: 20 }}>
-            {metrics?.totalUsers ?? '—'}
+  return (
+    <section aria-label="System metrics overview" role="region">
+      {KPI_SECTIONS.map((section) => (
+        <div key={section.key} style={s.kpiSection}>
+          <div style={s.kpiSectionLabel}>
+            {kpiT[section.labelKey] || section.labelKey}
           </div>
-          <div style={{ fontSize: 11, color: MUTED, marginTop: 2 }}>
-            {metrics?.totalActiveUsers != null
-              ? `${metrics.totalActiveUsers} activos`
-              : ''}
-          </div>
-        </div>
-        <div style={{ ...s.statCard, flex: '1 1 200px', padding: '14px 18px' }}>
-          <div style={{ fontSize: 12, color: MUTED, marginBottom: 4 }}>{td.kpiTotalOrders}</div>
-          <div style={{ ...s.statValue, fontSize: 20 }}>
-            {metrics?.totalOrders ?? '—'}
-          </div>
-          <div style={{ fontSize: 11, color: MUTED, marginTop: 2 }}>
-            {metrics?.activeOrders != null
-              ? `${metrics.activeOrders} activos`
-              : ''}
+          <div style={s.statsGrid}>
+            {section.items.map((kpi) => (
+              <KpiCard
+                key={kpi.key}
+                icon={kpi.icon}
+                label={kpiT[kpi.labelKey] || kpi.key}
+                value={metrics?.[kpi.key]}
+                accentColor={section.accent}
+                accentBg={`${section.accent}18`}
+              />
+            ))}
           </div>
         </div>
-        <div style={{ ...s.statCard, flex: '1 1 200px', padding: '14px 18px' }}>
-          <div style={{ fontSize: 12, color: MUTED, marginBottom: 4 }}>{td.kpiActiveStores}</div>
-          <div style={{ ...s.statValue, fontSize: 20 }}>
-            {metrics?.activeStores ?? '—'}
-          </div>
-          <div style={{ fontSize: 11, color: MUTED, marginTop: 2 }}>
-            {metrics?.activeProducts != null
-              ? `${metrics.activeProducts} productos`
-              : ''}
+      ))}
+
+      {/* Alerts section — always visible, highlights when > 0 */}
+      <div style={s.kpiSection}>
+        <div style={s.kpiSectionLabel}>
+          {kpiT.titleAlerts || 'Alertas'}
+        </div>
+        <div
+          style={s.kpiAlertCard}
+          role="alert"
+          aria-label={`${kpiT.pendingReports || 'Pending reports'}: ${pendingReports}`}
+        >
+          <div style={s.kpiAlertIcon}>⚠</div>
+          <div>
+            <div style={s.kpiAlertValue}>{pendingReports}</div>
+            <div style={s.kpiAlertLabel}>
+              {pendingReports === 0
+                ? (kpiT.noPendingReports || 'Sin reportes pendientes')
+                : (kpiT.pendingReports || 'Pending reports')}
+            </div>
           </div>
         </div>
       </div>
