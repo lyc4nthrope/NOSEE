@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { s, MUTED } from '../adminStyles';
 import { Icon } from '@/components/ui/Icon';
@@ -17,6 +18,7 @@ export function PublicationsTable({
 }) {
   const { t } = useLanguage();
   const td = t.adminDashboard;
+  const [hoveredRow, setHoveredRow] = useState(null);
   if (publications.length === 0) {
     return <EmptyMsg text={td.noPubsView} />;
   }
@@ -28,7 +30,9 @@ export function PublicationsTable({
         ))}
       </div>
       {publications.map(p => (
-        <div key={p.id} style={{ ...s.tableRow, gridTemplateColumns: '2fr 1fr 1fr 0.8fr 0.8fr 1.2fr' }} role="row">
+        <div key={p.id} style={{ ...s.tableRow, gridTemplateColumns: '2fr 1fr 1fr 0.8fr 0.8fr 1.2fr', ...(hoveredRow === p.id && s.tableRowHover) }} role="row"
+          onMouseEnter={() => setHoveredRow(p.id)}
+          onMouseLeave={() => setHoveredRow(null)}>
           <div style={s.td} role="gridcell">
             <div>
               <div style={s.rowName}>{p.productName || p.product?.name || '—'}</div>
@@ -96,6 +100,7 @@ export function PublicationsTable({
               onClick={() => onDelete(p)}
               disabled={deletingId === p.id}
               title={td.colAction}
+              aria-label={td.colAction}
             >
               {deletingId === p.id ? '...' : <Icon name="Trash2" size={16} />}
             </button>

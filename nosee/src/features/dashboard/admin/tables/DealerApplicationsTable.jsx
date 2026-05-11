@@ -23,9 +23,12 @@ function StatusBadge({ status, td }) {
 
 function ApplicationRow({ app, processing, onApprove, onOpenReject, td }) {
   const dateStr = useClientDateOnlyFormat(app.created_at);
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <div style={s.dealerRow}>
+    <div style={{ ...s.dealerRow, ...(isHovered && s.tableRowHover) }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}>
       <div style={s.dealerRowHeader}>
         <div>
           <p style={s.dealerName}>{app.full_name}</p>

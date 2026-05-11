@@ -47,6 +47,8 @@ export const s = {
   tableHead: { display: 'grid', gridTemplateColumns: '2fr 1fr 0.5fr 0.8fr 1fr', padding: '12px 20px', borderBottom: `1px solid ${BORDER}`, background: 'var(--bg-elevated)' },
   th:        { fontSize: 12, color: MUTED, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' },
   tableRow:  { display: 'grid', gridTemplateColumns: '2fr 1fr 0.5fr 0.8fr 1fr', padding: '14px 20px', alignItems: 'center', borderBottom: `1px solid ${BORDER}` },
+  tableRowHover: { background: 'var(--bg-elevated)', cursor: 'pointer', transition: 'background 0.15s' },
+  focusVisible: { outline: '2px solid var(--accent)', outlineOffset: '2px' },
   td:        { display: 'flex', alignItems: 'center', gap: 10 },
   tdNum:     { fontSize: 14, fontWeight: 600, color: ACCENT },
   rowAvatar: { width: 32, height: 32, borderRadius: '50%', background: 'var(--bg-elevated)', color: MUTED, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, flexShrink: 0 },

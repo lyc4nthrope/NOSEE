@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { s, ACCENT, MUTED } from '../adminStyles';
 import { ALL_ROLES } from '../adminConstants';
@@ -5,6 +6,7 @@ import { ALL_ROLES } from '../adminConstants';
 export function UsersTable({ users, onRoleChange, onBanToggle, changingRole }) {
   const { t } = useLanguage();
   const td = t.adminDashboard;
+  const [hoveredRow, setHoveredRow] = useState(null);
   return (
     <div style={s.table} className="admin-table" role="grid" aria-label="Lista de usuarios">
       <div style={s.tableHead} role="row">
@@ -13,7 +15,9 @@ export function UsersTable({ users, onRoleChange, onBanToggle, changingRole }) {
         ))}
       </div>
       {users.map((u) => (
-        <div key={u.id} style={s.tableRow} role="row">
+        <div key={u.id} style={{ ...s.tableRow, ...(hoveredRow === u.id && s.tableRowHover) }} role="row"
+          onMouseEnter={() => setHoveredRow(u.id)}
+          onMouseLeave={() => setHoveredRow(null)}>
           <div style={s.td} role="gridcell">
             <div style={s.rowAvatar}>{(u.name || td.noName).charAt(0)}</div>
             <div>
