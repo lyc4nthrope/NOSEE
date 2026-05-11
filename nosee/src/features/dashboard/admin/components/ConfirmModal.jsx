@@ -32,7 +32,7 @@ export function ConfirmModal({ isOpen, title, message, onConfirm, onCancel, conf
             <>
               {actions.map((action, i) => (
                 <button
-                  key={i}
+                  key={action.label}
                   onClick={() => { action.onClick?.(); onCancel(); }}
                   style={{
                     ...(action.danger ? { backgroundColor: 'var(--error)', color: '#fff' } : {}),

@@ -57,7 +57,7 @@ function LoadingSkeleton() {
           <div style={{ height: 14, width: 100, background: 'var(--border)', borderRadius: 4, marginBottom: 12 }} />
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} style={{ ...s.kpiLoadingSkeleton, padding: '18px 20px' }}>
+              <div key={`skel-${sectionIdx}-${i}`} style={{ ...s.kpiLoadingSkeleton, padding: '18px 20px' }}>
                 <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--border)', marginBottom: 12 }} />
                 <div style={{ height: 26, width: '60%', background: 'var(--border)', borderRadius: 6, marginBottom: 4 }} />
                 <div style={{ height: 12, width: '40%', background: 'var(--border)', borderRadius: 4 }} />
