@@ -12,22 +12,27 @@ import { getAdminLogsMetrics } from '@/services/api/adminMetrics.api';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { s, ACCENT, MUTED, TEXT } from '../adminStyles';
 
-function LogStatCard({ label, count24h, count7d, color, td }) {
+function LogStatCard({ label, count24h, count7d, color, td, bg }) {
   return (
     <div style={{
       ...s.statCard,
       flex: '1 1 180px',
-      padding: '14px 18px',
-      borderLeft: `3px solid ${color || ACCENT}`,
+      padding: 0,
+      overflow: 'hidden',
     }}>
-      <div style={{ fontSize: 12, color: MUTED, marginBottom: 6 }}>{label}</div>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-        <span style={{ ...s.statValue, fontSize: 22, color: color || TEXT }}>
-          {count24h ?? '—'}
-        </span>
-        <span style={{ fontSize: 11, color: MUTED }}>{td.logsPanel.in24h}</span>
+      <div style={{
+        padding: '14px 18px',
+        background: bg || 'transparent',
+      }}>
+        <div style={{ fontSize: 12, color: MUTED, marginBottom: 6 }}>{label}</div>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+          <span style={{ ...s.statValue, fontSize: 22, color: color || TEXT }}>
+            {count24h ?? '—'}
+          </span>
+          <span style={{ fontSize: 11, color: MUTED }}>{td.logsPanel.in24h}</span>
+        </div>
       </div>
-      <div style={{ fontSize: 11, color: MUTED, marginTop: 2 }}>
+      <div style={{ fontSize: 11, color: MUTED, padding: '0 18px 14px', marginTop: 2 }}>
         {count7d != null ? `${count7d} ${td.logsPanel.in7d}` : ''}
       </div>
     </div>
@@ -90,7 +95,8 @@ export default function LogsPanel() {
           label={td.logsPanel.loginEvents}
           count24h={metrics.loginEvents24h}
           count7d={metrics.loginEvents7d}
-          color="#64748b"
+          color="var(--text-secondary)"
+          bg="var(--info-soft)"
           td={td}
         />
         <LogStatCard
@@ -98,13 +104,15 @@ export default function LogsPanel() {
           count24h={metrics.activityEvents24h}
           count7d={metrics.activityEvents7d}
           color={ACCENT}
+          bg="var(--accent-soft)"
           td={td}
         />
         <LogStatCard
           label={td.logsPanel.adminActions}
           count24h={metrics.adminEvents24h}
           count7d={metrics.adminEvents7d}
-          color="#f59e0b"
+          color="var(--warning)"
+          bg="var(--warning-soft)"
           td={td}
         />
       </div>
@@ -129,8 +137,8 @@ export default function LogsPanel() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{
                     width: 6, height: 6, borderRadius: '50%',
-                    background: event.source === 'login' ? '#64748b'
-                      : event.source === 'activity' ? ACCENT : '#f59e0b',
+                    background: event.source === 'login' ? 'var(--text-secondary)'
+                      : event.source === 'activity' ? ACCENT : 'var(--warning)',
                     flexShrink: 0,
                   }} />
                   <span style={{ fontSize: 11, fontWeight: 600, color: MUTED }}>

@@ -246,16 +246,16 @@ export default function AdminDashboard() {
             td={td}
           />
         )}
-      </main>
 
-      {activeSection === 'dealers' && (
-        <AdminDealersSection
-          applications={applications}
-          applicationsLoading={applicationsLoading}
-          setApplicationsLoaded={setApplicationsLoaded}
-          loadApplications={loadApplications}
-        />
-      )}
+        {activeSection === 'dealers' && (
+          <AdminDealersSection
+            applications={applications}
+            applicationsLoading={applicationsLoading}
+            setApplicationsLoaded={setApplicationsLoaded}
+            loadApplications={loadApplications}
+          />
+        )}
+      </main>
 
       <AdminModalsSection
         banModal={banModal}

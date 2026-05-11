@@ -16,13 +16,13 @@ export function ConfirmModal({ isOpen, title, message, onConfirm, onCancel, conf
   return (
     <div role="presentation" style={{
       position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex',
+      backgroundColor: 'var(--overlay)', display: 'flex',
       alignItems: 'center', justifyContent: 'center', zIndex: 1000,
     }} onClick={onCancel}>
       <div ref={modalRef}
         role="dialog" aria-modal="true" aria-labelledby="confirm-title"
         style={{
-          background: '#fff', color: 'var(--text-primary)', borderRadius: 8, padding: 24,
+          background: 'var(--bg-surface)', color: 'var(--text-primary)', borderRadius: 8, padding: 24,
           minWidth: 320, maxWidth: 480,
         }} onClick={e => e.stopPropagation()}>
         <h3 id="confirm-title" style={{ margin: '0 0 8px' }}>{title}</h3>
@@ -35,8 +35,8 @@ export function ConfirmModal({ isOpen, title, message, onConfirm, onCancel, conf
                   key={i}
                   onClick={() => { action.onClick?.(); onCancel(); }}
                   style={{
-                    ...(action.danger ? { backgroundColor: '#dc3545', color: '#fff' } : {}),
-                    padding: '6px 14px', borderRadius: 6, border: '1px solid #ccc',
+                    ...(action.danger ? { backgroundColor: 'var(--error)', color: '#fff' } : {}),
+                    padding: '6px 14px', borderRadius: 6, border: '1px solid var(--border)',
                     cursor: 'pointer', fontSize: 13, fontWeight: 600,
                   }}
                 >
@@ -45,7 +45,7 @@ export function ConfirmModal({ isOpen, title, message, onConfirm, onCancel, conf
               ))}
               <button
                 onClick={onCancel}
-                style={{ padding: '6px 14px', borderRadius: 6, border: '1px solid #ccc', background: 'none', cursor: 'pointer', fontSize: 13 }}
+                style={{ padding: '6px 14px', borderRadius: 6, border: '1px solid var(--border)', background: 'none', cursor: 'pointer', fontSize: 13 }}
               >
                 {cancelLabel}
               </button>
@@ -54,16 +54,16 @@ export function ConfirmModal({ isOpen, title, message, onConfirm, onCancel, conf
             <>
               <button
                 onClick={onCancel}
-                style={{ padding: '6px 14px', borderRadius: 6, border: '1px solid #ccc', background: 'none', cursor: 'pointer', fontSize: 13 }}
+                style={{ padding: '6px 14px', borderRadius: 6, border: '1px solid var(--border)', background: 'none', cursor: 'pointer', fontSize: 13 }}
               >
                 {cancelLabel}
               </button>
               <button
                 onClick={onConfirm}
                 style={{
-                  padding: '6px 14px', borderRadius: 6, border: '1px solid #ccc',
+                  padding: '6px 14px', borderRadius: 6, border: '1px solid var(--border)',
                   cursor: 'pointer', fontSize: 13, fontWeight: 600,
-                  ...(danger ? { backgroundColor: '#dc3545', color: '#fff', borderColor: '#dc3545' } : {}),
+                  ...(danger ? { backgroundColor: 'var(--error)', color: '#fff', borderColor: 'var(--error)' } : {}),
                 }}
               >
                 {confirmLabel}
