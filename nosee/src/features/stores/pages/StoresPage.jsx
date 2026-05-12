@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuthStore, selectIsAuthenticated } from '@/features/auth/store/authStore';
@@ -64,7 +64,8 @@ export default function StoresPage() {
   const {
     search, stores, loading, loadingMore, hasMore, error,
     storeType, onlyWithLocation, categories,
-    handleSearchChange, handleStoreTypeChange, handleOnlyWithLocationChange,
+    activeFiltersCount, handleSearchChange, handleStoreTypeChange,
+    handleOnlyWithLocationChange, resetFilters,
     loadMore, updateStore,
   } = useStoresList({ productName: productNameFilter, categoryId });
 
@@ -87,6 +88,21 @@ export default function StoresPage() {
     }
     setSelectedStore(store);
   }, [isAuthenticated, navigate]);
+
+  const totalActiveFilters = useMemo(() => {
+    let count = activeFiltersCount;
+    if (productNameInput !== '') count++;
+    if (categoryId !== null) count++;
+    return count;
+  }, [activeFiltersCount, productNameInput, categoryId]);
+
+  const handleClearFilters = useCallback(() => {
+    clearTimeout(productDebounceRef.current);
+    setProductNameInput('');
+    setProductNameFilter('');
+    setCategoryId(null);
+    resetFilters();
+  }, [resetFilters]);
 
   const handleStoreUpdated = useCallback((updated) => {
     updateStore(updated);
@@ -151,6 +167,8 @@ export default function StoresPage() {
         onSearchChange={handleSearchChange}
         onLoadMore={loadMore}
         onViewDetail={handleViewDetail}
+        activeFiltersCount={totalActiveFilters}
+        onClearFilters={handleClearFilters}
         t={t.storesPage}
       />
 

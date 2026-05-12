@@ -1,4 +1,4 @@
-import { memo, useRef, useCallback } from 'react';
+import { memo, useRef, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import StoreCard from './StoreCard';
 import { DRAWER_PEEK_PX } from '../hooks/useDrawer';
@@ -52,6 +52,8 @@ const StoresDrawer = memo(function StoresDrawer({
   categoryId,
   onCategoryChange,
   categories,
+  activeFiltersCount,
+  onClearFilters,
   t,
 }) {
   const listRef = useRef(null);
@@ -64,6 +66,31 @@ const StoresDrawer = memo(function StoresDrawer({
     }
   }, [onLoadMore]);
 
+  const activeFilterItems = useMemo(() => {
+    const items = [];
+    if (search) {
+      items.push({ key: 'search', label: `${search}`, onRemove: () => onSearchChange('') });
+    }
+    if (storeType !== 'all') {
+      const typeLabel = storeType === 'physical'
+        ? (t.filterChips?.physical ?? 'Física')
+        : (t.filterChips?.virtual ?? 'Virtual');
+      items.push({ key: 'storeType', label: typeLabel, onRemove: () => onStoreTypeChange('all') });
+    }
+    if (onlyWithLocation) {
+      items.push({ key: 'location', label: t.onlyWithLocation ?? 'Solo con ubicación', onRemove: () => onOnlyWithLocationChange(false) });
+    }
+    if (productName) {
+      items.push({ key: 'product', label: productName, onRemove: () => onProductNameChange('') });
+    }
+    if (categoryId) {
+      const cat = categories.find(c => c.id === Number(categoryId));
+      items.push({ key: 'category', label: cat?.name ?? `Cat. ${categoryId}`, onRemove: () => onCategoryChange(null) });
+    }
+    return items;
+  }, [search, storeType, onlyWithLocation, productName, categoryId, categories, onSearchChange, onStoreTypeChange, onOnlyWithLocationChange, onProductNameChange, onCategoryChange, t]);
+
+  const hasActiveFilters = activeFiltersCount > 0;
   const expandLabel = snap === 'full' ? 'Contraer lista de tiendas' : 'Expandir lista de tiendas';
 
   return (
@@ -97,6 +124,21 @@ const StoresDrawer = memo(function StoresDrawer({
             {!loading && (
               <p style={styles.subtitle} aria-live="polite">
                 {stores.length} tienda{stores.length !== 1 ? 's' : ''}
+                {hasActiveFilters && (
+                  <>
+                    {' · '}
+                    <span style={styles.filterCountText}>🎯 {activeFiltersCount}</span>
+                    {' · '}
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); onClearFilters(); }}
+                      style={styles.clearLink}
+                      aria-label="Limpiar todos los filtros"
+                    >
+                      {t.clearFilters ?? 'Limpiar'}
+                    </button>
+                  </>
+                )}
               </p>
             )}
           </div>
@@ -124,6 +166,34 @@ const StoresDrawer = memo(function StoresDrawer({
           </div>
         </div>
       </div>
+
+      {/* ── Active filter tags ── */}
+      {hasActiveFilters && snap !== 'peek' && (
+        <div style={styles.activeFiltersBar}>
+          <div style={styles.activeFiltersRow}>
+            {activeFilterItems.map(item => (
+              <span key={item.key} style={styles.filterTag}>
+                <span style={styles.filterTagLabel}>{item.label}</span>
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); item.onRemove(); }}
+                  style={styles.filterTagX}
+                  aria-label={`Quitar filtro ${item.label}`}
+                >
+                  ✕
+                </button>
+              </span>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onClearFilters(); }}
+            style={styles.clearAllBtn}
+          >
+            {t.clearFilters ?? 'Limpiar todo'}
+          </button>
+        </div>
+      )}
 
       {/* ── Search ── */}
       <div style={styles.searchWrapper}>
@@ -311,6 +381,93 @@ const styles = {
     margin: '2px 0 0',
     fontSize: '12px',
     color: 'var(--text-muted)',
+    display: 'flex',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: '0 2px',
+  },
+  filterCountText: {
+    color: 'var(--accent)',
+    fontWeight: 600,
+    fontSize: '12px',
+  },
+  clearLink: {
+    background: 'none',
+    border: 'none',
+    padding: 0,
+    margin: 0,
+    color: 'var(--accent)',
+    fontSize: '12px',
+    fontWeight: 600,
+    textDecoration: 'underline',
+    textUnderlineOffset: '2px',
+    cursor: 'pointer',
+    lineHeight: 1,
+  },
+  activeFiltersBar: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '6px 16px 10px',
+    flexShrink: 0,
+    overflowX: 'auto',
+    scrollbarWidth: 'none',
+  },
+  activeFiltersRow: {
+    display: 'flex',
+    gap: '6px',
+    flex: 1,
+    overflowX: 'auto',
+    scrollbarWidth: 'none',
+  },
+  filterTag: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '4px',
+    padding: '4px 8px',
+    background: 'var(--accent)',
+    color: 'var(--on-accent, #002b3d)',
+    borderRadius: '999px',
+    fontSize: '11px',
+    fontWeight: 600,
+    whiteSpace: 'nowrap',
+    flexShrink: 0,
+  },
+  filterTagLabel: {
+    maxWidth: '120px',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  },
+  filterTagX: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'rgba(0,0,0,0.15)',
+    border: 'none',
+    borderRadius: '50%',
+    width: '16px',
+    height: '16px',
+    padding: 0,
+    fontSize: '9px',
+    lineHeight: 1,
+    color: 'inherit',
+    cursor: 'pointer',
+    flexShrink: 0,
+  },
+  clearAllBtn: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '4px 10px',
+    background: 'transparent',
+    border: '1px solid var(--border)',
+    borderRadius: '999px',
+    color: 'var(--text-muted)',
+    fontSize: '11px',
+    fontWeight: 500,
+    cursor: 'pointer',
+    whiteSpace: 'nowrap',
+    flexShrink: 0,
   },
   headerActions: {
     display: 'flex',

@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { listStores } from '@/services/api/stores.api';
 import { getProductCategories } from '@/services/api/products.api';
 import { INFINITE_SCROLL_CONFIG } from '@/config/infiniteScroll';
@@ -110,6 +110,30 @@ export function useStoresList({ productName = '', categoryId = null } = {}) {
     fetchStores({ query: searchRef.current, pageToLoad: 1, append: false });
   }, [fetchStores]);
 
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (search !== '') count++;
+    if (storeType !== 'all') count++;
+    if (onlyWithLocation) count++;
+    return count;
+  }, [search, storeType, onlyWithLocation]);
+
+  const resetFilters = useCallback(() => {
+    setSearch('');
+    searchRef.current = '';
+    setStoreType('all');
+    storeTypeRef.current = 'all';
+    setOnlyWithLocation(false);
+    onlyWithLocationRef.current = false;
+    clearTimeout(debounceRef.current);
+    pageRef.current = 1;
+    // Sync refs that are normally updated via useEffect → re-render
+    // Without this, fetchStores would use stale productName/categoryId
+    productNameRef.current = '';
+    categoryIdRef.current = null;
+    fetchStores({ query: '', pageToLoad: 1, append: false });
+  }, [fetchStores]);
+
   const loadMore = useCallback(() => {
     if (!hasMore || loading || loadingMoreRef.current) return;
     fetchStores({ query: searchRef.current, pageToLoad: pageRef.current + 1, append: true });
@@ -130,9 +154,11 @@ export function useStoresList({ productName = '', categoryId = null } = {}) {
     storeType,
     onlyWithLocation,
     categories,
+    activeFiltersCount,
     handleSearchChange,
     handleStoreTypeChange,
     handleOnlyWithLocationChange,
+    resetFilters,
     loadMore,
     updateStore,
   };

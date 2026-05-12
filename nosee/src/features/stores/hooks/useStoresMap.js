@@ -376,7 +376,9 @@ export function useStoresMap({ containerRef, onStoreClick, productName, category
     const hasFilter = productName?.trim() || categoryId;
 
     if (!hasFilter) {
-      // Filter cleared: allStoresRef already in sync via the dedicated effect
+      // Restore the full cache — getPhysicalStoresFiltered overwrites
+      // allStoresRef with filtered results, so we must restore it here
+      allStoresRef.current = physicalStores;
       const cluster = clusterRef.current;
       const map     = mapRef.current;
       const L       = _cdnL;
