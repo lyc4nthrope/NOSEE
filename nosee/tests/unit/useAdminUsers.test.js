@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import useAdminUsers from '@/features/dashboard/admin/hooks/useAdminUsers';
+import { useAdminStore } from '@/features/dashboard/admin/store/adminStore';
 import { getAllUsers, changeUserRole, updateUserStatus } from '@/services/api/users.api';
 import { insertActionLog } from '@/services/api/audit.api';
 import { hideUserPublications } from '@/services/api/adminCatalog.api';
@@ -72,9 +73,17 @@ vi.mock('@/types', () => ({
   },
 }));
 
+const resetAdminStore = () => {
+  useAdminStore.setState({
+    confirmModal: { isOpen: false, title: '', message: '', onConfirm: null, actions: null },
+    banModal: null,
+  });
+};
+
 describe('useAdminUsers', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetAdminStore();
   });
 
   describe('initial state', () => {
@@ -85,7 +94,6 @@ describe('useAdminUsers', () => {
       expect(result.current.usersLoading).toBe(true);
       expect(result.current.usersError).toBeNull();
       expect(result.current.changingRole).toBeNull();
-      expect(result.current.banModal).toBeNull();
     });
   });
 
@@ -133,15 +141,32 @@ describe('useAdminUsers', () => {
   });
 
   describe('handleRoleChange', () => {
-    it('cambia rol directamente cuando NO hay setConfirmModal', async () => {
-      const { result } = renderHook(() => useAdminUsers());
-
+    it('abre modal de confirmación en el store', async () => {
       getAllUsers.mockResolvedValue({ success: true, data: mockUsers });
+
+      const { result } = renderHook(() => useAdminUsers());
+      await act(() => result.current.loadUsers());
+
+      await act(() => result.current.handleRoleChange('user-1', 'Moderador'));
+
+      const { confirmModal } = useAdminStore.getState();
+      expect(confirmModal.isOpen).toBe(true);
+      expect(confirmModal.title).toBe('Cambiar rol');
+      expect(changeUserRole).not.toHaveBeenCalled();
+    });
+
+    it('ejecuta cambio de rol al confirmar el modal', async () => {
+      getAllUsers.mockResolvedValue({ success: true, data: mockUsers });
+
+      const { result } = renderHook(() => useAdminUsers());
       await act(() => result.current.loadUsers());
 
       changeUserRole.mockResolvedValue({ success: true });
 
       await act(() => result.current.handleRoleChange('user-1', 'Moderador'));
+
+      const { onConfirm } = useAdminStore.getState().confirmModal;
+      await act(() => onConfirm());
 
       expect(changeUserRole).toHaveBeenCalledWith('user-1', 2);
       expect(result.current.users[0].role).toBe('Moderador');
@@ -150,25 +175,6 @@ describe('useAdminUsers', () => {
         { newRole: 'Moderador', prevRole: 'Usuario' },
       );
       expect(result.current.changingRole).toBeNull();
-    });
-
-    it('abre modal de confirmación cuando setConfirmModal está presente', async () => {
-      const setConfirmModal = vi.fn();
-      const { result } = renderHook(() => useAdminUsers({ setConfirmModal }));
-
-      getAllUsers.mockResolvedValue({ success: true, data: mockUsers });
-      await act(() => result.current.loadUsers());
-
-      await act(() => result.current.handleRoleChange('user-1', 'Moderador'));
-
-      expect(setConfirmModal).toHaveBeenCalledTimes(1);
-      expect(setConfirmModal).toHaveBeenCalledWith(
-        expect.objectContaining({
-          isOpen: true,
-          title: 'Cambiar rol',
-        }),
-      );
-      expect(changeUserRole).not.toHaveBeenCalled();
     });
 
     it('no modifica target si es admin y currentUser es admin', async () => {
@@ -193,7 +199,7 @@ describe('useAdminUsers', () => {
   });
 
   describe('handleBanToggle / confirmBan', () => {
-    it('setea banModal al llamar handleBanToggle', async () => {
+    it('setea banModal en el store al llamar handleBanToggle', async () => {
       const { result } = renderHook(() => useAdminUsers());
 
       getAllUsers.mockResolvedValue({ success: true, data: mockUsers });
@@ -203,7 +209,7 @@ describe('useAdminUsers', () => {
         result.current.handleBanToggle('user-1');
       });
 
-      expect(result.current.banModal).toEqual(expect.objectContaining({ id: 'user-1' }));
+      expect(useAdminStore.getState().banModal).toEqual(expect.objectContaining({ id: 'user-1' }));
     });
 
     it('banea usuario (activo→baneado) y oculta publicaciones', async () => {
@@ -221,7 +227,7 @@ describe('useAdminUsers', () => {
       expect(updateUserStatus).toHaveBeenCalledWith('user-1', false);
       expect(hideUserPublications).toHaveBeenCalledWith('user-1');
       expect(result.current.users[0].status).toBe('baneado');
-      expect(result.current.banModal).toBeNull();
+      expect(useAdminStore.getState().banModal).toBeNull();
     });
 
     it('desbanea usuario (baneado→activo) sin ocultar publicaciones', async () => {
@@ -239,6 +245,7 @@ describe('useAdminUsers', () => {
       expect(hideUserPublications).not.toHaveBeenCalled();
       expect(result.current.users[1].status).toBe('activo');
       expect(insertActionLog).toHaveBeenCalled();
+      expect(useAdminStore.getState().banModal).toBeNull();
     });
   });
 

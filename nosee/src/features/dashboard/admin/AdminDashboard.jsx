@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy } from 'react';
+import { useEffect, lazy } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { s } from './adminStyles';
 
@@ -25,23 +25,19 @@ import useAdminLogs from './hooks/useAdminLogs';
 import useAdminDealers from './hooks/useAdminDealers';
 import useAdminConfirmHandlers from './hooks/useAdminConfirmHandlers';
 import { useAdminSessionTimeout } from './hooks/useAdminSessionTimeout';
+import { useAdminStore, selectActiveSection } from './store/adminStore';
 
 export default function AdminDashboard() {
   useAdminSessionTimeout();
   const { t } = useLanguage();
   const td = t.adminDashboard;
-
-  const [activeSection, setActiveSection] = useState('overview');
-  const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null, actions: null });
+  const activeSection = useAdminStore(selectActiveSection);
 
   const {
     publications, setPublications, pubsLoading, pubsLoaded,
     pubFilter, setPubFilter,
-    deletingPub, selectedPub, setSelectedPub,
+    deletingPub,
     deletingStoreId, deletingBrandId, deletingProductId,
-    selectedStore, setSelectedStore,
-    selectedBrand, setSelectedBrand,
-    selectedProduct, setSelectedProduct,
     unpublishedLoading, unpublishedLoaded, unpublishedResources,
     loadPublications, executeDeletePublication,
     handleEditPublication,
@@ -53,16 +49,15 @@ export default function AdminDashboard() {
 
   const {
     users, usersLoading, usersError,
-    changingRole, banModal, setBanModal,
+    changingRole,
     loadUsers, handleRoleChange, handleBanToggle, confirmBan,
-  } = useAdminUsers({ pubsLoaded, setPublications, setConfirmModal });
+  } = useAdminUsers({ pubsLoaded, setPublications });
 
   const {
     reports, reportsLoaded,
     reportStatusFilter, setReportStatusFilter,
     reportTypeFilter, setReportTypeFilter,
     reportSort, setReportSort,
-    selectedReport, setSelectedReport,
     reportTypeOptions,
     filteredReports,
     loadReports, updateReportData, handleQuickAction,
@@ -76,7 +71,7 @@ export default function AdminDashboard() {
     logDateFrom, setLogDateFrom,
     logDateTo, setLogDateTo,
     loadLogs,
-  } = useAdminLogs({ activeSection });
+  } = useAdminLogs();
 
   const {
     applications, applicationsLoading, applicationsLoaded,
@@ -101,7 +96,6 @@ export default function AdminDashboard() {
     handleExecuteDeleteStore,
     handleExecuteDeleteBrand,
     handleExecuteDeleteProduct,
-    setConfirmModal,
   });
 
   const reportsBadge = reports.filter(r => ['PENDING', 'IN_REVIEW'].includes(String(r.status).toUpperCase())).length || null;
@@ -119,7 +113,7 @@ export default function AdminDashboard() {
 
   return (
     <div style={s.root} className="admin-root">
-      <AdminSidebar navSections={navSections} activeSection={activeSection} setActiveSection={setActiveSection} />
+      <AdminSidebar navSections={navSections} />
 
       <main aria-label="Panel de administración" style={s.main} className="admin-main">
 
@@ -147,14 +141,6 @@ export default function AdminDashboard() {
             pubsLoaded={pubsLoaded}
             pubFilter={pubFilter}
             setPubFilter={setPubFilter}
-            selectedPub={selectedPub}
-            setSelectedPub={setSelectedPub}
-            selectedStore={selectedStore}
-            setSelectedStore={setSelectedStore}
-            selectedBrand={selectedBrand}
-            setSelectedBrand={setSelectedBrand}
-            selectedProduct={selectedProduct}
-            setSelectedProduct={setSelectedProduct}
             unpublishedLoading={unpublishedLoading}
             unpublishedResources={unpublishedResources}
             deletingPub={deletingPub}
@@ -178,12 +164,6 @@ export default function AdminDashboard() {
 
         {activeSection === 'catalog' && (
           <AdminCatalogSection
-            selectedStore={selectedStore}
-            setSelectedStore={setSelectedStore}
-            selectedBrand={selectedBrand}
-            setSelectedBrand={setSelectedBrand}
-            selectedProduct={selectedProduct}
-            setSelectedProduct={setSelectedProduct}
             deletingStoreId={deletingStoreId}
             deletingBrandId={deletingBrandId}
             deletingProductId={deletingProductId}
@@ -212,8 +192,6 @@ export default function AdminDashboard() {
             setReportTypeFilter={setReportTypeFilter}
             reportSort={reportSort}
             setReportSort={setReportSort}
-            selectedReport={selectedReport}
-            setSelectedReport={setSelectedReport}
             filteredReports={filteredReports}
             handleQuickAction={handleQuickAction}
             updateReportData={updateReportData}
@@ -258,11 +236,7 @@ export default function AdminDashboard() {
       </main>
 
       <AdminModalsSection
-        banModal={banModal}
         confirmBan={confirmBan}
-        setBanModal={setBanModal}
-        confirmModal={confirmModal}
-        setConfirmModal={setConfirmModal}
       />
     </div>
   );

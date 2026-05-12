@@ -35,7 +35,7 @@ export function StatusBadge({ status }) {
   };
   const c = map[status] || map.pending;
   return (
-    <span style={{ ...s.badge, background: c.bg, color: c.color, fontSize: 10, marginTop: 2 }}>
+    <span style={{ ...s.badge, background: c.bg, color: c.color, fontSize: 'var(--admin-fs-xs)', marginTop: 2 }}>
       {c.label}
     </span>
   );
@@ -45,14 +45,14 @@ export function LoadingState({ label }) {
   return (
     <div role="status" aria-live="polite" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '60px 20px', gap: 12 }}>
       <Spinner size={28} />
-      {label && <p style={{ color: MUTED, fontSize: 14, margin: 0 }}>{label}</p>}
+      {label && <p style={{ color: MUTED, fontSize: 'var(--admin-fs-md)', margin: 0 }}>{label}</p>}
     </div>
   );
 }
 
 export function EmptyMsg({ text }) {
   return (
-    <div style={{ padding: '48px 20px', textAlign: 'center', color: MUTED, fontSize: 14 }}>
+    <div style={{ padding: '48px 20px', textAlign: 'center', color: MUTED, fontSize: 'var(--admin-fs-md)' }}>
       {text}
     </div>
   );
@@ -68,7 +68,7 @@ export function ErrorBar({ msg, onRetry }) {
       background: 'var(--error-soft)',
       border: '1px solid var(--error)',
       color: 'var(--error)',
-      fontSize: 13,
+      fontSize: 'var(--admin-fs-base)',
       marginBottom: 20,
     }}>
       <Icon name="AlertTriangle" size={16} /> {msg}

@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { useAdminStore } from '../store/adminStore';
 import {
   deactivatePublication, getAdminPublications, getBrandDetail, getPublishedRefs, getAllStores, getAllProducts,
   getStoreDetail, hideBrand, hideProduct, hidePublication, hideStore,
@@ -23,20 +24,12 @@ import { checkRateLimit } from '@/services/utils/rateLimit';
  *   pubFilter: string,
  *   setPubFilter: Function,
  *   deletingPub: string|null,
- *   selectedPub: Object|null,
- *   setSelectedPub: Function,
  *   deletingStoreId: string|null,
  *   setDeletingStoreId: Function,
  *   deletingBrandId: number|null,
  *   setDeletingBrandId: Function,
  *   deletingProductId: number|null,
  *   setDeletingProductId: Function,
- *   selectedStore: Object|null,
- *   setSelectedStore: Function,
- *   selectedBrand: Object|null,
- *   setSelectedBrand: Function,
- *   selectedProduct: Object|null,
- *   setSelectedProduct: Function,
  *   unpublishedLoading: boolean,
  *   unpublishedLoaded: boolean,
  *   unpublishedResources: {stores: Array, products: Array},
@@ -65,13 +58,9 @@ export default function useAdminPublications() {
   const [pubsLoaded, setPubsLoaded] = useState(false);
   const [pubFilter, setPubFilter] = useState('all');
   const [deletingPub, setDeletingPub] = useState(null);
-  const [selectedPub, setSelectedPub] = useState(null);
   const [deletingStoreId, setDeletingStoreId] = useState(null);
   const [deletingBrandId, setDeletingBrandId] = useState(null);
   const [deletingProductId, setDeletingProductId] = useState(null);
-  const [selectedStore, setSelectedStore] = useState(null);
-  const [selectedBrand, setSelectedBrand] = useState(null);
-  const [selectedProduct, setSelectedProduct] = useState(null);
   const [unpublishedLoading, setUnpublishedLoading] = useState(false);
   const [unpublishedLoaded, setUnpublishedLoaded] = useState(false);
   const [unpublishedResources, setUnpublishedResources] = useState({ stores: [], products: [] });
@@ -106,7 +95,7 @@ export default function useAdminPublications() {
         setPublications((prev) =>
           prev.map((p) => (p.id === pubId ? { ...p, is_active: false, status: 'hidden' } : p)),
         );
-        setSelectedPub((prev) => (prev?.id === pubId ? { ...prev, is_active: false, status: 'hidden' } : prev));
+        (() => { const st = useAdminStore.getState(); if (st.selectedPub?.id === pubId) st.selectPublication({ ...st.selectedPub, is_active: false, status: 'hidden' }); })();
         insertActionLog(currentUserId, 'publication', pubId, 'hide');
         return;
       }
@@ -118,7 +107,7 @@ export default function useAdminPublications() {
       }
 
       setPublications((prev) => prev.filter((p) => p.id !== pubId));
-      setSelectedPub((prev) => (prev?.id === pubId ? null : prev));
+      (() => { const st = useAdminStore.getState(); if (st.selectedPub?.id === pubId) st.selectPublication(null); })();
       insertActionLog(currentUserId, 'publication', pubId, 'hide_full');
     } catch (err) {
       console.error('[useAdminPublications] hidePublication:', err);
@@ -190,7 +179,7 @@ export default function useAdminPublications() {
     }
 
     const relatedCount = publications.filter((p) => (p.storeId || p.store?.id || p.store_id) === storeId).length;
-    setSelectedStore({
+    useAdminStore.getState().selectStore({
       ...result.data,
       typeLabel: Number(result.data.store_type_id) === 1
         ? td.storeTypePhysical
@@ -213,7 +202,7 @@ export default function useAdminPublications() {
         ...prev,
         stores: prev.stores.filter((s) => s.id !== storeId),
       }));
-      setSelectedStore((prev) => (prev?.id === storeId ? null : prev));
+      (() => { const st = useAdminStore.getState(); if (st.selectedStore?.id === storeId) st.selectStore(null); })();
       insertActionLog(currentUserId, 'store', storeId, 'hide', null, { storeName });
     } finally {
       setDeletingStoreId(null);
@@ -235,7 +224,7 @@ export default function useAdminPublications() {
         ...prev,
         stores: prev.stores.map(s => s.id === storeId ? { ...s, ...merged } : s),
       }));
-      setSelectedStore(prev => prev?.id === storeId ? { ...prev, ...merged } : prev);
+      (() => { const st = useAdminStore.getState(); if (st.selectedStore?.id === storeId) st.selectStore({ ...st.selectedStore, ...merged }); })();
       return true;
     } catch (err) {
       console.error('[useAdminPublications] handleEditStore:', err);
@@ -254,7 +243,7 @@ export default function useAdminPublications() {
       console.error('[useAdminPublications] getBrandDetail:', result.error || 'Brand not found');
       return;
     }
-    setSelectedBrand({
+    useAdminStore.getState().selectBrand({
       ...result.data,
       productName: publication?.productName || publication?.product?.name || null,
       productBarcode: publication?.productBarcode || publication?.product?.barcode || null,
@@ -274,7 +263,7 @@ export default function useAdminPublications() {
           ? { ...p, brandId: null, brandName: null, product: { ...p.product, brand: null } }
           : p
       )));
-      setSelectedBrand((prev) => (prev?.id === brandId ? null : prev));
+      (() => { const st = useAdminStore.getState(); if (st.selectedBrand?.id === brandId) st.selectBrand(null); })();
       insertActionLog(currentUserId, 'brand', brandId, 'hide', null, { brandName });
     } finally {
       setDeletingBrandId(null);
@@ -290,7 +279,7 @@ export default function useAdminPublications() {
         if (pBrandId !== brandId) return p;
         return { ...p, brandName: updates.name || p.brandName, product: { ...(p.product || {}), brand: { ...(p.product?.brand || {}), ...updates } } };
       }));
-      setSelectedBrand(prev => prev?.id === brandId ? { ...prev, ...updates } : prev);
+      (() => { const st = useAdminStore.getState(); if (st.selectedBrand?.id === brandId) st.selectBrand({ ...st.selectedBrand, ...updates }); })();
       return true;
     } catch (err) {
       console.error('[useAdminPublications] handleEditBrand:', err);
@@ -299,7 +288,7 @@ export default function useAdminPublications() {
   }, []);
 
   const handleViewProduct = useCallback((product) => {
-    setSelectedProduct(product || null);
+    useAdminStore.getState().selectProduct(product || null);
   }, []);
 
   const handleExecuteDeleteProduct = useCallback(async (productId, productName) => {
@@ -314,7 +303,7 @@ export default function useAdminPublications() {
         ...prev,
         products: prev.products.filter((p) => p.id !== productId),
       }));
-      setSelectedProduct((prev) => (prev?.id === productId ? null : prev));
+      (() => { const st = useAdminStore.getState(); if (st.selectedProduct?.id === productId) st.selectProduct(null); })();
       insertActionLog(currentUserId, 'product', productId, 'hide', null, { productName });
     } finally {
       setDeletingProductId(null);
@@ -329,7 +318,7 @@ export default function useAdminPublications() {
         ...prev,
         products: prev.products.map(p => p.id === productId ? { ...p, ...updates } : p),
       }));
-      setSelectedProduct(prev => prev?.id === productId ? { ...prev, ...updates } : prev);
+      (() => { const st = useAdminStore.getState(); if (st.selectedProduct?.id === productId) st.selectProduct({ ...st.selectedProduct, ...updates }); })();
       return true;
     } catch (err) {
       console.error('[useAdminPublications] handleEditProduct:', err);
@@ -340,13 +329,10 @@ export default function useAdminPublications() {
   return {
     publications, setPublications, pubsLoading, pubsLoaded,
     pubFilter, setPubFilter,
-    deletingPub, selectedPub, setSelectedPub,
+    deletingPub,
     deletingStoreId, setDeletingStoreId,
     deletingBrandId, setDeletingBrandId,
     deletingProductId, setDeletingProductId,
-    selectedStore, setSelectedStore,
-    selectedBrand, setSelectedBrand,
-    selectedProduct, setSelectedProduct,
     unpublishedLoading, unpublishedLoaded, unpublishedResources,
     loadPublications, executeDeletePublication,
     handleEditPublication,

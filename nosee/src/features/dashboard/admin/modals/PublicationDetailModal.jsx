@@ -14,11 +14,11 @@ const SEARCH_DROPDOWN_STYLE = {
 const SEARCH_RESULT_BTN_STYLE = {
   display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px',
   background: 'none', border: 'none', color: TEXT, cursor: 'pointer',
-  fontSize: 13, borderBottom: `1px solid ${BORDER}`,
+  fontSize: 'var(--admin-fs-base)', borderBottom: `1px solid ${BORDER}`,
 };
 const SPINNER_STYLE = {
   position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
-  fontSize: 12, color: MUTED,
+  fontSize: 'var(--admin-fs-sm)', color: MUTED,
 };
 
 export function PublicationDetailModal({ pub, onClose, onSave, onDelete }) {
@@ -94,11 +94,11 @@ export function PublicationDetailModal({ pub, onClose, onSave, onDelete }) {
   };
 
   return (
-    <div role="presentation" style={s.modalOverlay} onClick={onClose} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}>
+    <div role="presentation" className="admin-modal-overlay" style={s.modalOverlay} onClick={onClose} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}>
       <div ref={modalRef} role="dialog" aria-modal="true" aria-labelledby="pub-detail-title" style={{ ...s.modalCard, maxHeight: '90vh', overflowY: 'auto' }} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
           <div>
-            <h2 id="pub-detail-title" style={{ margin: 0, fontSize: 18, color: TEXT }}>{td.pubDetailTitle}</h2>
+            <h2 id="pub-detail-title" style={{ margin: 0, fontSize: 'var(--admin-fs-xl)', color: TEXT }}>{td.pubDetailTitle}</h2>
             <p style={{ ...s.headerSub, margin: '4px 0 0' }}>ID: {pub.id}</p>
           </div>
           <button onClick={onClose} aria-label={td.publicationDetailModal.closeAria} title={td.publicationDetailModal.closeAria} style={CLOSE_BTN_STYLE}>✕</button>
@@ -176,14 +176,14 @@ export function PublicationDetailModal({ pub, onClose, onSave, onDelete }) {
                     <button key={pr.id} style={SEARCH_RESULT_BTN_STYLE}
                       onClick={() => { setProductSearch((prev) => ({ ...prev, id: pr.id, query: pr.name, results: [], searching: false })); }}>
                       <strong>{sanitizeHTML(pr.name)}</strong>
-                      {pr.brand?.name && <span style={{ color: MUTED, marginLeft: 6, fontSize: 12 }}>{sanitizeHTML(pr.brand.name)}</span>}
-                      {pr.barcode && <span style={{ color: MUTED, marginLeft: 6, fontSize: 12 }}>{sanitizeHTML(pr.barcode)}</span>}
+                      {pr.brand?.name && <span style={{ color: MUTED, marginLeft: 6, fontSize: 'var(--admin-fs-sm)' }}>{sanitizeHTML(pr.brand.name)}</span>}
+                      {pr.barcode && <span style={{ color: MUTED, marginLeft: 6, fontSize: 'var(--admin-fs-sm)' }}>{sanitizeHTML(pr.barcode)}</span>}
                     </button>
                   ))}
                 </div>
               )}
             </div>
-            {productId && <span style={{ fontSize: 12, color: 'var(--success)', marginTop: 4 }}>{td.publicationDetailModal.idSelected(productId)}</span>}
+            {productId && <span style={{ fontSize: 'var(--admin-fs-sm)', color: 'var(--success)', marginTop: 4 }}>{td.publicationDetailModal.idSelected(productId)}</span>}
           </div>
 
           <div style={s.filterLabelWrap}>
@@ -202,13 +202,13 @@ export function PublicationDetailModal({ pub, onClose, onSave, onDelete }) {
                     <button key={sr.id} style={SEARCH_RESULT_BTN_STYLE}
                       onClick={() => { setStoreSearch((prev) => ({ ...prev, id: sr.id, query: sr.name, results: [], searching: false })); }}>
                       <strong>{sanitizeHTML(sr.name)}</strong>
-                      {sr.address && <span style={{ color: MUTED, marginLeft: 6, fontSize: 12 }}>{sanitizeHTML(sr.address)}</span>}
+                      {sr.address && <span style={{ color: MUTED, marginLeft: 6, fontSize: 'var(--admin-fs-sm)' }}>{sanitizeHTML(sr.address)}</span>}
                     </button>
                   ))}
                 </div>
               )}
             </div>
-            {storeId && <span style={{ fontSize: 12, color: 'var(--success)', marginTop: 4 }}>{td.publicationDetailModal.idSelected(storeId)}</span>}
+            {storeId && <span style={{ fontSize: 'var(--admin-fs-sm)', color: 'var(--success)', marginTop: 4 }}>{td.publicationDetailModal.idSelected(storeId)}</span>}
           </div>
 
           <label style={s.filterLabelWrap}>
@@ -234,7 +234,7 @@ export function PublicationDetailModal({ pub, onClose, onSave, onDelete }) {
         </div>
 
         {saveState.saved && (
-          <p style={{ margin: '10px 0 0', fontSize: 13, color: 'var(--success)', textAlign: 'right' }}>
+          <p style={{ margin: '10px 0 0', fontSize: 'var(--admin-fs-base)', color: 'var(--success)', textAlign: 'right' }}>
             ✓ {td.pubSavedOk}
           </p>
         )}

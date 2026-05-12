@@ -73,12 +73,12 @@ export function ReportDetailsModal({ report, onClose, onSave }) {
   const severityLabel = td.severityLabels?.[report.severity] || report.severity?.toUpperCase() || '—';
 
   return (
-    <div role="presentation" style={s.modalOverlay} onClick={onClose} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}>
+    <div role="presentation" className="admin-modal-overlay" style={s.modalOverlay} onClick={onClose} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}>
       <div ref={modalRef} role="dialog" aria-modal="true" aria-labelledby="report-detail-title" style={{ ...s.modalCard, maxHeight: '90vh', overflowY: 'auto' }} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
         {/* Cabecera */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
           <div>
-            <h2 id="report-detail-title" style={{ margin: 0, fontSize: 18, color: TEXT }}>{td.reportDetailTitle}</h2>
+            <h2 id="report-detail-title" style={{ margin: 0, fontSize: 'var(--admin-fs-xl)', color: TEXT }}>{td.reportDetailTitle}</h2>
             <p style={{ ...s.headerSub, margin: '4px 0 0' }}>{typeof td.reportDetailSubtitle === 'function' ? td.reportDetailSubtitle(report.id) : `ID: ${report.id}`}</p>
           </div>
           <button onClick={onClose} title={td.cancel} aria-label={td.cancel} style={CLOSE_BTN_STYLE}>✕</button>
@@ -124,7 +124,7 @@ export function ReportDetailsModal({ report, onClose, onSave }) {
             <div style={{ ...s.sectionHead, marginBottom: 10 }}>
               <span style={s.sectionTitle}>{td.labelReportedPub}</span>
               {pubDeleted && (
-                <span style={{ fontSize: 12, fontWeight: 700, background: 'var(--error-soft)', color: 'var(--error)', borderRadius: 4, padding: '2px 8px' }}>
+                <span style={{ fontSize: 'var(--admin-fs-sm)', fontWeight: 700, background: 'var(--error-soft)', color: 'var(--error)', borderRadius: 4, padding: '2px 8px' }}>
                   {pub ? td.pubDeactivated : td.pubDeletedLabel}
                 </span>
               )}
@@ -138,7 +138,7 @@ export function ReportDetailsModal({ report, onClose, onSave }) {
                 <DetailRow label={td.colPrice} value={pub.price} />
               </div>
             ) : (
-              <p style={{ margin: 0, fontSize: 13, color: MUTED }}>
+              <p style={{ margin: 0, fontSize: 'var(--admin-fs-base)', color: MUTED }}>
                 {td.pubHiddenCompletely(report.publicationId)}
               </p>
             )}
@@ -157,7 +157,7 @@ export function ReportDetailsModal({ report, onClose, onSave }) {
               style={{ width: '100%', maxHeight: 260, objectFit: 'cover', borderRadius: 8, border: `1px solid ${BORDER}` }}
               onError={(e) => { e.currentTarget.style.display = 'none'; }}
             />
-            <a href={sanitizeHTML(report.evidenceUrl)} target="_blank" rel="noreferrer" style={{ ...s.linkBtn, display: 'block', marginTop: 6, fontSize: 12 }}>
+            <a href={sanitizeHTML(report.evidenceUrl)} target="_blank" rel="noreferrer" style={{ ...s.linkBtn, display: 'block', marginTop: 6, fontSize: 'var(--admin-fs-sm)' }}>
               {td.viewOriginalImage}
             </a>
           </div>
@@ -198,7 +198,7 @@ export function ReportDetailsModal({ report, onClose, onSave }) {
         </label>
 
         {ui.saved && (
-          <p style={{ margin: '8px 0 0', fontSize: 13, color: 'var(--success)', textAlign: 'right' }}>
+          <p style={{ margin: '8px 0 0', fontSize: 'var(--admin-fs-base)', color: 'var(--success)', textAlign: 'right' }}>
             ✓ {td.reportSavedOk}
           </p>
         )}

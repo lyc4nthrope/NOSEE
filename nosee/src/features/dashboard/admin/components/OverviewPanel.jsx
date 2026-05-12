@@ -102,10 +102,10 @@ export default function OverviewPanel() {
   if (error) {
     return (
       <div style={{ textAlign: 'center', padding: 40, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
-        <div style={{ fontSize: 14, color: 'var(--error)', marginBottom: 12 }}>{error}</div>
+        <div style={{ fontSize: 'var(--admin-fs-md)', color: 'var(--error)', marginBottom: 12 }}>{error}</div>
         <button
           onClick={() => window.location.reload()}
-          style={{ background: 'none', border: '1px solid var(--accent)', color: 'var(--accent)', borderRadius: 7, padding: '8px 16px', fontSize: 13, cursor: 'pointer', fontWeight: 600, minHeight: 44, minWidth: 44 }}
+          style={{ background: 'none', border: '1px solid var(--accent)', color: 'var(--accent)', borderRadius: 7, padding: '8px 16px', fontSize: 'var(--admin-fs-base)', cursor: 'pointer', fontWeight: 600, minHeight: 44, minWidth: 44 }}
         >
           {td.retry || 'Reintentar'}
         </button>

@@ -3,18 +3,20 @@ import { SectionHeader } from './AdminPrimitives';
 import { StoreDetailModal } from '../modals/StoreDetailModal';
 import { BrandDetailModal } from '../modals/BrandDetailModal';
 import { ProductDetailModal } from '../modals/ProductDetailModal';
+import { useAdminStore, selectSelectedStore, selectSelectedBrand, selectSelectedProduct } from '../store/adminStore';
 
 const CatalogPanel = lazy(() => import('./CatalogPanel'));
 
 export default function AdminCatalogSection({
-  selectedStore, setSelectedStore,
-  selectedBrand, setSelectedBrand,
-  selectedProduct, setSelectedProduct,
   deletingStoreId, deletingBrandId, deletingProductId,
   handleViewStore, handleDeleteStore, handleEditStore,
   handleViewBrand, handleDeleteBrand, handleEditBrand,
   handleViewProduct, handleDeleteProduct, handleEditProduct,
 }) {
+  const selectedStore = useAdminStore(selectSelectedStore);
+  const selectedBrand = useAdminStore(selectSelectedBrand);
+  const selectedProduct = useAdminStore(selectSelectedProduct);
+
   return (
     <>
       <SectionHeader title="Catálogo" sub="Gestión de tiendas, productos y marcas" />
@@ -35,7 +37,7 @@ export default function AdminCatalogSection({
       {selectedStore && (
         <StoreDetailModal
           store={selectedStore}
-          onClose={() => setSelectedStore(null)}
+          onClose={() => useAdminStore.getState().selectStore(null)}
           onSave={handleEditStore}
           onDelete={() => { handleDeleteStore(selectedStore); }}
           isDeleting={deletingStoreId === selectedStore.id}
@@ -44,7 +46,7 @@ export default function AdminCatalogSection({
       {selectedBrand && (
         <BrandDetailModal
           brand={selectedBrand}
-          onClose={() => setSelectedBrand(null)}
+          onClose={() => useAdminStore.getState().selectBrand(null)}
           onSave={handleEditBrand}
           onDelete={() => { handleDeleteBrand(selectedBrand); }}
           isDeleting={deletingBrandId === selectedBrand.id}
@@ -53,7 +55,7 @@ export default function AdminCatalogSection({
       {selectedProduct && (
         <ProductDetailModal
           product={selectedProduct}
-          onClose={() => setSelectedProduct(null)}
+          onClose={() => useAdminStore.getState().selectProduct(null)}
           onSave={handleEditProduct}
           onDelete={() => handleDeleteProduct(selectedProduct)}
           isDeleting={deletingProductId === selectedProduct.id}

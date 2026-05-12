@@ -13,14 +13,14 @@ import { s, ACCENT, MUTED, TEXT, BORDER } from '../adminStyles';
 
 function StoreRow({ store, onView, onHide, isDeleting, td }) {
   return (
-    <div style={{ ...s.tableRow, gridTemplateColumns: '2fr 1fr 0.5fr 1fr', padding: '10px 16px', fontSize: 13 }}>
+    <div style={{ ...s.tableRow, gridTemplateColumns: '2fr 1fr 0.5fr 1fr', padding: '10px 16px', fontSize: 'var(--admin-fs-base)' }}>
       <div style={s.td}>
         <div>
           <div style={{ fontWeight: 600 }}>{store.name}</div>
-          {store.address && <div style={{ fontSize: 11, color: MUTED }}>{store.address}</div>}
+          {store.address && <div style={{ fontSize: 'var(--admin-fs-xs)', color: MUTED }}>{store.address}</div>}
         </div>
       </div>
-      <div style={{ ...s.td, fontSize: 11 }}>
+      <div style={{ ...s.td, fontSize: 'var(--admin-fs-xs)' }}>
         <span style={{
           padding: '2px 8px', borderRadius: 999, fontWeight: 600,
           background: store.is_active ? 'var(--success-soft)' : 'var(--error-soft)',
@@ -29,14 +29,14 @@ function StoreRow({ store, onView, onHide, isDeleting, td }) {
           {store.is_active ? td.catalogPanel.statusActivePhysical : td.catalogPanel.statusInactivePhysical}
         </span>
       </div>
-      <div style={{ ...s.td, fontSize: 11, color: MUTED }}>{store.typeLabel || td.catalogPanel.storeTypeNA}</div>
+      <div style={{ ...s.td, fontSize: 'var(--admin-fs-xs)', color: MUTED }}>{store.typeLabel || td.catalogPanel.storeTypeNA}</div>
       <div style={{ ...s.td, gap: 6, justifyContent: 'flex-end' }}>
-        <button onClick={() => onView(store)} style={{ ...s.actionBtn, fontSize: 11 }}>{td.catalogPanel.viewBtn}</button>
+        <button onClick={() => onView(store)} style={{ ...s.actionBtn, fontSize: 'var(--admin-fs-xs)' }}>{td.catalogPanel.viewBtn}</button>
         {!store.is_admin_hidden && (
           <button
             onClick={() => onHide(store)}
             disabled={isDeleting}
-            style={{ ...s.actionBtn, ...s.actionBtnDanger, fontSize: 11, opacity: isDeleting ? 0.5 : 1 }}
+            style={{ ...s.actionBtn, ...s.actionBtnDanger, fontSize: 'var(--admin-fs-xs)', opacity: isDeleting ? 0.5 : 1 }}
           >
             {td.catalogPanel.hideBtn}
           </button>
@@ -48,14 +48,14 @@ function StoreRow({ store, onView, onHide, isDeleting, td }) {
 
 function ProductRow({ product, onView, onHide, isDeleting, td }) {
   return (
-    <div style={{ ...s.tableRow, gridTemplateColumns: '2fr 1fr 0.5fr 1fr', padding: '10px 16px', fontSize: 13 }}>
+    <div style={{ ...s.tableRow, gridTemplateColumns: '2fr 1fr 0.5fr 1fr', padding: '10px 16px', fontSize: 'var(--admin-fs-base)' }}>
       <div style={s.td}>
         <div>
           <div style={{ fontWeight: 600 }}>{product.name}</div>
-          {product.brand?.name && <div style={{ fontSize: 11, color: MUTED }}>{product.brand.name}</div>}
+          {product.brand?.name && <div style={{ fontSize: 'var(--admin-fs-xs)', color: MUTED }}>{product.brand.name}</div>}
         </div>
       </div>
-      <div style={{ ...s.td, fontSize: 11 }}>
+      <div style={{ ...s.td, fontSize: 'var(--admin-fs-xs)' }}>
         <span style={{
           padding: '2px 8px', borderRadius: 999, fontWeight: 600,
           background: product.is_active ? 'var(--success-soft)' : 'var(--error-soft)',
@@ -64,14 +64,14 @@ function ProductRow({ product, onView, onHide, isDeleting, td }) {
           {product.is_active ? td.catalogPanel.statusActiveProduct : td.catalogPanel.statusInactiveProduct}
         </span>
       </div>
-      <div style={{ ...s.td, fontSize: 11, color: MUTED }}>{product.barcode || '—'}</div>
+      <div style={{ ...s.td, fontSize: 'var(--admin-fs-xs)', color: MUTED }}>{product.barcode || '—'}</div>
       <div style={{ ...s.td, gap: 6, justifyContent: 'flex-end' }}>
-        <button onClick={() => onView(product)} style={{ ...s.actionBtn, fontSize: 11 }}>{td.catalogPanel.viewBtn}</button>
+        <button onClick={() => onView(product)} style={{ ...s.actionBtn, fontSize: 'var(--admin-fs-xs)' }}>{td.catalogPanel.viewBtn}</button>
         {!product.is_admin_hidden && (
           <button
             onClick={() => onHide(product)}
             disabled={isDeleting}
-            style={{ ...s.actionBtn, ...s.actionBtnDanger, fontSize: 11, opacity: isDeleting ? 0.5 : 1 }}
+            style={{ ...s.actionBtn, ...s.actionBtnDanger, fontSize: 'var(--admin-fs-xs)', opacity: isDeleting ? 0.5 : 1 }}
           >
             {td.catalogPanel.hideBtn}
           </button>
@@ -83,9 +83,9 @@ function ProductRow({ product, onView, onHide, isDeleting, td }) {
 
 function BrandRow({ brand, onView, onHide, isDeleting, td }) {
   return (
-    <div style={{ ...s.tableRow, gridTemplateColumns: '2fr 1fr 1fr', padding: '10px 16px', fontSize: 13 }}>
+    <div style={{ ...s.tableRow, gridTemplateColumns: '2fr 1fr 1fr', padding: '10px 16px', fontSize: 'var(--admin-fs-base)' }}>
       <div style={{ ...s.td, fontWeight: 600 }}>{brand.name}</div>
-      <div style={{ ...s.td, fontSize: 11 }}>
+      <div style={{ ...s.td, fontSize: 'var(--admin-fs-xs)' }}>
         <span style={{
           padding: '2px 8px', borderRadius: 999, fontWeight: 600,
           background: brand.is_active ? 'var(--success-soft)' : 'var(--error-soft)',
@@ -95,12 +95,12 @@ function BrandRow({ brand, onView, onHide, isDeleting, td }) {
         </span>
       </div>
       <div style={{ ...s.td, gap: 6, justifyContent: 'flex-end' }}>
-        <button onClick={() => onView(brand)} style={{ ...s.actionBtn, fontSize: 11 }}>{td.catalogPanel.viewBtn}</button>
+        <button onClick={() => onView(brand)} style={{ ...s.actionBtn, fontSize: 'var(--admin-fs-xs)' }}>{td.catalogPanel.viewBtn}</button>
         {!brand.is_admin_hidden && (
           <button
             onClick={() => onHide(brand)}
             disabled={isDeleting}
-            style={{ ...s.actionBtn, ...s.actionBtnDanger, fontSize: 11, opacity: isDeleting ? 0.5 : 1 }}
+            style={{ ...s.actionBtn, ...s.actionBtnDanger, fontSize: 'var(--admin-fs-xs)', opacity: isDeleting ? 0.5 : 1 }}
           >
             {td.catalogPanel.hideBtn}
           </button>

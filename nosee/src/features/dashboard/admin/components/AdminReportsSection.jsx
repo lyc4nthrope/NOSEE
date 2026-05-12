@@ -3,6 +3,7 @@ import { s } from '../adminStyles';
 import { REPORT_STATUS_OPTIONS, normalizeReportStatus } from '../adminConstants';
 import { ReportCard } from './ReportCard';
 import { ReportDetailsModal } from '../modals/ReportDetailsModal';
+import { useAdminStore, selectSelectedReport } from '../store/adminStore';
 
 const ReportsPanel = lazy(() => import('./ReportsPanel'));
 
@@ -11,12 +12,13 @@ export default function AdminReportsSection({
   reportStatusFilter, setReportStatusFilter,
   reportTypeFilter, setReportTypeFilter,
   reportSort, setReportSort,
-  selectedReport, setSelectedReport,
   filteredReports,
   handleQuickAction, updateReportData,
   reportTypeOptions,
   td,
 }) {
+  const selectedReport = useAdminStore(selectSelectedReport);
+
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
@@ -67,7 +69,7 @@ export default function AdminReportsSection({
                 report={r}
                 showActions={r.status === 'PENDING' || r.status === 'IN_REVIEW'}
                 onResolve={handleQuickAction}
-                onOpenDetails={() => setSelectedReport(r)}
+                onOpenDetails={() => useAdminStore.getState().selectReport(r)}
               />
             ))}
           </div>
@@ -77,11 +79,12 @@ export default function AdminReportsSection({
       {selectedReport && (
         <ReportDetailsModal
           report={selectedReport}
-          onClose={() => setSelectedReport(null)}
+          onClose={() => useAdminStore.getState().selectReport(null)}
           onSave={async (updates) => {
             const ok = await updateReportData(selectedReport, updates);
             if (ok) {
-              setSelectedReport((prev) => prev ? { ...prev, ...updates, status: normalizeReportStatus(updates.status || prev.status) } : null);
+              const st = useAdminStore.getState();
+              if (st.selectedReport) st.selectReport({ ...st.selectedReport, ...updates, status: normalizeReportStatus(updates.status || st.selectedReport.status) });
             }
           }}
         />

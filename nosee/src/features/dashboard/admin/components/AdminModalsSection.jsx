@@ -1,17 +1,20 @@
 import { BanModal } from '../modals/BanModal';
 import { ConfirmModal } from './ConfirmModal';
+import { useAdminStore, selectConfirmModal, selectBanModal } from '../store/adminStore';
 
 export default function AdminModalsSection({
-  banModal, confirmBan, setBanModal,
-  confirmModal, setConfirmModal,
+  confirmBan,
 }) {
+  const confirmModal = useAdminStore(selectConfirmModal);
+  const banModal = useAdminStore(selectBanModal);
+
   return (
     <>
       {banModal && (
         <BanModal
           user={banModal}
           onConfirm={confirmBan}
-          onCancel={() => setBanModal(null)}
+          onCancel={() => useAdminStore.getState().setBanModal(null)}
         />
       )}
 
@@ -20,8 +23,8 @@ export default function AdminModalsSection({
         title={confirmModal.title}
         message={confirmModal.message}
         actions={confirmModal.actions}
-        onConfirm={() => { confirmModal.onConfirm?.(); setConfirmModal({ isOpen: false, actions: null }); }}
-        onCancel={() => setConfirmModal({ isOpen: false, actions: null })}
+        onConfirm={() => { confirmModal.onConfirm?.(); useAdminStore.getState().closeConfirmModal(); }}
+        onCancel={() => useAdminStore.getState().closeConfirmModal()}
       />
     </>
   );

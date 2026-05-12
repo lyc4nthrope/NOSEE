@@ -123,20 +123,20 @@ export default function AdminLogTable({
         <input type="date" value={logDateTo} onChange={e => setLogDateTo(e.target.value)} title={td.adminLogTable.dateTo} style={{ ...s.filterSelect, width: 140, fontFamily: 'inherit' }} />
         {hasFilters && (
           <button type="button" onClick={() => { setLogFilter(''); setLogCatFilter('all'); setLogSourceFilter('all'); setLogDateFrom(''); setLogDateTo(''); }}
-            style={{ fontSize: 12, color: MUTED, background: 'none', border: '1px solid var(--border)', borderRadius: 6, padding: '4px 10px', cursor: 'pointer' }}>
+            style={{ fontSize: 'var(--admin-fs-sm)', color: MUTED, background: 'none', border: '1px solid var(--border)', borderRadius: 6, padding: '4px 10px', cursor: 'pointer' }}>
             {td.adminLogTable.clearFilters}
           </button>
         )}
       </div>
 
       <div style={{ display: 'flex', gap: 12, marginBottom: 12, flexWrap: 'wrap' }}>
-        <span style={{ fontSize: 12, color: MUTED }}>
+        <span style={{ fontSize: 'var(--admin-fs-sm)', color: MUTED }}>
           <strong style={{ color: TEXT }}>{visibleRows.length}</strong> / {rows.length} {td.adminLogTable.records}
         </span>
-        <span style={{ fontSize: 12, color: MUTED }}>{td.adminLogTable.labelSession} {stats.session}</span>
-        <span style={{ fontSize: 12, color: ACCENT }}>{td.adminLogTable.labelActivity} {stats.activity}</span>
-        <span style={{ fontSize: 12, color: 'var(--warning)' }}>{td.adminLogTable.labelAdmin} {stats.admin}</span>
-        <span style={{ fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}>
+        <span style={{ fontSize: 'var(--admin-fs-sm)', color: MUTED }}>{td.adminLogTable.labelSession} {stats.session}</span>
+        <span style={{ fontSize: 'var(--admin-fs-sm)', color: ACCENT }}>{td.adminLogTable.labelActivity} {stats.activity}</span>
+        <span style={{ fontSize: 'var(--admin-fs-sm)', color: 'var(--warning)' }}>{td.adminLogTable.labelAdmin} {stats.admin}</span>
+        <span style={{ fontSize: 'var(--admin-fs-sm)', display: 'flex', alignItems: 'center', gap: 4 }}>
           <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--success)', display: 'inline-block' }} />
           <span style={{ color: MUTED }}>{td.adminLogTable.liveLabel}</span>
         </span>
@@ -151,22 +151,22 @@ export default function AdminLogTable({
               {headers.map(h => <div key={h} style={s.th} role="columnheader">{h}</div>)}
             </div>
             {visibleRows.map((row, idx) => (
-              <div key={row.id} style={{ ...s.tableRow, gridTemplateColumns: COLS, fontSize: 13, background: idx % 2 === 0 ? 'transparent' : 'var(--bg-elevated)' }} role="row">
-                <div style={{ ...s.td, color: MUTED, fontSize: 12 }} title={row._titleDate}>{row._fmtDate}</div>
+              <div key={row.id} style={{ ...s.tableRow, gridTemplateColumns: COLS, fontSize: 'var(--admin-fs-base)', background: idx % 2 === 0 ? 'transparent' : 'var(--bg-elevated)' }} role="row">
+                <div style={{ ...s.td, color: MUTED, fontSize: 'var(--admin-fs-sm)' }} title={row._titleDate}>{row._fmtDate}</div>
                 <div style={s.td}>
-                  <span style={{ fontSize: 12, fontWeight: 700, padding: '2px 6px', borderRadius: 999, background: `${COLORS[row.source]}18`, color: COLORS[row.source], whiteSpace: 'nowrap' }}>
+                  <span style={{ fontSize: 'var(--admin-fs-sm)', fontWeight: 700, padding: '2px 6px', borderRadius: 999, background: `${COLORS[row.source]}18`, color: COLORS[row.source], whiteSpace: 'nowrap' }}>
                     {srcLabels[row.source]}
                   </span>
                 </div>
-                <div style={{ ...s.td, fontWeight: 700, color: TEXT, fontSize: 12 }}>{userName(row.userId)}</div>
-                <div style={{ ...s.td, fontWeight: 600, fontSize: 12 }}>
+                <div style={{ ...s.td, fontWeight: 700, color: TEXT, fontSize: 'var(--admin-fs-sm)' }}>{userName(row.userId)}</div>
+                <div style={{ ...s.td, fontWeight: 600, fontSize: 'var(--admin-fs-sm)' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                     <span style={{ width: 6, height: 6, borderRadius: '50%', background: actionColor(row.type), flexShrink: 0 }} />
                     <span style={{ color: actionColor(row.type) }}>{actionLabel(row.type)}</span>
                   </span>
                 </div>
-                <div style={{ ...s.td, fontWeight: 500, fontSize: 12 }}>{objectInfo(row.type, row.details)}</div>
-                <div style={{ ...s.td, color: MUTED, fontSize: 12 }}>{row.reason || description(row.type, row.details, row.ip, row.ua)}</div>
+                <div style={{ ...s.td, fontWeight: 500, fontSize: 'var(--admin-fs-sm)' }}>{objectInfo(row.type, row.details)}</div>
+                <div style={{ ...s.td, color: MUTED, fontSize: 'var(--admin-fs-sm)' }}>{row.reason || description(row.type, row.details, row.ip, row.ua)}</div>
               </div>
             ))}
           </div>

@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { useAdminStore, selectActiveSection } from '../store/adminStore';
 import { getActionLogs, getLoginLogs, getUserActivityLogs } from '@/services/api/audit.api';
 import { getAllUsers, getUserBasicInfo } from '@/services/api/users.api';
 import { supabase } from '@/services/supabase.client';
@@ -33,7 +34,7 @@ import { supabase } from '@/services/supabase.client';
  *   loadLogs: Function,
  * }}
  */
-export default function useAdminLogs({ activeSection } = {}) {
+export default function useAdminLogs() {
   const [actionLogs, setActionLogs] = useState([]);
   const [loginLogs, setLoginLogs] = useState([]);
   const [logsLoading, setLogsLoading] = useState(false);
@@ -45,6 +46,7 @@ export default function useAdminLogs({ activeSection } = {}) {
   const [logSourceFilter, setLogSourceFilter] = useState('all');
   const [logDateFrom, setLogDateFrom] = useState('');
   const [logDateTo, setLogDateTo] = useState('');
+  const activeSection = useAdminStore(selectActiveSection);
 
   const loadLogs = useCallback(async () => {
     setLogsLoading(true);

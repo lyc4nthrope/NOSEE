@@ -24,15 +24,15 @@ function LogStatCard({ label, count24h, count7d, color, td, bg }) {
         padding: '14px 18px',
         background: bg || 'transparent',
       }}>
-        <div style={{ fontSize: 12, color: MUTED, marginBottom: 6 }}>{label}</div>
+        <div style={{ fontSize: 'var(--admin-fs-sm)', color: MUTED, marginBottom: 6 }}>{label}</div>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-          <span style={{ ...s.statValue, fontSize: 22, color: color || TEXT }}>
+          <span style={{ ...s.statValue, fontSize: 'var(--admin-fs-2xl)', color: color || TEXT }}>
             {count24h ?? '—'}
           </span>
-          <span style={{ fontSize: 11, color: MUTED }}>{td.logsPanel.in24h}</span>
+          <span style={{ fontSize: 'var(--admin-fs-xs)', color: MUTED }}>{td.logsPanel.in24h}</span>
         </div>
       </div>
-      <div style={{ fontSize: 11, color: MUTED, padding: '0 18px 14px', marginTop: 2 }}>
+      <div style={{ fontSize: 'var(--admin-fs-xs)', color: MUTED, padding: '0 18px 14px', marginTop: 2 }}>
         {count7d != null ? `${count7d} ${td.logsPanel.in7d}` : ''}
       </div>
     </div>
@@ -141,12 +141,12 @@ export default function LogsPanel() {
                       : event.source === 'activity' ? ACCENT : 'var(--warning)',
                     flexShrink: 0,
                   }} />
-                  <span style={{ fontSize: 11, fontWeight: 600, color: MUTED }}>
+                  <span style={{ fontSize: 'var(--admin-fs-xs)', fontWeight: 600, color: MUTED }}>
                     {event.source}
                   </span>
                 </div>
-                <span style={{ fontSize: 12, color: TEXT }}>{event.action}</span>
-                <span style={{ fontSize: 11, color: MUTED }}>
+                <span style={{ fontSize: 'var(--admin-fs-sm)', color: TEXT }}>{event.action}</span>
+                <span style={{ fontSize: 'var(--admin-fs-xs)', color: MUTED }}>
                   {event.created_at
                     ? new Date(event.created_at).toLocaleDateString('es-CO', {
                         month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',

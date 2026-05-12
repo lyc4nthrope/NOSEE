@@ -8,7 +8,7 @@ export default function AdminDealersSection({
   setApplicationsLoaded, loadApplications,
 }) {
   return (
-    <section style={s.main} className="admin-main">
+    <>
       <div style={s.section}>
         <div style={s.sectionHead}>
           <span style={s.sectionTitle}><Icon name="Bike" size={20} /> Solicitudes de Repartidor</span>
@@ -22,6 +22,6 @@ export default function AdminDealersSection({
           />
         )}
       </div>
-    </section>
+    </>
   );
 }

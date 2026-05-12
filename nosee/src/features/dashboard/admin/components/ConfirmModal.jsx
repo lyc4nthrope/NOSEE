@@ -1,20 +1,22 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 
 export function ConfirmModal({ isOpen, title, message, onConfirm, onCancel, confirmLabel = 'Confirmar', cancelLabel = 'Cancelar', danger = false, actions }) {
   const modalRef = useFocusTrap(isOpen);
+  const onCancelRef = useRef(onCancel);
+  onCancelRef.current = onCancel;
 
   useEffect(() => {
     if (!isOpen) return;
-    const handleEsc = (e) => { if (e.key === 'Escape') onCancel(); };
+    const handleEsc = (e) => { if (e.key === 'Escape') onCancelRef.current(); };
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
-  }, [isOpen, onCancel]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
   return (
-    <div role="presentation" style={{
+    <div role="presentation" className="admin-modal-overlay" style={{
       position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
       backgroundColor: 'var(--overlay)', display: 'flex',
       alignItems: 'center', justifyContent: 'center', zIndex: 1000,
@@ -37,7 +39,7 @@ export function ConfirmModal({ isOpen, title, message, onConfirm, onCancel, conf
                   style={{
                     ...(action.danger ? { backgroundColor: 'var(--error)', color: '#fff' } : {}),
                     padding: '6px 14px', borderRadius: 6, border: '1px solid var(--border)',
-                    cursor: 'pointer', fontSize: 13, fontWeight: 600,
+                    cursor: 'pointer', fontSize: 'var(--admin-fs-base)', fontWeight: 600,
                   }}
                 >
                   {action.label}
@@ -45,7 +47,7 @@ export function ConfirmModal({ isOpen, title, message, onConfirm, onCancel, conf
               ))}
               <button
                 onClick={onCancel}
-                style={{ padding: '6px 14px', borderRadius: 6, border: '1px solid var(--border)', background: 'none', cursor: 'pointer', fontSize: 13 }}
+                style={{ padding: '6px 14px', borderRadius: 6, border: '1px solid var(--border)', background: 'none', cursor: 'pointer', fontSize: 'var(--admin-fs-base)' }}
               >
                 {cancelLabel}
               </button>
@@ -54,7 +56,7 @@ export function ConfirmModal({ isOpen, title, message, onConfirm, onCancel, conf
             <>
               <button
                 onClick={onCancel}
-                style={{ padding: '6px 14px', borderRadius: 6, border: '1px solid var(--border)', background: 'none', cursor: 'pointer', fontSize: 13 }}
+                style={{ padding: '6px 14px', borderRadius: 6, border: '1px solid var(--border)', background: 'none', cursor: 'pointer', fontSize: 'var(--admin-fs-base)' }}
               >
                 {cancelLabel}
               </button>
@@ -62,7 +64,7 @@ export function ConfirmModal({ isOpen, title, message, onConfirm, onCancel, conf
                 onClick={onConfirm}
                 style={{
                   padding: '6px 14px', borderRadius: 6, border: '1px solid var(--border)',
-                  cursor: 'pointer', fontSize: 13, fontWeight: 600,
+                  cursor: 'pointer', fontSize: 'var(--admin-fs-base)', fontWeight: 600,
                   ...(danger ? { backgroundColor: 'var(--error)', color: '#fff', borderColor: 'var(--error)' } : {}),
                 }}
               >

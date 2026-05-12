@@ -7,14 +7,11 @@ import { PublicationDetailModal } from '../modals/PublicationDetailModal';
 import { StoreDetailModal } from '../modals/StoreDetailModal';
 import { BrandDetailModal } from '../modals/BrandDetailModal';
 import { ProductDetailModal } from '../modals/ProductDetailModal';
+import { useAdminStore, selectSelectedPublication, selectSelectedStore, selectSelectedBrand, selectSelectedProduct } from '../store/adminStore';
 
 export default function AdminContentSection({
   publications, pubsLoading, pubsLoaded,
   pubFilter, setPubFilter,
-  selectedPub, setSelectedPub,
-  selectedStore, setSelectedStore,
-  selectedBrand, setSelectedBrand,
-  selectedProduct, setSelectedProduct,
   unpublishedLoading, unpublishedResources,
   deletingPub, deletingStoreId, deletingBrandId, deletingProductId,
   handleDeletePublication, handleEditPublication,
@@ -23,6 +20,11 @@ export default function AdminContentSection({
   handleViewProduct, handleDeleteProduct, handleEditProduct,
   td,
 }) {
+  const selectedPub = useAdminStore(selectSelectedPublication);
+  const selectedStore = useAdminStore(selectSelectedStore);
+  const selectedBrand = useAdminStore(selectSelectedBrand);
+  const selectedProduct = useAdminStore(selectSelectedProduct);
+
   return (
     <>
       <SectionHeader title={td.contentTitle} sub={td.contentSub} />
@@ -90,7 +92,7 @@ export default function AdminContentSection({
             return true;
           })}
           onDelete={handleDeletePublication}
-          onView={(p) => setSelectedPub(p)}
+          onView={(p) => useAdminStore.getState().selectPublication(p)}
           onViewStore={handleViewStore}
           onDeleteStore={handleDeleteStore}
           onViewBrand={handleViewBrand}
@@ -104,14 +106,17 @@ export default function AdminContentSection({
       {selectedPub && (
         <PublicationDetailModal
           pub={selectedPub}
-          onClose={() => setSelectedPub(null)}
+          onClose={() => useAdminStore.getState().selectPublication(null)}
           onSave={async (updates) => {
             const ok = await handleEditPublication(selectedPub.id, updates.db, updates.ui);
-            if (ok) setSelectedPub(prev => prev ? { ...prev, ...updates.db, ...(updates.ui || {}) } : null);
+            if (ok) {
+              const st = useAdminStore.getState();
+              if (st.selectedPub) st.selectPublication({ ...st.selectedPub, ...updates.db, ...(updates.ui || {}) });
+            }
           }}
           onDelete={() => {
             handleDeletePublication(selectedPub);
-            setSelectedPub(null);
+            useAdminStore.getState().selectPublication(null);
           }}
         />
       )}
@@ -119,7 +124,7 @@ export default function AdminContentSection({
       {selectedStore && (
         <StoreDetailModal
           store={selectedStore}
-          onClose={() => setSelectedStore(null)}
+          onClose={() => useAdminStore.getState().selectStore(null)}
           onSave={handleEditStore}
           onDelete={() => { handleDeleteStore(selectedStore); }}
           isDeleting={deletingStoreId === selectedStore.id}
@@ -129,7 +134,7 @@ export default function AdminContentSection({
       {selectedBrand && (
         <BrandDetailModal
           brand={selectedBrand}
-          onClose={() => setSelectedBrand(null)}
+          onClose={() => useAdminStore.getState().selectBrand(null)}
           onSave={handleEditBrand}
           onDelete={() => { handleDeleteBrand(selectedBrand); }}
           isDeleting={deletingBrandId === selectedBrand.id}
@@ -139,7 +144,7 @@ export default function AdminContentSection({
       {selectedProduct && (
         <ProductDetailModal
           product={selectedProduct}
-          onClose={() => setSelectedProduct(null)}
+          onClose={() => useAdminStore.getState().selectProduct(null)}
           onSave={handleEditProduct}
           onDelete={() => handleDeleteProduct(selectedProduct)}
           isDeleting={deletingProductId === selectedProduct.id}

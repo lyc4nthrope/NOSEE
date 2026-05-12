@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useAdminStore } from '../store/adminStore';
 
 /**
  * Hook que genera handlers de confirmación para ocultar publicaciones, tiendas, marcas y productos.
@@ -11,7 +12,6 @@ import { useCallback } from 'react';
  * @param {Function} params.handleExecuteDeleteStore - Callback para borrar tienda
  * @param {Function} params.handleExecuteDeleteBrand - Callback para borrar marca
  * @param {Function} params.handleExecuteDeleteProduct - Callback para borrar producto
- * @param {Function} params.setConfirmModal - Setter del modal de confirmación
  * @returns {{
  *   handleDeletePublication: Function,
  *   handleDeleteStore: Function,
@@ -25,7 +25,6 @@ export default function useAdminConfirmHandlers({
   handleExecuteDeleteStore,
   handleExecuteDeleteBrand,
   handleExecuteDeleteProduct,
-  setConfirmModal,
 }) {
   const handleDeletePublication = useCallback((publicationInput) => {
     const publication =
@@ -36,8 +35,7 @@ export default function useAdminConfirmHandlers({
     const isActive = publication?.is_active === true;
     if (!pubId) return;
     if (isActive) {
-      setConfirmModal({
-        isOpen: true,
+      useAdminStore.getState().openConfirmModal({
         title: td.promptHideTitle || 'Moderar publicación',
         message: td.promptHidePub,
         actions: [
@@ -46,8 +44,7 @@ export default function useAdminConfirmHandlers({
         ],
       });
     } else {
-      setConfirmModal({
-        isOpen: true,
+      useAdminStore.getState().openConfirmModal({
         title: td.confirmHideTitle || 'Ocultar completamente',
         message: td.confirmHideFull,
         onConfirm: () => executeDeletePublication(pubId, 'hide_full'),
@@ -59,8 +56,7 @@ export default function useAdminConfirmHandlers({
     const storeId = publication?.storeId || publication?.store?.id || publication?.store_id || publication?.id;
     const storeName = publication?.storeName || publication?.store?.name || publication?.name || 'esta tienda';
     if (!storeId) return;
-    setConfirmModal({
-      isOpen: true,
+    useAdminStore.getState().openConfirmModal({
       title: td.confirmHideTitle || 'Ocultar tienda',
       message: td.confirmHide(storeName),
       onConfirm: () => handleExecuteDeleteStore(storeId, storeName),
@@ -74,8 +70,7 @@ export default function useAdminConfirmHandlers({
       console.error(td.errorNoBrand);
       return;
     }
-    setConfirmModal({
-      isOpen: true,
+    useAdminStore.getState().openConfirmModal({
       title: td.confirmHideTitle || 'Ocultar marca',
       message: td.confirmHideBrand(brandName),
       onConfirm: () => handleExecuteDeleteBrand(brandId, brandName),
@@ -86,8 +81,7 @@ export default function useAdminConfirmHandlers({
     const productId = product?.productId || product?.id;
     const productName = product?.productName || product?.name || 'este producto';
     if (!productId) return;
-    setConfirmModal({
-      isOpen: true,
+    useAdminStore.getState().openConfirmModal({
       title: td.confirmHideTitle || 'Ocultar producto',
       message: td.confirmHide(productName),
       onConfirm: () => handleExecuteDeleteProduct(productId, productName),

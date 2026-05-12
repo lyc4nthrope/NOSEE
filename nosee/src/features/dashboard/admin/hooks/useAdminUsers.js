@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { useAdminStore } from '../store/adminStore';
 import { changeUserRole, getAllUsers, updateUserStatus } from '@/services/api/users.api';
 import { insertActionLog } from '@/services/api/audit.api';
 import { hideUserPublications } from '@/services/api/adminCatalog.api';
@@ -21,22 +22,19 @@ const ROLE_MAP = {
  * @param {Object} [params]
  * @param {boolean} [params.pubsLoaded] - Indica si las publicaciones ya cargaron
  * @param {Function} [params.setPublications] - Setter de publicaciones (para ocultar al banear)
- * @param {Function} [params.setConfirmModal] - Setter del modal de confirmación
  * @returns {{
  *   users: Array,
  *   setUsers: Function,
  *   usersLoading: boolean,
  *   usersError: string|null,
  *   changingRole: string|null,
- *   banModal: Object|null,
- *   setBanModal: Function,
  *   loadUsers: Function,
  *   handleRoleChange: Function,
  *   handleBanToggle: Function,
  *   confirmBan: Function,
  * }}
  */
-export default function useAdminUsers({ pubsLoaded, setPublications, setConfirmModal } = {}) {
+export default function useAdminUsers({ pubsLoaded, setPublications } = {}) {
   const { t, lang } = useLanguage();
   const td = t.adminDashboard;
   const currentUser = useAuthStore(s => s.user);
@@ -46,7 +44,6 @@ export default function useAdminUsers({ pubsLoaded, setPublications, setConfirmM
   const [usersLoading, setUsersLoading] = useState(true);
   const [usersError, setUsersError] = useState(null);
   const [changingRole, setChangingRole] = useState(null);
-  const [banModal, setBanModal] = useState(null);
 
   const loadUsers = useCallback(async () => {
     setUsersLoading(true);
@@ -93,46 +90,28 @@ export default function useAdminUsers({ pubsLoaded, setPublications, setConfirmM
       return;
     }
 
-    if (setConfirmModal) {
-      setConfirmModal({
-        isOpen: true,
-        title: 'Cambiar rol',
-        message: `¿Cambiar rol de ${targetUser.name} a ${newRole}?`,
-        onConfirm: async () => {
-          setChangingRole(userId);
-          try {
-            const result = await changeUserRole(userId, ROLE_MAP[newRole]);
-            if (result.success) {
-              setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
-              insertActionLog(currentUserId, 'user', userId, 'change_role', null, { newRole, prevRole: targetUser?.role || null });
-            } else {
-              console.error('[useAdminUsers] changeUserRole:', result.error);
-            }
-          } catch (err) {
-            console.error('[useAdminUsers] changeUserRole:', err);
-          } finally {
-            setChangingRole(null);
+    useAdminStore.getState().openConfirmModal({
+      title: 'Cambiar rol',
+      message: `¿Cambiar rol de ${targetUser.name} a ${newRole}?`,
+      onConfirm: async () => {
+        setChangingRole(userId);
+        try {
+          const result = await changeUserRole(userId, ROLE_MAP[newRole]);
+          if (result.success) {
+            setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
+            insertActionLog(currentUserId, 'user', userId, 'change_role', null, { newRole, prevRole: targetUser?.role || null });
+          } else {
+            console.error('[useAdminUsers] changeUserRole:', result.error);
           }
-        },
-      });
-      return;
-    }
-
-    setChangingRole(userId);
-    try {
-      const result = await changeUserRole(userId, ROLE_MAP[newRole]);
-      if (result.success) {
-        setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
-        insertActionLog(currentUserId, 'user', userId, 'change_role', null, { newRole, prevRole: targetUser?.role || null });
-      } else {
-        console.error('[useAdminUsers] changeUserRole:', result.error);
-      }
-    } catch (err) {
-      console.error('[useAdminUsers] changeUserRole:', err);
-    } finally {
-      setChangingRole(null);
-    }
-  }, [users, td, currentUserId, currentUser, setConfirmModal]);
+        } catch (err) {
+          console.error('[useAdminUsers] changeUserRole:', err);
+        } finally {
+          setChangingRole(null);
+        }
+      },
+    });
+    return;
+  }, [users, td, currentUserId, currentUser]);
 
   const handleBanToggle = useCallback((userId) => {
     const target = users.find(u => u.id === userId);
@@ -148,12 +127,12 @@ export default function useAdminUsers({ pubsLoaded, setPublications, setConfirmM
       return;
     }
 
-    setBanModal(target);
+    useAdminStore.getState().setBanModal(target);
   }, [users, td, currentUser]);
 
   const confirmBan = useCallback(async () => {
-    const target = banModal;
-    setBanModal(null);
+    const target = useAdminStore.getState().banModal;
+    useAdminStore.getState().setBanModal(null);
     const isBanning  = target.status === 'activo';
     const newIsActive = !isBanning;
 
@@ -180,11 +159,11 @@ export default function useAdminUsers({ pubsLoaded, setPublications, setConfirmM
     } catch (err) {
       console.error('[useAdminUsers] confirmBan:', err);
     }
-  }, [banModal, td, currentUserId, pubsLoaded, setPublications]);
+  }, [td, currentUserId, pubsLoaded, setPublications]);
 
   return {
     users, setUsers, usersLoading, usersError,
-    changingRole, banModal, setBanModal,
+    changingRole,
     loadUsers, handleRoleChange, handleBanToggle, confirmBan,
   };
 }

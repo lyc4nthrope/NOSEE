@@ -16,9 +16,9 @@ export function ReportCard({ report, showActions, onResolve, onOpenDetails }) {
         <span style={{ ...s.severityBadge, background: sev.bg, color: sev.text }}>
           {severityLabel}
         </span>
-        <span style={{ fontSize: 15, fontWeight: 600 }}>{typeLabel}</span>
+        <span style={{ fontSize: 'var(--admin-fs-md)', fontWeight: 600 }}>{typeLabel}</span>
         <span style={s.statusPill}>{statusLabel}</span>
-        <span style={{ marginLeft: 'auto', fontSize: 12, color: MUTED }}>{report.time}</span>
+        <span style={{ marginLeft: 'auto', fontSize: 'var(--admin-fs-sm)', color: MUTED }}>{report.time}</span>
       </div>
       <div className="admin-report-info-rows" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
         {[
@@ -28,7 +28,7 @@ export function ReportCard({ report, showActions, onResolve, onOpenDetails }) {
           [td.labelReportedUser,  report.reported ?? td.unknown],
           [td.labelElementId, report.reportedId || '—'],
         ].map(([label, value]) => (
-          <div key={label} style={{ display: 'flex', gap: 12, fontSize: 14 }}>
+          <div key={label} style={{ display: 'flex', gap: 12, fontSize: 'var(--admin-fs-md)' }}>
             <span style={{ color: MUTED, width: 150, flexShrink: 0 }}>{label}</span>
             <span style={{ color: TEXT }}>{value}</span>
           </div>
@@ -36,7 +36,7 @@ export function ReportCard({ report, showActions, onResolve, onOpenDetails }) {
 
         {report.publicationSummary && (
           <div style={{ marginTop: 8, padding: '10px 14px', borderRadius: 8, background: 'var(--bg-surface)', border: `1px solid ${BORDER}` }}>
-            <p style={{ margin: '0 0 8px', fontSize: 11, fontWeight: 600, color: MUTED, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            <p style={{ margin: '0 0 8px', fontSize: 'var(--admin-fs-xs)', fontWeight: 600, color: MUTED, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
               {td.labelReportedPub}
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 16px' }}>
@@ -46,7 +46,7 @@ export function ReportCard({ report, showActions, onResolve, onOpenDetails }) {
                 [td.colUnit,   report.publicationSummary.unit],
                 [td.colPrice,  report.publicationSummary.price],
               ].map(([label, value]) => (
-                <div key={label} style={{ display: 'flex', gap: 6, fontSize: 13 }}>
+                <div key={label} style={{ display: 'flex', gap: 6, fontSize: 'var(--admin-fs-base)' }}>
                   <span style={{ color: MUTED, flexShrink: 0 }}>{label}:</span>
                   <span style={{ color: TEXT, fontWeight: 500 }}>{value}</span>
                 </div>

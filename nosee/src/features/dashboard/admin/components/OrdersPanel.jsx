@@ -28,7 +28,7 @@ const TERMINAL_STATUSES = ['cancelado', 'cancelado_no_pago', 'entregado', 'usuar
 function FunnelBar({ label, count, pct, color }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-      <span style={{ width: 140, fontSize: 12, color: MUTED, textAlign: 'right' }}>{label}</span>
+      <span style={{ width: 140, fontSize: 'var(--admin-fs-sm)', color: MUTED, textAlign: 'right' }}>{label}</span>
       <div style={{
         flex: 1, height: 20, background: 'var(--bg-elevated)',
         borderRadius: 4, overflow: 'hidden', position: 'relative',
@@ -36,10 +36,10 @@ function FunnelBar({ label, count, pct, color }) {
         <div style={{
           width: `${Math.max(pct, 2)}%`, height: '100%',
           background: color || ACCENT, borderRadius: 4,
-          transition: 'width 0.3s ease',
+          transition: 'width var(--transition-slow) var(--transition-ease)',
         }} />
       </div>
-      <span style={{ width: 60, fontSize: 13, fontWeight: 700, color: TEXT }}>{count}</span>
+      <span style={{ width: 60, fontSize: 'var(--admin-fs-base)', fontWeight: 700, color: TEXT }}>{count}</span>
     </div>
   );
 }
@@ -205,15 +205,15 @@ export default function OrdersPanel() {
               {filteredOrders.map((o, idx) => (
                 <div key={o.id} style={{
                   ...s.tableRow, gridTemplateColumns: '100px 1fr 100px 80px 100px',
-                  padding: '10px 16px', fontSize: 13,
+                  padding: '10px 16px', fontSize: 'var(--admin-fs-base)',
                   background: idx % 2 === 0 ? 'transparent' : 'var(--bg-elevated)',
                 }}>
-                  <div style={{ ...s.td, fontSize: 12, color: MUTED }}>
+                  <div style={{ ...s.td, fontSize: 'var(--admin-fs-sm)', color: MUTED }}>
                     {o.local_id || `#${o.id}`}
                   </div>
                   <div style={s.td}>
                     <span style={{
-                      fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 999,
+                      fontSize: 'var(--admin-fs-xs)', fontWeight: 600, padding: '2px 8px', borderRadius: 999,
                       background: o.status === 'entregado' ? 'var(--success-soft)' :
                                   o.status === 'cancelado' || o.status === 'cancelado_no_pago' ? 'var(--error-soft)' :
                                   'var(--bg-elevated)',
@@ -226,8 +226,8 @@ export default function OrdersPanel() {
                   <div style={{ ...s.td, fontWeight: 600 }}>
                     {Number(o.total_estimated || 0).toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })}
                   </div>
-                  <div style={{ ...s.td, fontSize: 11, color: MUTED }}>{o.strategy || '—'}</div>
-                  <div style={{ ...s.td, fontSize: 11, color: MUTED }}>
+                  <div style={{ ...s.td, fontSize: 'var(--admin-fs-xs)', color: MUTED }}>{o.strategy || '—'}</div>
+                  <div style={{ ...s.td, fontSize: 'var(--admin-fs-xs)', color: MUTED }}>
                     {o.created_at ? new Date(o.created_at).toLocaleDateString('es-CO', { month: 'short', day: 'numeric' }) : '—'}
                   </div>
                 </div>
@@ -243,21 +243,23 @@ export default function OrdersPanel() {
             style={{
               padding: '6px 14px', borderRadius: 6, border: `1px solid var(--border)`,
               background: page === 0 ? 'var(--bg-elevated)' : 'transparent',
-              color: page === 0 ? 'var(--muted)' : 'var(--text)', cursor: page === 0 ? 'default' : 'pointer',
-              fontSize: 13,
+              color: page === 0 ? MUTED : TEXT, cursor: page === 0 ? 'default' : 'pointer',
+              fontSize: 'var(--admin-fs-base)',
+              transition: 'background var(--transition-fast) ease, color var(--transition-fast) ease',
             }}
           >
             {td.ordersPanel.prevPage}
           </button>
-          <span style={{ fontSize: 13, color: 'var(--muted)' }}>{td.ordersPanel.pageLabel(page + 1)}</span>
+          <span style={{ fontSize: 'var(--admin-fs-base)', color: MUTED }}>{td.ordersPanel.pageLabel(page + 1)}</span>
           <button
             onClick={() => setPage(p => p + 1)}
             disabled={orders.length < pageSize}
             style={{
               padding: '6px 14px', borderRadius: 6, border: `1px solid var(--border)`,
               background: orders.length < pageSize ? 'var(--bg-elevated)' : 'transparent',
-              color: orders.length < pageSize ? 'var(--muted)' : 'var(--text)', cursor: orders.length < pageSize ? 'default' : 'pointer',
-              fontSize: 13,
+              color: orders.length < pageSize ? MUTED : TEXT, cursor: orders.length < pageSize ? 'default' : 'pointer',
+              fontSize: 'var(--admin-fs-base)',
+              transition: 'background var(--transition-fast) ease, color var(--transition-fast) ease',
             }}
           >
             {td.ordersPanel.nextPage}

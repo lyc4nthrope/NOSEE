@@ -104,11 +104,11 @@ export default function ReportsPanel() {
                   {report.severity}
                 </span>
                 <span style={s.statusPill}>{report.reported_type}</span>
-                <span style={{ fontSize: 12, color: MUTED, marginLeft: 'auto' }}>
+                <span style={{ fontSize: 'var(--admin-fs-sm)', color: MUTED, marginLeft: 'auto' }}>
                   {new Date(report.created_at).toLocaleDateString('es-CO')}
                 </span>
               </div>
-              <div style={{ fontSize: 13, color: MUTED }}>
+              <div style={{ fontSize: 'var(--admin-fs-base)', color: MUTED }}>
                 {td.reportTypes?.[report.reason] || report.reason} — ID: {report.reported_id}
               </div>
             </div>

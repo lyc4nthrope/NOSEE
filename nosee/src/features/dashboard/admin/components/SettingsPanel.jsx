@@ -143,7 +143,7 @@ export default function SettingsPanel() {
                     style={{
                       background: 'var(--bg-elevated)', border: `1px solid ${BORDER}`,
                       color: TEXT, borderRadius: 6, padding: '5px 10px',
-                      fontSize: 15, fontWeight: 700, width: 80, textAlign: 'right',
+                      fontSize: 'var(--admin-fs-md)', fontWeight: 700, width: 80, textAlign: 'right',
                     }}
                   />
                 ) : (
@@ -167,7 +167,7 @@ export default function SettingsPanel() {
           <span style={s.sectionTitle}>{td.catsTitle}</span>
           {catsLoading
             ? null
-            : <span style={{ fontSize: 13, color: MUTED }}>{categories.length} {td.settingsPanel.categoriesLabel}</span>
+            : <span style={{ fontSize: 'var(--admin-fs-base)', color: MUTED }}>{categories.length} {td.settingsPanel.categoriesLabel}</span>
           }
         </div>
 
@@ -179,7 +179,7 @@ export default function SettingsPanel() {
             onChange={e => setNewCatName(e.target.value)}
               style={{
                 flex: 1, background: 'var(--bg-elevated)', border: `1px solid ${BORDER}`,
-                color: TEXT, borderRadius: 8, padding: '8px 14px', fontSize: 14,
+                color: TEXT, borderRadius: 8, padding: '8px 14px', fontSize: 'var(--admin-fs-md)',
               }}
           />
           <button
@@ -200,7 +200,7 @@ export default function SettingsPanel() {
             {categories.map(cat => (
               <div key={cat.id} style={s.configRow}>
                 <div style={s.configParam}>{cat.name}</div>
-                <span style={{ ...s.configValue, color: MUTED, fontSize: 13 }}>
+                <span style={{ ...s.configValue, color: MUTED, fontSize: 'var(--admin-fs-base)' }}>
                   {cat.products?.[0]?.count ?? 0} {td.settingsPanel.productsLabel}
                 </span>
               </div>

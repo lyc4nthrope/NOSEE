@@ -26,8 +26,6 @@ import {
  *   setReportTypeFilter: Function,
  *   reportSort: string,
  *   setReportSort: Function,
- *   selectedReport: Object|null,
- *   setSelectedReport: Function,
  *   resolvedCount: number,
  *   reportTypeOptions: Array,
  *   reportStatusCounts: Object,
@@ -49,7 +47,6 @@ export default function useAdminReports() {
   const [reportStatusFilter, setReportStatusFilter] = useState('all');
   const [reportTypeFilter, setReportTypeFilter] = useState('all');
   const [reportSort, setReportSort] = useState('recent');
-  const [selectedReport, setSelectedReport] = useState(null);
   const [resolvedCount, setResolvedCount] = useState(0);
 
   const loadReports = useCallback(async () => {
@@ -217,7 +214,6 @@ export default function useAdminReports() {
     reportStatusFilter, setReportStatusFilter,
     reportTypeFilter, setReportTypeFilter,
     reportSort, setReportSort,
-    selectedReport, setSelectedReport,
     resolvedCount, reportTypeOptions, reportStatusCounts, reportTypeCounts,
     filteredReports,
     loadReports, updateReportData, handleQuickAction,

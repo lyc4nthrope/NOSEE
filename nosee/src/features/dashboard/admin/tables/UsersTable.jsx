@@ -37,7 +37,7 @@ export function UsersTable({ users, onRoleChange, onBanToggle, changingRole }) {
               ))}
             </select>
             {changingRole === u.id && (
-              <span style={{ marginLeft: 8, fontSize: 12, color: ACCENT }}>{td.savingRole}</span>
+              <span style={{ marginLeft: 8, fontSize: 'var(--admin-fs-sm)', color: ACCENT }}>{td.savingRole}</span>
             )}
           </div>
           <div style={{ ...s.td, ...s.tdNum }} role="gridcell">{u.rep}</div>

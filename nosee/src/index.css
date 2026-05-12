@@ -74,6 +74,22 @@
 
   /* Navbar */
   --nav-bg: rgba(8, 12, 20, 0.85);
+
+  /* Admin typography scale */
+  --admin-fs-xs:  11px;
+  --admin-fs-sm:  12px;
+  --admin-fs-base: 13px;
+  --admin-fs-md:  14px;
+  --admin-fs-lg:  16px;
+  --admin-fs-xl:  18px;
+  --admin-fs-2xl: 26px;
+
+  /* Transition tokens */
+  --transition-fast: 0.15s;
+  --transition-base: 0.2s;
+  --transition-slow: 0.3s;
+  --transition-ease: ease;
+  --transition-ease-out: ease-out;
 }
 
 /* ── Publication Card scoped overrides ───────────────── */
@@ -307,6 +323,10 @@ img {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.admin-modal-overlay {
+  animation: fadeIn var(--transition-slow) var(--transition-ease-out);
 }
 
 @keyframes spin {

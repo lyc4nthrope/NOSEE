@@ -7,7 +7,7 @@ import { useFocusTrap } from '../hooks/useFocusTrap';
 import { sanitizeHTML } from '@/services/utils/sanitize';
 
 const SPINNER_STYLE = {
-  textAlign: 'center', padding: '20px 0', color: MUTED, fontSize: 13,
+  textAlign: 'center', padding: '20px 0', color: MUTED, fontSize: 'var(--admin-fs-base)',
 };
 
 export function ProductDetailModal({ product, onClose, onDelete, isDeleting, onSave }) {
@@ -57,11 +57,11 @@ export function ProductDetailModal({ product, onClose, onDelete, isDeleting, onS
       : product?.base_quantity ?? '\u2014';
 
   return (
-    <div role="presentation" style={s.modalOverlay} onClick={onClose} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}>
+    <div role="presentation" className="admin-modal-overlay" style={s.modalOverlay} onClick={onClose} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}>
       <div ref={modalRef} role="dialog" aria-modal="true" aria-labelledby="product-detail-title" style={{ ...s.modalCard, maxWidth: 560, maxHeight: '90vh', overflowY: 'auto' }} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
           <div>
-            <h2 id="product-detail-title" style={{ margin: 0, fontSize: 18, color: TEXT }}>{td.productDetailTitle}</h2>
+            <h2 id="product-detail-title" style={{ margin: 0, fontSize: 'var(--admin-fs-xl)', color: TEXT }}>{td.productDetailTitle}</h2>
             <p style={{ ...s.headerSub, margin: '4px 0 0' }}>ID: {product.id}</p>
           </div>
           <button onClick={onClose} aria-label={td.productDetailModal.closeAria} title={td.productDetailModal.closeAria} style={CLOSE_BTN_STYLE}>✕</button>
@@ -123,8 +123,8 @@ export function ProductDetailModal({ product, onClose, onDelete, isDeleting, onS
           </div>
         )}
 
-        {errorMsg && <p style={{ margin: '10px 0 0', fontSize: 13, color: 'var(--error)', textAlign: 'right' }}>{errorMsg}</p>}
-        {saveState.saved && <p style={{ margin: '10px 0 0', fontSize: 13, color: 'var(--success)', textAlign: 'right' }}>{td.productDetailModal.savedOk}</p>}
+        {errorMsg && <p style={{ margin: '10px 0 0', fontSize: 'var(--admin-fs-base)', color: 'var(--error)', textAlign: 'right' }}>{errorMsg}</p>}
+        {saveState.saved && <p style={{ margin: '10px 0 0', fontSize: 'var(--admin-fs-base)', color: 'var(--success)', textAlign: 'right' }}>{td.productDetailModal.savedOk}</p>}
 
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 16, gap: 10 }}>
           <button onClick={onDelete} style={s.btnDelete} disabled={isDeleting}>

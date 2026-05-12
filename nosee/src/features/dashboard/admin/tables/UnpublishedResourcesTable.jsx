@@ -28,19 +28,19 @@ export function UnpublishedResourcesTable({
           ))}
         </div>
         {(stores || []).length === 0 ? (
-          <div style={{ padding: '14px 20px', color: MUTED, fontSize: 13 }}>{td.noUnpublishedStores}</div>
+          <div style={{ padding: '14px 20px', color: MUTED, fontSize: 'var(--admin-fs-base)' }}>{td.noUnpublishedStores}</div>
         ) : (
           (stores || []).map((store) => (
             <div key={store.id} style={{ ...s.tableRow, gridTemplateColumns: '2fr 1fr 1fr' }} role="row">
               <div style={s.td}>
                 <div>
                   <div style={s.rowName}>{store.name || '—'}</div>
-                  <div style={{ fontSize: 12, color: MUTED }}>{store.address || td.noAddress}</div>
+                  <div style={{ fontSize: 'var(--admin-fs-sm)', color: MUTED }}>{store.address || td.noAddress}</div>
                 </div>
               </div>
-              <div style={{ ...s.td, fontSize: 13, color: MUTED }}>{store.typeLabel || '—'}</div>
+              <div style={{ ...s.td, fontSize: 'var(--admin-fs-base)', color: MUTED }}>{store.typeLabel || '—'}</div>
               <div style={{ ...s.td, gap: 6 }}>
-                <button style={{ ...s.filterBtn, padding: '5px 10px', fontSize: 12 }} onClick={() => onViewStore(store)}>
+                <button style={{ ...s.filterBtn, padding: '5px 10px', fontSize: 'var(--admin-fs-sm)' }} onClick={() => onViewStore(store)}>
                   {td.viewDetailBtn}
                 </button>
                 <button
@@ -63,19 +63,19 @@ export function UnpublishedResourcesTable({
           ))}
         </div>
         {(products || []).length === 0 ? (
-          <div style={{ padding: '14px 20px', color: MUTED, fontSize: 13 }}>{td.noUnpublishedProducts}</div>
+          <div style={{ padding: '14px 20px', color: MUTED, fontSize: 'var(--admin-fs-base)' }}>{td.noUnpublishedProducts}</div>
         ) : (
           (products || []).map((product) => (
             <div key={product.id} style={{ ...s.tableRow, gridTemplateColumns: '2fr 1fr 1fr' }} role="row">
               <div style={s.td}>
                 <div>
                   <div style={s.rowName}>{product.name || '—'}</div>
-                  <div style={{ fontSize: 12, color: MUTED }}>{td.colBarcode}: {product.barcode || td.noCode}</div>
+                  <div style={{ fontSize: 'var(--admin-fs-sm)', color: MUTED }}>{td.colBarcode}: {product.barcode || td.noCode}</div>
                 </div>
               </div>
-              <div style={{ ...s.td, fontSize: 13, color: MUTED }}>{product.brand?.name || td.noBrand}</div>
+              <div style={{ ...s.td, fontSize: 'var(--admin-fs-base)', color: MUTED }}>{product.brand?.name || td.noBrand}</div>
               <div style={{ ...s.td, gap: 6 }}>
-                <button style={{ ...s.filterBtn, padding: '5px 10px', fontSize: 12 }} onClick={() => onViewProduct(product)}>
+                <button style={{ ...s.filterBtn, padding: '5px 10px', fontSize: 'var(--admin-fs-sm)' }} onClick={() => onViewProduct(product)}>
                   {td.viewDetailBtn}
                 </button>
                 <button
