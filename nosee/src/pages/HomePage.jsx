@@ -13,6 +13,7 @@ import { usePublicationsStore } from "@/features/publications/store/publications
 import { getBrands } from "@/services/api/products.api";
 import PublicationCard from "@/features/publications/components/PublicationCard";
 import PriceSearchFilter from "@/features/publications/components/PriceSearchFilter";
+import StoreFilterBanner from "@/features/publications/components/StoreFilterBanner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { isAdmin } from "@/types";
 import { INFINITE_SCROLL_CONFIG } from "@/config/infiniteScroll";
@@ -157,12 +158,7 @@ export default function HomePage() {
   useEffect(() => {
     if (hasInitializedRef.current) return;
     hasInitializedRef.current = true;
-    setPublicationFilters((prev) => ({
-      ...prev,
-      latitude: latitude || null,
-      longitude: longitude || null,
-      sortBy: "recent",
-    }));
+    setPublicationFilters({ latitude: latitude || null, longitude: longitude || null, sortBy: "recent" });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [latitude, longitude]);
 
@@ -174,7 +170,7 @@ export default function HomePage() {
     if (lastLocationCoordsRef.current === coordsKey) return;
     lastLocationCoordsRef.current = coordsKey;
     if (latitude && longitude) {
-      setPublicationFilters((prev) => ({ ...prev, latitude, longitude, sortBy: "recent" }));
+      setPublicationFilters({ latitude, longitude, sortBy: "recent" });
     }
   }, [latitude, longitude, setPublicationFilters]);
 
@@ -196,12 +192,12 @@ export default function HomePage() {
       const validStoreId = Number.isFinite(numericStoreId) && numericStoreId > 0 ? numericStoreId : null;
       const decodedName = storeName ? decodeURIComponent(storeName).trim() : "";
       setFilters((prev) => ({ ...prev, storeId: validStoreId, storeName: decodedName }));
-      setPublicationFilters((prev) => ({ ...prev, storeId: validStoreId, storeName: decodedName }));
+      setPublicationFilters({ storeId: validStoreId, storeName: decodedName });
     } else {
       const decoded = decodeURIComponent(storeName).trim();
       if (!decoded) return;
       setFilters((prev) => ({ ...prev, storeName: decoded, storeId: null }));
-      setPublicationFilters((prev) => ({ ...prev, storeName: decoded, storeId: null }));
+      setPublicationFilters({ storeName: decoded, storeId: null });
     }
     // Limpiar URL para evitar re-aplicar si el usuario navega dentro de la página
     navigate("/", { replace: true });
@@ -383,6 +379,11 @@ export default function HomePage() {
     setTimeout(() => setFeedback(null), 5000);
     return result;
   }, [reportPublication, th.reportSuccess, th.reportError]);
+
+  const handleClearStoreFilter = useCallback(() => {
+    setFilters((prev) => ({ ...prev, storeId: null, storeName: '' }));
+    setPublicationFilters({ storeId: null, storeName: '' });
+  }, [setPublicationFilters]);
 
   // ── 4.9: handleRequireAuth — navigate to /login instead of alert ──────────
   const handleRequireAuth = useCallback(() => {
@@ -589,6 +590,12 @@ export default function HomePage() {
             Filtrar
           </button>
         </div>
+
+        <StoreFilterBanner
+          filters={filters}
+          onClearStore={handleClearStoreFilter}
+          t={th}
+        />
 
         {/* Filtros activos como tags + panel expandible */}
         <PriceSearchFilter

@@ -591,10 +591,57 @@ export async function updateStore(storeId, updates = {}) {
 }
 
 /**
+ * Resuelve el conjunto de store_ids que tienen publicaciones de los productos
+ * que coinciden con productName y/o categoryId.
+ * Devuelve { success, storeIds } donde storeIds=null significa "sin filtro".
+ */
+async function resolveStoreIdsByProductFilters({ productName, categoryId } = {}) {
+  let productIds = null;
+
+  if (productName?.trim()) {
+    const { data, error } = await supabase
+      .from('products')
+      .select('id')
+      .ilike('name', `%${productName.trim()}%`)
+      .limit(200);
+    if (error) return { success: false, error: error.message };
+    productIds = (data || []).map(p => p.id);
+    if (productIds.length === 0) return { success: true, storeIds: [] };
+  }
+
+  if (categoryId) {
+    const { data, error } = await supabase
+      .from('products')
+      .select('id')
+      .eq('category_id', categoryId)
+      .limit(2000);
+    if (error) return { success: false, error: error.message };
+    const catIds = (data || []).map(p => p.id);
+    if (catIds.length === 0) return { success: true, storeIds: [] };
+    productIds = productIds
+      ? productIds.filter(id => catIds.includes(id))
+      : catIds;
+    if (productIds.length === 0) return { success: true, storeIds: [] };
+  }
+
+  if (!productIds) return { success: true, storeIds: null };
+
+  const { data: pubs, error: pubsError } = await supabase
+    .from('price_publications')
+    .select('store_id')
+    .in('product_id', productIds)
+    .limit(5000);
+  if (pubsError) return { success: false, error: pubsError.message };
+
+  const storeIds = [...new Set((pubs || []).map(p => p.store_id))];
+  return { success: true, storeIds };
+}
+
+/**
  * Lista tiendas con soporte de búsqueda y paginación.
  *
- * @param {string=} name - Filtro opcional por nombre
- * @param {number|object=} optionsOrLimit - límite legacy o { limit, page }
+ * @param {string=} name - Filtro opcional por nombre de tienda
+ * @param {number|object=} optionsOrLimit - límite legacy o { limit, page, storeType, onlyWithLocation, productName, categoryId }
  */
 export async function listStores(name = "", optionsOrLimit = 20) {
   try {
@@ -607,15 +654,35 @@ export async function listStores(name = "", optionsOrLimit = 20) {
     const safePage = Math.max(1, Number(resolvedOptions.page) || 1);
     const offset = (safePage - 1) * safeLimit;
 
+    const { storeType, onlyWithLocation, productName, categoryId } = resolvedOptions;
+
     let query = supabase
       .from("stores")
       .select("id, name, store_type_id, address, website_url, location, created_by")
-      .order("name", { ascending: true })
-      .range(offset, offset + safeLimit - 1);
+      .order("name", { ascending: true });
 
     if (name && name.trim().length >= 1) {
       query = query.ilike("name", `%${name.trim()}%`);
     }
+
+    if (storeType && storeType !== 'all') {
+      query = query.eq('store_type_id', STORE_TYPE_ID[storeType]);
+    }
+
+    if (onlyWithLocation === true) {
+      query = query.not('location', 'is', null);
+    }
+
+    if (productName?.trim() || categoryId) {
+      const { success, storeIds, error: resolveError } = await resolveStoreIdsByProductFilters({ productName, categoryId });
+      if (!success) return { success: false, error: resolveError };
+      if (storeIds !== null) {
+        if (storeIds.length === 0) return { success: true, data: [], hasMore: false, page: safePage };
+        query = query.in('id', storeIds);
+      }
+    }
+
+    query = query.range(offset, offset + safeLimit - 1);
 
     const { data, error } = await withTimeout(query, REQUEST_TIMEOUT_MS, "La carga de tiendas tardó demasiado");
 
@@ -906,12 +973,51 @@ export async function getAllPhysicalStoresWithLocation() {
   }
 }
 
+/**
+ * Devuelve las tiendas físicas con ubicación que venden productos coincidentes
+ * con los filtros activos. Sin filtros devuelve todas las tiendas físicas.
+ * Usado por el mapa para mantener los marcadores sincronizados con el drawer.
+ */
+export async function getPhysicalStoresFiltered({ productName, categoryId } = {}) {
+  try {
+    const { success, storeIds, error: resolveError } = await resolveStoreIdsByProductFilters({ productName, categoryId });
+    if (!success) return { success: false, error: resolveError };
+    if (storeIds !== null && storeIds.length === 0) return { success: true, data: [] };
+
+    let query = supabase
+      .from('stores')
+      .select('id, name, store_type_id, address, location')
+      .eq('store_type_id', STORE_TYPE_ID.physical)
+      .not('location', 'is', null);
+
+    if (storeIds !== null) query = query.in('id', storeIds);
+
+    const { data, error } = await withTimeout(query, REQUEST_TIMEOUT_MS, 'La carga de tiendas tardó demasiado');
+    if (error) return { success: false, error: error.message };
+
+    const mapped = (data || []).map(store => {
+      const point = parsePointText(store.location);
+      return {
+        ...store,
+        type: 'physical',
+        latitude: point?.latitude ?? null,
+        longitude: point?.longitude ?? null,
+      };
+    }).filter(s => s.latitude !== null && s.longitude !== null);
+
+    return { success: true, data: mapped };
+  } catch (err) {
+    return { success: false, error: err.message || 'Error filtrando tiendas' };
+  }
+}
+
 export default {
   createStore,
   createStoreSimple,
   uploadStoreEvidence,
   searchNearbyStores,
   listStores,
+  getPhysicalStoresFiltered,
   detectMapPlaceAtLocation,
   findNearestPhysicalStore,
   getAllPhysicalStoresWithLocation,

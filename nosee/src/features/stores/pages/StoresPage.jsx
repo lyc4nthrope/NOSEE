@@ -33,13 +33,19 @@ export default function StoresPage() {
   const navigate       = useNavigate();
   const isAuthenticated = useAuthStore(selectIsAuthenticated);
 
-  const mapContainerRef = useRef(null);
-  const drawerRef       = useRef(null);
+  const mapContainerRef    = useRef(null);
+  const drawerRef          = useRef(null);
+  const productDebounceRef = useRef(null);
   const [selectedStore, setSelectedStore] = useState(null);
+
+  // Product/category filter state lives here so both hooks receive same values
+  const [productNameInput,  setProductNameInput]  = useState('');  // input display (immediate)
+  const [productNameFilter, setProductNameFilter] = useState('');  // fetch trigger (debounced)
+  const [categoryId,        setCategoryId]        = useState(null);
 
   useEffect(injectSpinKeyframe, []);
 
-  // ── Hooks ──────────────────────────────────────────────────────────────────
+  // ── Hooks (original order preserved) ──────────────────────────────────────
   const { snap, snapTo, cycleSnap, onPointerDown, onPointerMove, onPointerUp } = useDrawer(drawerRef);
 
   // Opens the modal and nudges the drawer to half if it's peeking
@@ -51,12 +57,27 @@ export default function StoresPage() {
   const { isLoading: mapLoading, locationError, mapError } = useStoresMap({
     containerRef: mapContainerRef,
     onStoreClick: handleMarkerClick,
+    productName: productNameFilter,
+    categoryId,
   });
 
   const {
     search, stores, loading, loadingMore, hasMore, error,
-    handleSearchChange, loadMore, updateStore,
-  } = useStoresList();
+    storeType, onlyWithLocation, categories,
+    handleSearchChange, handleStoreTypeChange, handleOnlyWithLocationChange,
+    loadMore, updateStore,
+  } = useStoresList({ productName: productNameFilter, categoryId });
+
+  // ── Product/category filter handlers ──────────────────────────────────────
+  const handleProductNameChange = useCallback((value) => {
+    setProductNameInput(value);
+    clearTimeout(productDebounceRef.current);
+    productDebounceRef.current = setTimeout(() => setProductNameFilter(value), 350);
+  }, []);
+
+  const handleCategoryChange = useCallback((id) => {
+    setCategoryId(id ? Number(id) : null);
+  }, []);
 
   // ── Handlers ───────────────────────────────────────────────────────────────
   const handleViewDetail = useCallback((store) => {
@@ -118,6 +139,15 @@ export default function StoresPage() {
         loadingMore={loadingMore}
         hasMore={hasMore}
         error={error}
+        storeType={storeType}
+        onStoreTypeChange={handleStoreTypeChange}
+        onlyWithLocation={onlyWithLocation}
+        onOnlyWithLocationChange={handleOnlyWithLocationChange}
+        productName={productNameInput}
+        onProductNameChange={handleProductNameChange}
+        categoryId={categoryId}
+        onCategoryChange={handleCategoryChange}
+        categories={categories}
         onSearchChange={handleSearchChange}
         onLoadMore={loadMore}
         onViewDetail={handleViewDetail}

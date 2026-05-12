@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { getAllPhysicalStoresWithLocation } from '@/services/api/stores.api';
+import { getAllPhysicalStoresWithLocation, getPhysicalStoresFiltered } from '@/services/api/stores.api';
 import { useAuthStore, selectAuthUser } from '@/features/auth/store/authStore';
 
 const LEAFLET_CSS   = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
@@ -185,7 +185,7 @@ function getA11yTheme() {
 }
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
-export function useStoresMap({ containerRef, onStoreClick }) {
+export function useStoresMap({ containerRef, onStoreClick, productName, categoryId }) {
   const user = useAuthStore(selectAuthUser);
 
   const mapRef          = useRef(null);
@@ -367,9 +367,43 @@ export function useStoresMap({ containerRef, onStoreClick }) {
     const icon    = storeIconRef.current;
     if (!clusterReady || !cluster || !map || !L || !icon || !physicalStores.length) return;
 
-    const next = getStoresInViewport(physicalStores, map);
+    const next = getStoresInViewport(allStoresRef.current, map);
     syncMarkers(cluster, L, activeMarkersRef.current, next, icon, onStoreClickRef);
   }, [clusterReady, physicalStores]);
+
+  // Re-sync markers when product/category filter changes
+  useEffect(() => {
+    const hasFilter = productName?.trim() || categoryId;
+
+    if (!hasFilter) {
+      // Filter cleared: allStoresRef already in sync via the dedicated effect
+      const cluster = clusterRef.current;
+      const map     = mapRef.current;
+      const L       = _cdnL;
+      const icon    = storeIconRef.current;
+      if (cluster && map && L && icon) {
+        const next = getStoresInViewport(allStoresRef.current, map);
+        syncMarkers(cluster, L, activeMarkersRef.current, next, icon, onStoreClickRef);
+      }
+      return;
+    }
+
+    let cancelled = false;
+    getPhysicalStoresFiltered({ productName, categoryId }).then(res => {
+      if (cancelled) return;
+      const filtered = res.success ? res.data : [];
+      allStoresRef.current = filtered;
+      const cluster = clusterRef.current;
+      const map     = mapRef.current;
+      const L       = _cdnL;
+      const icon    = storeIconRef.current;
+      if (cluster && map && L && icon) {
+        const next = getStoresInViewport(filtered, map);
+        syncMarkers(cluster, L, activeMarkersRef.current, next, icon, onStoreClickRef);
+      }
+    });
+    return () => { cancelled = true; };
+  }, [productName, categoryId]);
 
   return { isLoading: locationLoading || !mapReady, locationError, mapError };
 }

@@ -496,8 +496,9 @@ export const getPublications = async (filters = {}) => {
 
     // Pre-filtro: IDs de tiendas cuyo nombre coincide con storeName
     // (solo sin filtro de distancia, que ya maneja storeName client-side)
+    // No aplica cuando storeId ya está definido — el ID tiene prioridad y es exacto
     let storeNameFilter = null;
-    if (storeName && !shouldApplyDistanceFilter) {
+    if (storeName && !shouldApplyDistanceFilter && !storeId) {
       const normalizedStoreSearchTerm = normalizeSearchText(storeName);
       const { data: matchingStores, error: storeSearchError } = await supabase
         .from("stores")
