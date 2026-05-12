@@ -1,0 +1,9 @@
+change: admin-metrics-panel
+mode: openspec
+status:
+  proposal: completed
+  spec: completed
+  design: completed
+  tasks: completed
+next_recommended: sdd-apply
+updated_at: 2026-05-09
