@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { getAllPhysicalStoresWithLocation, getPhysicalStoresFiltered } from '@/services/api/stores.api';
 import { useAuthStore, selectAuthUser } from '@/features/auth/store/authStore';
+import { getOrSetCache, clearCache } from '@/services/cache';
 
 const LEAFLET_CSS   = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
 const LEAFLET_JS    = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
@@ -14,6 +15,7 @@ const GEO_TIMEOUT_MS    = 10000;
 const VIEWPORT_PAD      = 0.4;  // 40% buffer beyond visible bounds
 const PAN_DEBOUNCE_MS   = 250;  // wait for pan/zoom to settle before re-filtering
 const CACHE_TTL_MS      = 5 * 60 * 1000;
+const MAP_CACHE_KEY     = 'stores:physical:map';
 
 const TILE_LAYERS = {
   dark:         { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',  attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/attributions">CARTO</a>' },
@@ -21,44 +23,22 @@ const TILE_LAYERS = {
   highContrast: { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',  attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/attributions">CARTO</a>' },
 };
 
-// ─── Module-level cache ───────────────────────────────────────────────────────
-// One fetch per 5 min across ALL component instances — zero server load on pan/zoom
-let _storesCache    = null;
-let _storesCacheAt  = 0;
-let _storesFetching = null; // deduplicates concurrent requests during the same tick
+// ─── Cache service ─────────────────────────────────────────────────────────────
 
 /**
  * Invalida el cache de tiendas físicas.
  * Llamar después de crear/editar/eliminar una tienda para forzar un refetch.
  */
 export function invalidateStoresCache() {
-  _storesCache    = null;
-  _storesCacheAt  = 0;
-  _storesFetching = null;
+  clearCache(MAP_CACHE_KEY);
 }
 
 async function fetchPhysicalStores() {
-  if (_storesCache && Date.now() - _storesCacheAt < CACHE_TTL_MS) {
-    return _storesCache;
-  }
-  if (_storesFetching) return _storesFetching;
-
-  _storesFetching = getAllPhysicalStoresWithLocation()
-    .then(res => {
-      _storesFetching = null;
-      if (res.success) {
-        _storesCache   = (res.data ?? []).filter(s => s.latitude && s.longitude);
-        _storesCacheAt = Date.now();
-        return _storesCache;
-      }
-      return _storesCache ?? [];
-    })
-    .catch(() => {
-      _storesFetching = null;
-      return _storesCache ?? [];
-    });
-
-  return _storesFetching;
+  return getOrSetCache(MAP_CACHE_KEY, async () => {
+    const res = await getAllPhysicalStoresWithLocation();
+    if (!res.success) throw new Error(res.error || 'Error cargando tiendas');
+    return (res.data ?? []).filter(s => s.latitude && s.longitude);
+  }, CACHE_TTL_MS);
 }
 
 // ─── Viewport filter — pure client-side, no server requests ──────────────────
@@ -217,18 +197,40 @@ export function useStoresMap({ containerRef, onStoreClick, productName, category
   const [clusterReady,    setClusterReady]    = useState(false);
   const [physicalStores,  setPhysicalStores]  = useState([]);
   const [mapError,        setMapError]        = useState(null);
+  const [storesError,     setStoresError]     = useState(null);
 
   // Keep allStoresRef in sync so the moveend handler always has fresh data
   useEffect(() => { allStoresRef.current = physicalStores; }, [physicalStores]);
 
-  // Fetch stores — ONE request per 5 min, shared across all instances
+  // Fetch stores — cached via cache service, shared across all instances
   useEffect(() => {
     let cancelled = false;
-    fetchPhysicalStores().then(stores => {
-      if (!cancelled) setPhysicalStores(stores);
-    });
+    setStoresError(null);
+    fetchPhysicalStores()
+      .then(stores => {
+        if (!cancelled) setPhysicalStores(stores);
+      })
+      .catch(err => {
+        if (!cancelled) setStoresError(err.message || 'Error cargando tiendas');
+      });
     return () => { cancelled = true; };
   }, []);
+
+  // ── Refetch stores on demand ──────────────────────────────────────────────────
+  const refetchStores = useCallback(() => {
+    clearCache(MAP_CACHE_KEY);
+    setStoresError(null);
+    fetchPhysicalStores()
+      .then(stores => setPhysicalStores(stores))
+      .catch(err => setStoresError(err.message || 'Error cargando tiendas'));
+  }, []);
+
+  // Listen for store updates — refetch when any store changes
+  useEffect(() => {
+    function handleStoreUpdated() { refetchStores(); }
+    window.addEventListener('nosee:store-updated', handleStoreUpdated);
+    return () => window.removeEventListener('nosee:store-updated', handleStoreUpdated);
+  }, [refetchStores]);
 
   // Geolocation
   useEffect(() => {
@@ -417,5 +419,5 @@ export function useStoresMap({ containerRef, onStoreClick, productName, category
     return () => { cancelled = true; };
   }, [productName, categoryId, physicalStores]);
 
-  return { isLoading: locationLoading || !mapReady, locationError, mapError };
+  return { isLoading: locationLoading || !mapReady, locationError, mapError, storesError, refetchStores };
 }

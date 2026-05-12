@@ -54,7 +54,7 @@ export default function StoresPage() {
     if (snap === 'peek') snapTo('half');
   }, [snap, snapTo]);
 
-  const { isLoading: mapLoading, locationError, mapError } = useStoresMap({
+  const { isLoading: mapLoading, locationError, mapError, storesError } = useStoresMap({
     containerRef: mapContainerRef,
     onStoreClick: handleMarkerClick,
     productName: productNameFilter,
@@ -134,6 +134,12 @@ export default function StoresPage() {
           <div style={styles.locationBanner} role="status" aria-live="polite">
             <MapPinIcon />
             <span>{locationError}</span>
+          </div>
+        )}
+
+        {storesError && (
+          <div style={styles.storesErrorBanner} role="alert">
+            <span>{storesError}</span>
           </div>
         )}
       </div>
@@ -242,6 +248,25 @@ const styles = {
     border: '1px solid rgba(251,191,36,0.3)',
     borderRadius: 'var(--radius-md)',
     color: 'var(--warning)',
+    fontSize: '12px',
+    padding: '6px 12px',
+    whiteSpace: 'nowrap',
+    maxWidth: 'calc(100% - 32px)',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+  },
+  storesErrorBanner: {
+    position: 'absolute',
+    top: '12px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    zIndex: 500,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    background: 'rgba(220,38,38,0.12)',
+    border: '1px solid rgba(220,38,38,0.3)',
+    borderRadius: 'var(--radius-md)',
+    color: 'var(--error)',
     fontSize: '12px',
     padding: '6px 12px',
     whiteSpace: 'nowrap',
